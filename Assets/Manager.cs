@@ -13,7 +13,7 @@ public class Manager : MonoBehaviour
     [SerializeField] Dictionary<(int, int, int), GameObject> map = new Dictionary<(int, int, int), GameObject>();
     [SerializeField] int maxX = 5, maxY = 5, maxZ = 5;
 
-    [SerializeField] Dictionary<byte[], bool> entropy = new Dictionary<byte[], bool>();
+    List<byte[]> entropy = new List<byte[]> ();
 
     private float lastUpdateTime = 0f; // Keep track of the last update time
 
@@ -35,7 +35,7 @@ public class Manager : MonoBehaviour
                 // Set the j-th bit of i and assign it to the j-th position in _rule
                 _rule[j] = (byte)((i >> j) & 1);
             }
-            entropy.Add(_rule, true);
+            entropy.Add(_rule);
         }
 
         foreach (var tile in map)
@@ -78,6 +78,10 @@ public class Manager : MonoBehaviour
         foreach (var tile in map) 
         {
             var temp = tile.Value.GetComponent<TileManager>().GetEntropyCount();
+            if (temp == 1) 
+            {
+                continue;
+            }
             if (temp < tempLowNum)
             {
                 lowEntopyList = new List<(int, int, int)>();
@@ -96,34 +100,33 @@ public class Manager : MonoBehaviour
 
     private void Update()
     {
-        if (Time.time - lastUpdateTime >= 5f)
+        if (Time.time - lastUpdateTime >= 1.5f)
         {
-            /*
-            //debug code
-            foreach (var tileEntry in map)
-            {
-                GameObject tileObject = tileEntry.Value;
-                TileManager tileManager = tileObject.GetComponent<TileManager>();
-                tileManager.UpdateEntopy((byte)count);
-            }
-            count++;
-            if (count >= 64) count = 0;
-            */
-
             //get all tiles entropy
             //find all with the lowest entropy
             var _list = GetLowestEntropyList();
-            //Debug.Log($"{_list}");
 
             //randomly pick one
-            var _tile = map[_list[Random.Range(0, _list.Count)]];
+            int _randNum= Random.Range(0, _list.Count);
+            var _tilePos = _list[_randNum];
+            var _tile = map[_tilePos].GetComponent<TileManager>();
 
             //collapse the entropy for that one
-            _tile.GetComponent<TileManager>().CollapseEntropy();
+            _tile.UpdateEntropy();
 
             //by picking the one of the possible entropy
+            _tile.CollapseEntropy();
 
             //propergate the collapse to the sorunding
+            List<(int, int, int)> _dirs = new List<(int, int, int)> {(0,0,1), (0, 0, -1), (0, 1, 0), (0, -1, 0), (1, 0, 0), (-1, 0, 0), };
+            foreach (var _dir in _dirs) 
+            { 
+                (int,int,int) _newDir = (_dir.Item1+_tilePos.Item1, _dir.Item2 + _tilePos.Item2, _dir.Item3 + _tilePos.Item3);
+                _tile = map[_newDir].GetComponent<TileManager>();
+                _tile.UpdateEntropy();
+            }
+
+
 
             lastUpdateTime = Time.time;
         }

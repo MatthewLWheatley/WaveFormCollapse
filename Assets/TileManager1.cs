@@ -11,7 +11,7 @@ public class TileManager : MonoBehaviour
 
     public int maxX, maxY, maxZ;
 
-    private bool collapsed = false; 
+    private bool collapsed = false;
 
     [SerializeField] GameObject centre;
 
@@ -27,7 +27,7 @@ public class TileManager : MonoBehaviour
     public byte[] exits = new byte[6];
 
     public (int x, int y, int z) pos;
-    public Dictionary<byte[], bool> entropy;
+    public List<byte[]> entropy;
 
     private void Update()
     {
@@ -51,34 +51,29 @@ public class TileManager : MonoBehaviour
     }
 
     //TODO: Fix
-    public Dictionary<byte, bool> GetEntropy()
+    public List<byte[]> GetEntropy()
     {
-        return new Dictionary<byte, bool>(); // entropy.Where(rule => rule.Value == true).ToDictionary(rule => rule.Key, rule => rule.Value);
+        return entropy;
     }
 
     public int GetEntropyCount()
     {
-        return entropy.Where(rule => rule.Value == true).ToDictionary(rule => rule.Key, rule => rule.Value).Count;
+        return entropy.Count;
     }
 
-    public void UpdateEntropy(byte[] _exits)
-    {
-        exits = _exits;
-    }
-
-    public void CollapseEntropy()
+    public void UpdateEntropy()
     {
         var _targetPos = pos;
-        Debug.Log($"{_targetPos.x},{_targetPos.y},{_targetPos.z}");
+        //Debug.Log($"{_targetPos.x},{_targetPos.y},{_targetPos.z}");
 
         // Loop through all directions and check entropy
         for (int dir = 0; dir < 6; dir++)
         {
-            CheckEntropy(dir);
+            UpdateEntropyDir(dir);
         }
     }
 
-    public void CheckEntropy(int _dir) 
+    public void UpdateEntropyDir(int _dir) 
     {
         // Calculate the target position based on the direction
         var _targetPos = pos;
@@ -103,40 +98,49 @@ public class TileManager : MonoBehaviour
                 _targetPos.z = (_targetPos.z - 1 + maxZ) % maxZ;
                 break;
         }
-
+        //Debug.Log($"pos: {pos.x},{pos.y},{pos.z}");
+        //Debug.Log($"target pos: {_targetPos.x},{_targetPos.y},{_targetPos.z}");
 
         // Get the target tile and its entropy
         var _targetTile = Parent.GetComponent<Manager>().GetTile(_targetPos).GetComponent<TileManager>();
         var _targetEntropy = _targetTile.GetEntropy();
 
+        Debug.Log($"shit {_targetEntropy.Count}");
+
         // Check if the target tile's entropy configuration is compatible with this tile's entropy
         foreach (var entry in _targetEntropy)
         {
-            byte targetExit = entry.Key;
-            bool isPossible = entry.Value;
-
-            // Check the corresponding exit in the current tile
-            // Assuming the exits in the current tile and the target tile are aligned (e.g., +x in current is -x in target)
-            int correspondingExit = (_dir + 3) % 6; // Opposite direction
-
-            // If the target tile's exit is possible, the corresponding exit in this tile must be possible too
-            if (isPossible && exits[correspondingExit] != targetExit)
+            List<byte[]> _toRemove = new List<byte[]>();
+            var _correspondingExit = (_dir + 3) % 6;
+            for(int i = 0; i < entropy.Count; i++) 
             {
-                // Mark this tile's entropy as false for the corresponding exit configuration
-                byte[] currentEntropyKey = exits.Clone() as byte[];
-                currentEntropyKey[correspondingExit] = targetExit;
-                if (entropy.ContainsKey(currentEntropyKey))
+                if (entropy[i][_dir] != entry[_correspondingExit]) 
                 {
-                    entropy[currentEntropyKey] = false;
-                }
+                    _toRemove.Add(entropy[i]);
+                }             
+            }
+
+            for (int i = 0; i < _toRemove.Count; i++) 
+            {
+                entropy.Remove(_toRemove[i]);
             }
         }
 
         // Optional: Log the updated entropy count
-        Debug.Log($"Updated Entropy Count: {this.GetEntropyCount()}");
+        //Debug.Log($"Updated Entropy Count: {this.GetEntropyCount()}");
     }
 
-    public void UpdateCubesBasedOnExits()
+    public void CollapseEntropy()
+    {
+        int _randNum = Random.Range(0, entropy.Count);
+        Debug.Log($"CollapseEntropy rand number: {_randNum}  entropy count: {entropy.Count}");
+        exits = entropy[_randNum];
+        entropy = new List<byte[]>();
+        entropy.Add(exits);
+    }
+
+
+    public void UpdateExits()
     {
         if (cubes.Length != exits.Length)
         {
