@@ -27,7 +27,7 @@ public class TileManager : MonoBehaviour
     public byte[] exits = new byte[6];
 
     public (int x, int y, int z) pos;
-    public List<byte[]> entropy;
+    public List<byte[]> entropy = new List<byte[]>();
 
     private void Update()
     {
@@ -66,14 +66,17 @@ public class TileManager : MonoBehaviour
         var _targetPos = pos;
         //Debug.Log($"{_targetPos.x},{_targetPos.y},{_targetPos.z}");
 
+
+        //Debug.Log($" + Entropy pos: {pos.x},{pos.y},{pos.z}");
+
         // Loop through all directions and check entropy
-        for (int dir = 0; dir < 6; dir++)
+        for (int _dir = 0; _dir < 6; _dir++)
         {
-            UpdateEntropyDir(dir);
+            UpdateEntropyDir(_dir);
         }
     }
 
-    public void UpdateEntropyDir(int _dir) 
+    public void UpdateEntropyDir(int _dir)
     {
         // Calculate the target position based on the direction
         var _targetPos = pos;
@@ -98,34 +101,49 @@ public class TileManager : MonoBehaviour
                 _targetPos.z = (_targetPos.z - 1 + maxZ) % maxZ;
                 break;
         }
-        //Debug.Log($"pos: {pos.x},{pos.y},{pos.z}");
-        //Debug.Log($"target pos: {_targetPos.x},{_targetPos.y},{_targetPos.z}");
+        //Debug.Log($" + + target Entropy pos: {_targetPos.x},{_targetPos.y},{_targetPos.z}");
 
         // Get the target tile and its entropy
         var _targetTile = Parent.GetComponent<Manager>().GetTile(_targetPos).GetComponent<TileManager>();
         var _targetEntropy = _targetTile.GetEntropy();
 
-        Debug.Log($"shit {_targetEntropy.Count}");
-
         // Check if the target tile's entropy configuration is compatible with this tile's entropy
-        foreach (var entry in _targetEntropy)
-        {
-            List<byte[]> _toRemove = new List<byte[]>();
-            var _correspondingExit = (_dir + 3) % 6;
-            for(int i = 0; i < entropy.Count; i++) 
-            {
-                if (entropy[i][_dir] != entry[_correspondingExit]) 
-                {
-                    _toRemove.Add(entropy[i]);
-                }             
-            }
 
-            for (int i = 0; i < _toRemove.Count; i++) 
+        List<byte[]> _toRemove = new List<byte[]>();
+        var _correspondingExit = (_dir + 3) % 6;
+        List<byte> _possibleExits = new List<byte>();
+
+        foreach (var _exit in _targetEntropy)
+        {
+            if (!_possibleExits.Contains(_exit[_dir]))
             {
-                entropy.Remove(_toRemove[i]);
+                _possibleExits.Add(_exit[_dir]);
             }
         }
 
+        if (_possibleExits.Count < 2)
+        {
+            Debug.Log($" + + _possibleExits count: {_possibleExits.Count}");
+
+            for (int i = 0; i < entropy.Count; i++)
+            {
+                if (!_possibleExits.Contains(entropy[i][_correspondingExit]))
+                {
+                    _toRemove.Add(entropy[i]);
+                }
+            }
+
+            if (_toRemove.Count > 0) Debug.Log($" + + _toRemove count: {_toRemove.Count}");
+
+            for (int i = 0; i < _toRemove.Count; i++)
+            {
+                entropy.Remove(_toRemove[i]);
+            }
+            if (_toRemove.Count > 0)
+            {
+                Debug.Log($" + + {_toRemove[0][_correspondingExit]}");
+            }
+        }
         // Optional: Log the updated entropy count
         //Debug.Log($"Updated Entropy Count: {this.GetEntropyCount()}");
     }
@@ -133,10 +151,12 @@ public class TileManager : MonoBehaviour
     public void CollapseEntropy()
     {
         int _randNum = Random.Range(0, entropy.Count);
-        Debug.Log($"CollapseEntropy rand number: {_randNum}  entropy count: {entropy.Count}");
+        //Debug.Log($"CollapseEntropy rand number: {_randNum}  entropy count: {entropy.Count}");
         exits = entropy[_randNum];
         entropy = new List<byte[]>();
         entropy.Add(exits);
+        //Debug.Log($"{exits[0]}, {exits[1]},{exits[2]},{exits[3]},{exits[4]},{exits[5]}");
+        UpdateExits();
     }
 
 

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.UIElements;
@@ -35,6 +36,11 @@ public class Manager : MonoBehaviour
                 // Set the j-th bit of i and assign it to the j-th position in _rule
                 _rule[j] = (byte)((i >> j) & 1);
             }
+            byte[] dont = new byte[] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+            if (_rule == dont) 
+            {
+                continue;
+            }
             entropy.Add(_rule);
         }
 
@@ -61,7 +67,10 @@ public class Manager : MonoBehaviour
                     //Debug.Log($"{x}, {y}, {z}");
                     _tileManager.exits = new byte[] {0x00,0x00,0x00,0x00,0x00,0x00};
                     _tileManager.pos = (x, y, z);
-                    _tileManager.entropy = entropy;
+                    for (int i = 0; i < entropy.Count; i++)
+                    {
+                        _tileManager.entropy.Add(entropy[i]);
+                    }
                     _tileManager.maxX = maxX;
                     _tileManager.maxY = maxY;
                     _tileManager.maxZ = maxZ;
@@ -108,24 +117,57 @@ public class Manager : MonoBehaviour
 
             //randomly pick one
             int _randNum= Random.Range(0, _list.Count);
-            var _tilePos = _list[_randNum];
+            (int x, int y, int z) _tilePos = _list[_randNum];
             var _tile = map[_tilePos].GetComponent<TileManager>();
 
             //collapse the entropy for that one
-            _tile.UpdateEntropy();
+            //_tile.UpdateEntropy();
 
             //by picking the one of the possible entropy
             _tile.CollapseEntropy();
 
             //propergate the collapse to the sorunding
-            List<(int, int, int)> _dirs = new List<(int, int, int)> {(0,0,1), (0, 0, -1), (0, 1, 0), (0, -1, 0), (1, 0, 0), (-1, 0, 0), };
-            foreach (var _dir in _dirs) 
-            { 
-                (int,int,int) _newDir = (_dir.Item1+_tilePos.Item1, _dir.Item2 + _tilePos.Item2, _dir.Item3 + _tilePos.Item3);
-                _tile = map[_newDir].GetComponent<TileManager>();
-                _tile.UpdateEntropy();
-            }
+            //List<(int, int, int)> _dirs = new List<(int, int, int)> {(0,0,1), (0, 0, -1), (0, 1, 0), (0, -1, 0), (1, 0, 0), (-1, 0, 0), };
+            //foreach (var _dir in _dirs) 
+            //{ 
+            //    (int,int,int) _newDir = (_dir.Item1+_tilePos.Item1, _dir.Item2 + _tilePos.Item2, _dir.Item3 + _tilePos.Item3);
+            //    _tile = map[_newDir].GetComponent<TileManager>();
+            //    _tile.UpdateEntropy();
+            //}
 
+
+            //Debug.Log($"Tile pos: {_tilePos.x},{_tilePos.y},{_tilePos.z}");
+
+            for (int i = 0; i < 6; i++)
+            {
+                (int x, int y, int z) _targetPos = _tilePos;
+                switch (i)
+                {
+                    case 0: // +x
+                        _targetPos.x = (_targetPos.x + 1) % maxX;
+                        break;
+                    case 3: // -x
+                        _targetPos.x = (_targetPos.x - 1 + maxX) % maxX;
+                        break;
+                    case 1: // +y
+                        _targetPos.y = (_targetPos.y + 1) % maxY;
+                        break;
+                    case 4: // -y
+                        _targetPos.y = (_targetPos.y - 1 + maxY) % maxY;
+                        break;
+                    case 2: // +z
+                        _targetPos.z = (_targetPos.z + 1) % maxZ;
+                        break;
+                    case 5: // -z
+                        _targetPos.z = (_targetPos.z - 1 + maxZ) % maxZ;
+                        break;
+                }
+                //Debug.Log($"target pos: {_targetPos.x},{_targetPos.y},{_targetPos.z}");
+                _tile = map[_targetPos].GetComponent<TileManager>();
+                //Debug.Log($"target entropy before: {_tile.GetEntropyCount()}");
+                _tile.UpdateEntropy();
+                //Debug.Log($"target entropy after: {_tile.GetEntropyCount()}");
+            }
 
 
             lastUpdateTime = Time.time;
