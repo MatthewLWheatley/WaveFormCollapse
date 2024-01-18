@@ -262,6 +262,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Parent: {fileID: 0}
+  maxX: 0
+  maxY: 0
+  maxZ: 0
   centre: {fileID: 3320694469675354522}
   cubes:
   - {fileID: 6488715271545422922}
@@ -270,7 +273,7 @@ MonoBehaviour:
   - {fileID: 9060749646754956031}
   - {fileID: 353374997866674730}
   - {fileID: 6357025360323247795}
-  tile: 0
+  exits: 000000000000
 --- !u!1 &3320694469675354522
 GameObject:
   m_ObjectHideFlags: 0
@@ -333,7 +336,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: -876546973899608171, guid: 80aa867ac363ac043847b06ad71604cd, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

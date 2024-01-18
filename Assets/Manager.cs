@@ -18,6 +18,8 @@ public class Manager : MonoBehaviour
 
     private float lastUpdateTime = 0f; // Keep track of the last update time
 
+    int rndSeed = 1;
+
     private void Start()
     {
         CreateRules();
@@ -61,7 +63,7 @@ public class Manager : MonoBehaviour
                     map.Add((x, y, z), null);
                     // Create a new tile only if the position in the map is marked as true
                     Vector3 tilePosition = new Vector3(x*3, y * 3, z * 3);
-                    GameObject newTile = Instantiate(tile, tilePosition, Quaternion.identity);
+                    GameObject newTile = Instantiate(tile, tilePosition, Quaternion.identity,this.gameObject.transform);
                     map[(x, y, z)] = newTile;
                     var _tileManager = newTile.GetComponent<TileManager>();
                     //Debug.Log($"{x}, {y}, {z}");
@@ -87,7 +89,7 @@ public class Manager : MonoBehaviour
         foreach (var tile in map) 
         {
             var temp = tile.Value.GetComponent<TileManager>().GetEntropyCount();
-            if (temp == 1) 
+            if (tile.Value.GetComponent<TileManager>().GetCollapsed())
             {
                 continue;
             }
@@ -102,42 +104,34 @@ public class Manager : MonoBehaviour
                 lowEntopyList.Add(tile.Key);
             }
         }
+
         return lowEntopyList;
     }
 
-    int count = 0;
-
     private void Update()
     {
-        if (Time.time - lastUpdateTime >= 1.5f)
+        if (Time.time - lastUpdateTime >= 0.0000001f)
         {
             //get all tiles entropy
             //find all with the lowest entropy
             var _list = GetLowestEntropyList();
 
             //randomly pick one
-            int _randNum= Random.Range(0, _list.Count);
+            Random.seed = rndSeed;
+            if (_list.Count == 0) return;
+            int _randNum = Random.Range(0, _list.Count);
+            Debug.Log(_list.Count);
             (int x, int y, int z) _tilePos = _list[_randNum];
             var _tile = map[_tilePos].GetComponent<TileManager>();
 
             //collapse the entropy for that one
-            //_tile.UpdateEntropy();
-
             //by picking the one of the possible entropy
             _tile.CollapseEntropy();
 
             //propergate the collapse to the sorunding
-            //List<(int, int, int)> _dirs = new List<(int, int, int)> {(0,0,1), (0, 0, -1), (0, 1, 0), (0, -1, 0), (1, 0, 0), (-1, 0, 0), };
-            //foreach (var _dir in _dirs) 
-            //{ 
-            //    (int,int,int) _newDir = (_dir.Item1+_tilePos.Item1, _dir.Item2 + _tilePos.Item2, _dir.Item3 + _tilePos.Item3);
-            //    _tile = map[_newDir].GetComponent<TileManager>();
-            //    _tile.UpdateEntropy();
-            //}
-
 
             //Debug.Log($"Tile pos: {_tilePos.x},{_tilePos.y},{_tilePos.z}");
-
+            //int i = 0;
             for (int i = 0; i < 6; i++)
             {
                 (int x, int y, int z) _targetPos = _tilePos;
@@ -162,6 +156,13 @@ public class Manager : MonoBehaviour
                         _targetPos.z = (_targetPos.z - 1 + maxZ) % maxZ;
                         break;
                 }
+
+                //_tile.entropy = new List<byte[]>();
+                //for (int j = 0; j < entropy.Count; j++)
+                //{
+                //    _tile.entropy.Add(entropy[j]);
+                //}
+
                 //Debug.Log($"target pos: {_targetPos.x},{_targetPos.y},{_targetPos.z}");
                 _tile = map[_targetPos].GetComponent<TileManager>();
                 //Debug.Log($"target entropy before: {_tile.GetEntropyCount()}");

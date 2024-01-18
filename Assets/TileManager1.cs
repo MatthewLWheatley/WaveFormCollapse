@@ -64,10 +64,6 @@ public class TileManager : MonoBehaviour
     public void UpdateEntropy()
     {
         var _targetPos = pos;
-        //Debug.Log($"{_targetPos.x},{_targetPos.y},{_targetPos.z}");
-
-
-        //Debug.Log($" + Entropy pos: {pos.x},{pos.y},{pos.z}");
 
         // Loop through all directions and check entropy
         for (int _dir = 0; _dir < 6; _dir++)
@@ -101,62 +97,53 @@ public class TileManager : MonoBehaviour
                 _targetPos.z = (_targetPos.z - 1 + maxZ) % maxZ;
                 break;
         }
-        //Debug.Log($" + + target Entropy pos: {_targetPos.x},{_targetPos.y},{_targetPos.z}");
 
         // Get the target tile and its entropy
         var _targetTile = Parent.GetComponent<Manager>().GetTile(_targetPos).GetComponent<TileManager>();
         var _targetEntropy = _targetTile.GetEntropy();
-
-        // Check if the target tile's entropy configuration is compatible with this tile's entropy
-
         List<byte[]> _toRemove = new List<byte[]>();
         var _correspondingExit = (_dir + 3) % 6;
         List<byte> _possibleExits = new List<byte>();
 
+        //find all the possible exits
         foreach (var _exit in _targetEntropy)
         {
-            if (!_possibleExits.Contains(_exit[_dir]))
+            if (!_possibleExits.Contains(_exit[_correspondingExit]))
             {
-                _possibleExits.Add(_exit[_dir]);
+                _possibleExits.Add(_exit[_correspondingExit]);
             }
         }
 
-        if (_possibleExits.Count < 2)
+        //exit if no removals will happen
+        if (_possibleExits.Count > 1) 
         {
-            Debug.Log($" + + _possibleExits count: {_possibleExits.Count}");
+            return;
+        }
 
-            for (int i = 0; i < entropy.Count; i++)
+        //filter throgh entropy adding to the a remove list 
+        for (int i = 0; i < entropy.Count; i++)
+        {
+            if (!_possibleExits.Contains(entropy[i][_dir]))
             {
-                if (!_possibleExits.Contains(entropy[i][_correspondingExit]))
-                {
-                    _toRemove.Add(entropy[i]);
-                }
-            }
-
-            if (_toRemove.Count > 0) Debug.Log($" + + _toRemove count: {_toRemove.Count}");
-
-            for (int i = 0; i < _toRemove.Count; i++)
-            {
-                entropy.Remove(_toRemove[i]);
-            }
-            if (_toRemove.Count > 0)
-            {
-                Debug.Log($" + + {_toRemove[0][_correspondingExit]}");
+                _toRemove.Add(entropy[i]);
             }
         }
-        // Optional: Log the updated entropy count
-        //Debug.Log($"Updated Entropy Count: {this.GetEntropyCount()}");
+
+        //remove everything in the remove list
+        for (int i = 0; i < _toRemove.Count; i++)
+        {
+            entropy.Remove(_toRemove[i]);
+        }
     }
 
     public void CollapseEntropy()
     {
         int _randNum = Random.Range(0, entropy.Count);
-        //Debug.Log($"CollapseEntropy rand number: {_randNum}  entropy count: {entropy.Count}");
         exits = entropy[_randNum];
         entropy = new List<byte[]>();
         entropy.Add(exits);
-        //Debug.Log($"{exits[0]}, {exits[1]},{exits[2]},{exits[3]},{exits[4]},{exits[5]}");
         UpdateExits();
+        collapsed = true;
     }
 
 
