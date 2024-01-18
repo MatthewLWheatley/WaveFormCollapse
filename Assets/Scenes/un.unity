@@ -153,9 +153,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tile: {fileID: 2207604882340328436, guid: c1a13cee700145a4091bb760e65a613f, type: 3}
-  maxX: 25
-  maxY: 25
-  maxZ: 25
+  maxX: 100
+  maxY: 1
+  maxZ: 100
 --- !u!4 &69861712
 Transform:
   m_ObjectHideFlags: 0

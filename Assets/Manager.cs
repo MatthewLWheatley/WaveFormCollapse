@@ -30,21 +30,47 @@ public class Manager : MonoBehaviour
     {
         byte[] _r = { 0x00, 0x01 };
 
-        for (int i = 0; i < 64; i++)
-        {
-            byte[] _rule = new byte[6];
-            for (int j = 0; j < 6; j++)
-            {
-                // Set the j-th bit of i and assign it to the j-th position in _rule
-                _rule[j] = (byte)((i >> j) & 1);
-            }
-            byte[] dont = new byte[] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-            if (_rule == dont) 
-            {
-                continue;
-            }
-            entropy.Add(_rule);
-        }
+        //entropy.Add(new byte[] { _r[0], _r[0], _r[0], _r[0], _r[1], _r[1]});
+        //entropy.Add(new byte[] { _r[0], _r[0], _r[0], _r[1], _r[1], _r[0]});
+        //entropy.Add(new byte[] { _r[0], _r[0], _r[1], _r[1], _r[0], _r[0]});
+        //entropy.Add(new byte[] { _r[0], _r[1], _r[1], _r[0], _r[0], _r[0]});
+        //entropy.Add(new byte[] { _r[1], _r[1], _r[0], _r[0], _r[0], _r[0]});
+        //entropy.Add(new byte[] { _r[0], _r[0], _r[0], _r[1], _r[0], _r[1] });
+        //entropy.Add(new byte[] { _r[0], _r[0], _r[1], _r[0], _r[1], _r[0] });
+        //entropy.Add(new byte[] { _r[0], _r[1], _r[0], _r[1], _r[0], _r[0] });
+        //entropy.Add(new byte[] { _r[1], _r[0], _r[1], _r[0], _r[0], _r[0] });
+        //entropy.Add(new byte[] { _r[0], _r[1], _r[0], _r[0], _r[0], _r[1] });
+        //entropy.Add(new byte[] { _r[1], _r[0], _r[0], _r[0], _r[1], _r[0] });
+        //entropy.Add(new byte[] { _r[0], _r[0], _r[1], _r[0], _r[0], _r[1] });
+        //entropy.Add(new byte[] { _r[0], _r[1], _r[0], _r[0], _r[1], _r[0] });
+        //entropy.Add(new byte[] { _r[1], _r[0], _r[0], _r[1], _r[0], _r[0] });
+        //entropy.Add(new byte[] { _r[0], _r[1], _r[0], _r[0], _r[0], _r[1] });
+        //entropy.Add(new byte[] { _r[1], _r[0], _r[0], _r[0], _r[1], _r[0] });
+        //entropy.Add(new byte[] { _r[0], _r[1], _r[0], _r[0], _r[0], _r[1] });
+
+
+        entropy.Add(new byte[] { _r[1], _r[0], _r[1], _r[0], _r[0], _r[0]});
+        entropy.Add(new byte[] { _r[1], _r[0], _r[0], _r[1], _r[0], _r[0]});
+        entropy.Add(new byte[] { _r[1], _r[0], _r[0], _r[0], _r[0], _r[1] });
+        entropy.Add(new byte[] { _r[0], _r[0], _r[1], _r[1], _r[0], _r[0] });
+        entropy.Add(new byte[] { _r[0], _r[0], _r[1], _r[0], _r[0], _r[1] });
+        entropy.Add(new byte[] { _r[0], _r[0], _r[0], _r[1], _r[0], _r[1] });
+
+        //for (int i = 0; i < 64; i++)
+        //{
+        //    byte[] _rule = new byte[6];
+        //    for (int j = 0; j < 6; j++)
+        //    {
+        //        // Set the j-th bit of i and assign it to the j-th position in _rule
+        //        _rule[j] = (byte)((i >> j) & 1);
+        //    }
+        //    byte[] dont = new byte[] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+        //    if (_rule == dont) 
+        //    {
+        //        continue;
+        //    }
+        //    entropy.Add(_rule);
+        //}
 
         foreach (var tile in map)
         { 
@@ -117,7 +143,7 @@ public class Manager : MonoBehaviour
             var _list = GetLowestEntropyList();
 
             //randomly pick one
-            Random.seed = rndSeed;
+            //Random.seed = rndSeed;
             if (_list.Count == 0) return;
             int _randNum = Random.Range(0, _list.Count);
             Debug.Log(_list.Count);
@@ -129,45 +155,24 @@ public class Manager : MonoBehaviour
             _tile.CollapseEntropy();
 
             //propergate the collapse to the sorunding
-
-            //Debug.Log($"Tile pos: {_tilePos.x},{_tilePos.y},{_tilePos.z}");
-            //int i = 0;
-            for (int i = 0; i < 6; i++)
+            List<(int x, int y, int z)> dirs = new List<(int x, int y, int z)> {
+                (1,0,0),(-1,0,0),(0,1,0),(0,-1,0),(0,0,1),(0,0,-1),
+                (2,0,0),(-2,0,0),(0,2,0),(0,-2,0),(0,0,2),(0,0,-2),
+                (1,0,1),(-1,0,1),(1,0,-1),(-1,0,-1),
+                (1,1,0),(-1,1,0),(1,-1,0),(-1,-1,0),
+                (0,1,1),(0,-1,1),(0,1,-1),(0,-1,-1)};
+            for (int i = 0; i < dirs.Count; i++)
             {
                 (int x, int y, int z) _targetPos = _tilePos;
-                switch (i)
-                {
-                    case 0: // +x
-                        _targetPos.x = (_targetPos.x + 1) % maxX;
-                        break;
-                    case 3: // -x
-                        _targetPos.x = (_targetPos.x - 1 + maxX) % maxX;
-                        break;
-                    case 1: // +y
-                        _targetPos.y = (_targetPos.y + 1) % maxY;
-                        break;
-                    case 4: // -y
-                        _targetPos.y = (_targetPos.y - 1 + maxY) % maxY;
-                        break;
-                    case 2: // +z
-                        _targetPos.z = (_targetPos.z + 1) % maxZ;
-                        break;
-                    case 5: // -z
-                        _targetPos.z = (_targetPos.z - 1 + maxZ) % maxZ;
-                        break;
-                }
+                _targetPos.x = (_targetPos.x + dirs[i].x) % maxX;
+                if (_targetPos.x < 0) _targetPos.x += maxX;
+                _targetPos.y = (_targetPos.y + dirs[i].y) % maxY;
+                if (_targetPos.y < 0) _targetPos.y += maxY;
+                _targetPos.z = (_targetPos.z + dirs[i].z) % maxZ;
+                if (_targetPos.z < 0) _targetPos.z += maxZ;
 
-                //_tile.entropy = new List<byte[]>();
-                //for (int j = 0; j < entropy.Count; j++)
-                //{
-                //    _tile.entropy.Add(entropy[j]);
-                //}
-
-                //Debug.Log($"target pos: {_targetPos.x},{_targetPos.y},{_targetPos.z}");
                 _tile = map[_targetPos].GetComponent<TileManager>();
-                //Debug.Log($"target entropy before: {_tile.GetEntropyCount()}");
                 _tile.UpdateEntropy();
-                //Debug.Log($"target entropy after: {_tile.GetEntropyCount()}");
             }
 
 

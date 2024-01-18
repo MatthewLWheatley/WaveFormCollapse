@@ -31,8 +31,6 @@ public class TileManager : MonoBehaviour
 
     private void Update()
     {
-        //Debug.Log($"{exits.Length}");
-        //turn off when debugging but make the centre not active when tile is empty
         if (exits[0] + exits[1] + exits[2] + exits[3] + exits[4] + exits[5] == 0)
         {
             centre.SetActive(false);
@@ -157,8 +155,6 @@ public class TileManager : MonoBehaviour
 
         for (int i = 0; i < exits.Length; i++)
         {
-            // Assuming the value 1 in exits array means the exit is open
-            // and the corresponding cube should be active.
             if (exits[i] == 1)
             {
                 cubes[i].SetActive(true);
