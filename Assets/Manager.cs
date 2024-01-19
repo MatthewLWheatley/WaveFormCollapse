@@ -30,31 +30,21 @@ public class Manager : MonoBehaviour
     {
         byte[] _r = { 0x00, 0x01 };
 
-        //entropy.Add(new byte[] { _r[0], _r[0], _r[0], _r[0], _r[1], _r[1]});
-        //entropy.Add(new byte[] { _r[0], _r[0], _r[0], _r[1], _r[1], _r[0]});
-        //entropy.Add(new byte[] { _r[0], _r[0], _r[1], _r[1], _r[0], _r[0]});
-        //entropy.Add(new byte[] { _r[0], _r[1], _r[1], _r[0], _r[0], _r[0]});
-        //entropy.Add(new byte[] { _r[1], _r[1], _r[0], _r[0], _r[0], _r[0]});
-        //entropy.Add(new byte[] { _r[0], _r[0], _r[0], _r[1], _r[0], _r[1] });
-        //entropy.Add(new byte[] { _r[0], _r[0], _r[1], _r[0], _r[1], _r[0] });
-        //entropy.Add(new byte[] { _r[0], _r[1], _r[0], _r[1], _r[0], _r[0] });
-        //entropy.Add(new byte[] { _r[1], _r[0], _r[1], _r[0], _r[0], _r[0] });
-        //entropy.Add(new byte[] { _r[0], _r[1], _r[0], _r[0], _r[0], _r[1] });
-        //entropy.Add(new byte[] { _r[1], _r[0], _r[0], _r[0], _r[1], _r[0] });
-        //entropy.Add(new byte[] { _r[0], _r[0], _r[1], _r[0], _r[0], _r[1] });
-        //entropy.Add(new byte[] { _r[0], _r[1], _r[0], _r[0], _r[1], _r[0] });
-        //entropy.Add(new byte[] { _r[1], _r[0], _r[0], _r[1], _r[0], _r[0] });
-        //entropy.Add(new byte[] { _r[0], _r[1], _r[0], _r[0], _r[0], _r[1] });
-        //entropy.Add(new byte[] { _r[1], _r[0], _r[0], _r[0], _r[1], _r[0] });
-        //entropy.Add(new byte[] { _r[0], _r[1], _r[0], _r[0], _r[0], _r[1] });
-
-
+        entropy.Add(new byte[] { _r[1], _r[1], _r[0], _r[0], _r[0], _r[0]});
         entropy.Add(new byte[] { _r[1], _r[0], _r[1], _r[0], _r[0], _r[0]});
         entropy.Add(new byte[] { _r[1], _r[0], _r[0], _r[1], _r[0], _r[0]});
-        entropy.Add(new byte[] { _r[1], _r[0], _r[0], _r[0], _r[0], _r[1] });
-        entropy.Add(new byte[] { _r[0], _r[0], _r[1], _r[1], _r[0], _r[0] });
-        entropy.Add(new byte[] { _r[0], _r[0], _r[1], _r[0], _r[0], _r[1] });
-        entropy.Add(new byte[] { _r[0], _r[0], _r[0], _r[1], _r[0], _r[1] });
+        entropy.Add(new byte[] { _r[1], _r[0], _r[0], _r[0], _r[1], _r[0]});
+        entropy.Add(new byte[] { _r[1], _r[0], _r[0], _r[0], _r[0], _r[1]});
+        entropy.Add(new byte[] { _r[0], _r[1], _r[1], _r[0], _r[0], _r[0]});
+        entropy.Add(new byte[] { _r[0], _r[1], _r[0], _r[1], _r[0], _r[0]});
+        entropy.Add(new byte[] { _r[0], _r[1], _r[0], _r[0], _r[1], _r[0]});
+        entropy.Add(new byte[] { _r[0], _r[1], _r[0], _r[0], _r[0], _r[1]});
+        entropy.Add(new byte[] { _r[0], _r[0], _r[1], _r[1], _r[0], _r[0]});
+        entropy.Add(new byte[] { _r[0], _r[0], _r[1], _r[0], _r[1], _r[0]});
+        entropy.Add(new byte[] { _r[0], _r[0], _r[1], _r[0], _r[0], _r[1]});
+        entropy.Add(new byte[] { _r[0], _r[0], _r[0], _r[1], _r[1], _r[0]});
+        entropy.Add(new byte[] { _r[0], _r[0], _r[0], _r[1], _r[0], _r[1]});
+        entropy.Add(new byte[] { _r[0], _r[0], _r[0], _r[0], _r[1], _r[1]});
 
         //for (int i = 0; i < 64; i++)
         //{
@@ -92,7 +82,6 @@ public class Manager : MonoBehaviour
                     GameObject newTile = Instantiate(tile, tilePosition, Quaternion.identity,this.gameObject.transform);
                     map[(x, y, z)] = newTile;
                     var _tileManager = newTile.GetComponent<TileManager>();
-                    //Debug.Log($"{x}, {y}, {z}");
                     _tileManager.exits = new byte[] {0x00,0x00,0x00,0x00,0x00,0x00};
                     _tileManager.pos = (x, y, z);
                     for (int i = 0; i < entropy.Count; i++)
@@ -136,7 +125,7 @@ public class Manager : MonoBehaviour
 
     private void Update()
     {
-        if (Time.time - lastUpdateTime >= 0.0000001f)
+        //if (Time.time - lastUpdateTime >= 0.0000001f)
         {
             //get all tiles entropy
             //find all with the lowest entropy
@@ -146,7 +135,7 @@ public class Manager : MonoBehaviour
             //Random.seed = rndSeed;
             if (_list.Count == 0) return;
             int _randNum = Random.Range(0, _list.Count);
-            Debug.Log(_list.Count);
+            //Debug.Log(_list.Count);
             (int x, int y, int z) _tilePos = _list[_randNum];
             var _tile = map[_tilePos].GetComponent<TileManager>();
 
