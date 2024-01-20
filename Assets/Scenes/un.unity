@@ -154,9 +154,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tilePrefab: {fileID: 2207604882340328436, guid: c1a13cee700145a4091bb760e65a613f,
     type: 3}
-  maxX: 4
-  maxY: 4
-  maxZ: 4
+  maxX: 2
+  maxY: 2
+  maxZ: 2
 --- !u!4 &69861712
 Transform:
   m_ObjectHideFlags: 0

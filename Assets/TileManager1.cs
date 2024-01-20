@@ -8,136 +8,17 @@ using UnityEngine;
 public class TileManager : MonoBehaviour
 {
     public GameObject Parent { get; private set; }
-
-    private int maxX, maxY, maxZ;
-    private bool collapsed = false;
-    private (int x, int y, int z) pos;
-    private List<byte[]> entropy = new List<byte[]>();
-
-    [SerializeField] private GameObject centre;
     [SerializeField] private GameObject[] cubes = new GameObject[6];
     private byte[] exits = new byte[6];
+    [SerializeField] private GameObject centre;
 
-    public void Initialize((int x, int y, int z) position, int mx, int my, int mz, List<byte[]> ent, GameObject parent)
+    public void SetExits(byte[] _exits) 
     {
-        pos = position;
-        maxX = mx; maxY = my; maxZ = mz;
-        Parent = parent;
-        entropy = new List<byte[]>(ent); // Deep copy if necessary
-        centre.SetActive(false);
-    }
-
-    public bool GetCollapsed()
-    {
-        return (collapsed);
-    }
-
-    public List<byte[]> GetEntropy()
-    {
-        return entropy;
-    }
-
-    public int GetEntropyCount()
-    {
-        return entropy.Count;
-    }
-
-    public void UpdateEntropy()
-    {
-        var _targetPos = pos;
-
-        // Loop through all directions and check entropy
-        for (int _dir = 0; _dir < 6; _dir++)
-        {
-            UpdateEntropyDir(_dir);
-        }
-    }
-
-    public void UpdateEntropyDir(int _dir)
-    {
-        // Calculate the target position based on the direction
-        var _targetPos = pos;
-        switch (_dir)
-        {
-            case 0: // +x
-                _targetPos.x = (_targetPos.x + 1) % maxX;
-                break;
-            case 3: // -x
-                _targetPos.x = (_targetPos.x - 1 + maxX) % maxX;
-                break;
-            case 1: // +y
-                _targetPos.y = (_targetPos.y + 1) % maxY;
-                break;
-            case 4: // -y
-                _targetPos.y = (_targetPos.y - 1 + maxY) % maxY;
-                break;
-            case 2: // +z
-                _targetPos.z = (_targetPos.z + 1) % maxZ;
-                break;
-            case 5: // -z
-                _targetPos.z = (_targetPos.z - 1 + maxZ) % maxZ;
-                break;
-        }
-
-        // Get the target tile and its entropy
-        var _targetTile = Parent.GetComponent<Manager>().GetTile(_targetPos).GetComponent<TileManager>();
-        var _targetEntropy = _targetTile.GetEntropy();
-        List<byte[]> _toRemove = new List<byte[]>();
-        var _correspondingExit = (_dir + 3) % 6;
-        List<byte> _possibleExits = new List<byte>();
-
-        //find all the possible exits
-        foreach (var _exit in _targetEntropy)
-        {
-            if (!_possibleExits.Contains(_exit[_correspondingExit]))
-            {
-                _possibleExits.Add(_exit[_correspondingExit]);
-            }
-        }
-
-        //exit if no removals will happen
-        if (_possibleExits.Count > 1) 
-        {
-            return;
-        }
-
-        //filter throgh entropy adding to the a remove list 
-        for (int i = 0; i < entropy.Count; i++)
-        {
-            if (!_possibleExits.Contains(entropy[i][_dir]))
-            {
-                _toRemove.Add(entropy[i]);
-            }
-        }
-
-        //remove everything in the remove list
-        for (int i = 0; i < _toRemove.Count; i++)
-        {
-            entropy.Remove(_toRemove[i]);
-        }
-    }
-
-    public void CollapseEntropy()
-    {
-        int _randNum = Random.Range(0, entropy.Count);
-        if (entropy.Count == 0) 
-        { 
-            Parent.GetComponent<Manager>().Reset();
-        }
-        exits = entropy[_randNum];
-        entropy = new List<byte[]>();
-        entropy.Add(exits);
-        collapsed = true;
+        exits = _exits;
     }
 
     public void UpdateExits()
     {
-        if (cubes.Length != exits.Length)
-        {
-            Debug.LogError("Cubes array and exits array do not match in length.");
-            return;
-        }
-
         for (int i = 0; i < exits.Length; i++)
         {
             if (exits[i] == 1)
@@ -153,5 +34,10 @@ public class TileManager : MonoBehaviour
         {
             if (exits[i] > 0) centre.SetActive(true);
         }
+    }
+
+    public void ResetExits()
+    {
+        Destroy(this);
     }
 }
