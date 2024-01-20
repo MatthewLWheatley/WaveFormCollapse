@@ -7,40 +7,24 @@ using UnityEngine;
 
 public class TileManager : MonoBehaviour
 {
-    public GameObject Parent = null;
+    public GameObject Parent { get; private set; }
 
-    public int maxX, maxY, maxZ;
-
+    private int maxX, maxY, maxZ;
     private bool collapsed = false;
+    private (int x, int y, int z) pos;
+    private List<byte[]> entropy = new List<byte[]>();
 
-    [SerializeField] GameObject centre;
+    [SerializeField] private GameObject centre;
+    [SerializeField] private GameObject[] cubes = new GameObject[6];
+    private byte[] exits = new byte[6];
 
-    [SerializeField] GameObject[] cubes = new GameObject[6];
-    /// <summary>
-    /// 0 : +x
-    /// 1 : +y
-    /// 2 : +z
-    /// 3 : -x
-    /// 4 :  -y
-    /// 5 : -z
-    /// </summary>
-    public byte[] exits = new byte[6];
-
-    public (int x, int y, int z) pos;
-    public List<byte[]> entropy = new List<byte[]>();
-
-    private void Update()
+    public void Initialize((int x, int y, int z) position, int mx, int my, int mz, List<byte[]> ent, GameObject parent)
     {
-        if (exits[0] + exits[1] + exits[2] + exits[3] + exits[4] + exits[5] == 0)
-        {
-            centre.SetActive(false);
-            //Debug.Log("fuck");
-        }
-        else
-        {
-            centre.SetActive(true);
-            //Debug.Log("shit");
-        }
+        pos = position;
+        maxX = mx; maxY = my; maxZ = mz;
+        Parent = parent;
+        entropy = new List<byte[]>(ent); // Deep copy if necessary
+        centre.SetActive(false);
     }
 
     public bool GetCollapsed()
@@ -48,7 +32,6 @@ public class TileManager : MonoBehaviour
         return (collapsed);
     }
 
-    //TODO: Fix
     public List<byte[]> GetEntropy()
     {
         return entropy;
@@ -137,13 +120,15 @@ public class TileManager : MonoBehaviour
     public void CollapseEntropy()
     {
         int _randNum = Random.Range(0, entropy.Count);
+        if (entropy.Count == 0) 
+        { 
+            Parent.GetComponent<Manager>().Reset();
+        }
         exits = entropy[_randNum];
         entropy = new List<byte[]>();
         entropy.Add(exits);
-        UpdateExits();
         collapsed = true;
     }
-
 
     public void UpdateExits()
     {
@@ -163,6 +148,10 @@ public class TileManager : MonoBehaviour
             {
                 cubes[i].SetActive(false);
             }
+        }
+        for (int i = 0; i < exits.Length; i++)
+        {
+            if (exits[i] > 0) centre.SetActive(true);
         }
     }
 }
