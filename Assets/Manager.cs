@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Jobs;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
@@ -85,51 +86,48 @@ public class Manager : MonoBehaviour
         return lowEntopyList;
     }
 
-    int count = 0;
-
-    public void Reset(bool fuck)
+    public void StartAgain(bool fuck)
     {
+
+        
+
         if ((Time.realtimeSinceStartup - startTime) > 0.0f)
         {
             //Debug.Log($"{Time.realtimeSinceStartup - startTime}");
-            //startTime = Time.realtimeSinceStartup;
+            startTime = Time.realtimeSinceStartup;
 
             if (fuck)
             {
                 Debug.Log("respawn");
-                count++;
             }
-            else 
+            else
             {
                 Debug.Log("fuck");
             }
 
-            if (count < 50)
+            foreach (var tile in map)
             {
-                foreach (var tile in map)
-                {
-                    Destroy(tile.Value.Child);
-                }
-
-                map = new Dictionary<(int, int, int), Tile>();
-                entropy = new List<byte[]>();
-                CreateRules();
-                SpawnTiles();
+                Destroy(tile.Value.Child);
             }
+
+            map = new Dictionary<(int, int, int), Tile>();
+            entropy = new List<byte[]>();
+            CreateRules();
+            SpawnTiles();
+
         }
     }
 
     bool start = false;
     bool end = true;
 
-
-    private void Update()
+    public void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
+        if(Input.GetKeyDown(KeyCode.Space))
+        { 
             if (start) 
             {
-                Reset(true);
+                StartAgain(true);
                 end = true;
             }
             start = true;
@@ -151,7 +149,7 @@ public class Manager : MonoBehaviour
                 foreach (var tile in map)
                 {
                     tile.Value.CollapseEntropy();
-                    tile.Value.UpdateExits();
+                    tile.Value.SetExits();
                 }
                 if (end) 
                 {
@@ -203,8 +201,6 @@ public class Manager : MonoBehaviour
     }
 
     public Tile GetTile((int x, int y, int z) _pos) => map[_pos];
-
-    
 }
 
 public class ByteArrayComparer : IEqualityComparer<byte[]>
@@ -230,155 +226,5 @@ public class ByteArrayComparer : IEqualityComparer<byte[]>
             hash = hash * 31 + element.GetHashCode();
         }
         return hash;
-    }
-}
-
-[System.Serializable]
-public class Tile
-{
-    public Manager Parent { get; private set; }
-    public GameObject Child { get; private set; }
-    public TileManager ChildTile { get; private set; }
-
-    private int maxX, maxY, maxZ;
-    private bool collapsed = false;
-    private (int x, int y, int z) pos;
-    private HashSet<byte[]> entropy;
-
-    private byte[] exits = new byte[6];
-
-    public void Initialize((int x, int y, int z) position, int mx, int my, int mz, List<byte[]> ent, Manager parent, GameObject child)
-    {
-        pos = position;
-        maxX = mx; maxY = my; maxZ = mz;
-        Parent = parent;
-        entropy = new HashSet<byte[]>(new ByteArrayComparer());
-        foreach (var en in ent)
-        {
-            entropy.Add(en);
-        }
-        Child = child;
-        ChildTile = Child.GetComponent<TileManager>();
-    }
-
-    public bool GetCollapsed()
-    {
-        return entropy.Count() == 1;
-    }
-
-    public List<byte[]> GetEntropy()
-    {
-        return new List<byte[]>(entropy);
-    }
-
-    public int GetEntropyCount()
-    {
-        return entropy.Count;
-    }
-
-    public void UpdateEntropy()
-    {
-        var _targetPos = pos;
-
-        // Loop through all directions and check entropy
-        for (int _dir = 0; _dir < 6; _dir++)
-        {
-            UpdateEntropyDir(_dir);
-        }
-    }
-
-    public void UpdateEntropyDir(int _dir)
-    {
-        // Calculate the target position based on the direction
-        var _targetPos = pos;
-        switch (_dir)
-        {
-            case 0: // +x
-                _targetPos.x = (_targetPos.x + 1) % maxX;
-                break;
-            case 3: // -x
-                _targetPos.x = (_targetPos.x - 1 + maxX) % maxX;
-                break;
-            case 1: // +y
-                _targetPos.y = (_targetPos.y + 1) % maxY;
-                break;
-            case 4: // -y
-                _targetPos.y = (_targetPos.y - 1 + maxY) % maxY;
-                break;
-            case 2: // +z
-                _targetPos.z = (_targetPos.z + 1) % maxZ;
-                break;
-            case 5: // -z
-                _targetPos.z = (_targetPos.z - 1 + maxZ) % maxZ;
-                break;
-        }
-
-        // Get the target tile and its entropy
-        var _targetTile = Parent.GetTile(_targetPos);
-        var _targetEntropy = _targetTile.GetEntropy();
-        HashSet<byte[]> _toRemove = new HashSet<byte[]>(new ByteArrayComparer());
-        var _correspondingExit = (_dir + 3) % 6;
-        List<byte> _possibleExits = new List<byte>();
-
-        //find all the possible exits
-        foreach (var _exit in _targetEntropy)
-        {
-            if (!_possibleExits.Contains(_exit[_correspondingExit]))
-            {
-                _possibleExits.Add(_exit[_correspondingExit]);
-            }
-        }
-
-        //exit if no removals will happen
-        if (_possibleExits.Count > 1)
-        {
-            return;
-        }
-
-        //filter through entropy adding to the remove HashSet
-        foreach (var ent in entropy)
-        {
-            if (!_possibleExits.Contains(ent[_dir]))
-            {
-                _toRemove.Add(ent);
-            }
-        }
-
-        //remove everything in the remove list
-        foreach (var item in _toRemove)
-        {
-            entropy.Remove(item);
-        }
-    }
-
-    public void CollapseEntropy()
-    {
-        int entropyCount = entropy.Count;
-        if (entropyCount == 0)
-        {
-            // Handle the case when there's no entropy left
-            Parent.GetComponent<Manager>().Reset(false);
-            return;
-        }
-
-        int _randNum = Random.Range(0, entropyCount);
-        byte[] randomEntropyElement = entropy.ElementAt(_randNum);
-        exits = randomEntropyElement;
-
-        entropy.Clear();
-        entropy.Add(exits);
-
-        collapsed = true;
-    }
-
-    public void UpdateExits()
-    {
-        ChildTile.SetExits(exits);
-        ChildTile.UpdateExits();
-    }
-
-    public void Delete()
-    {
-        Child.GetComponent<TileManager>().ResetExits();
     }
 }
