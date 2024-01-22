@@ -38,6 +38,6 @@ public class TileManager : MonoBehaviour
 
     public void ResetExits()
     {
-        Destroy(this);
+        Destroy(this.transform);
     }
 }
