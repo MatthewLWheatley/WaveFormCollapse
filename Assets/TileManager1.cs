@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,34 +26,44 @@ public class TileManager : MonoBehaviour
         exits = _exits;
         for (int i = 0; i < exits.Length; i++)
         {
-            if (exits[i] == 1)
+            // WTF
+            try 
             {
-                Vector3 Target = new Vector3(0.0f, 0.0f, 0.0f);
-                switch (i)
-                {
-                    case 0:
-                        Target.x += 1;
-                        break;
-                    case 1:
-                        Target.y += 1;
-                        break;
-                    case 2:
-                        Target.z += 1;
-                        break;
-                    case 3:
-                        Target.x -= 1;
-                        break;
-                    case 4:
-                        Target.y -= 1;
-                        break;
-                    case 5:
-                        Target.z -= 1;
-                        break;
-                }
-                GameObject edgeInstance = Instantiate(edge, this.transform.position+Target, Quaternion.identity, this.transform);
-                edges[i] = edgeInstance;
-                centre.SetActive(true);
+                if (edges[i].name == "") 
+                { }
             }
+            catch(NullReferenceException) 
+            {
+                if (exits[i] == 1)
+                {
+                    Vector3 Target = new Vector3(0.0f, 0.0f, 0.0f);
+                    switch (i)
+                    {
+                        case 0:
+                            Target.x += 1;
+                            break;
+                        case 1:
+                            Target.y += 1;
+                            break;
+                        case 2:
+                            Target.z += 1;
+                            break;
+                        case 3:
+                            Target.x -= 1;
+                            break;
+                        case 4:
+                            Target.y -= 1;
+                            break;
+                        case 5:
+                            Target.z -= 1;
+                            break;
+                    }
+                    GameObject edgeInstance = Instantiate(edge, this.transform.position + Target, Quaternion.identity, this.transform);
+                    edges[i] = edgeInstance;
+                    centre.SetActive(true);
+                }
+            }
+            
         }
     }
 
