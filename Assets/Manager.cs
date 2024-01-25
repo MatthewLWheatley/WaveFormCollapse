@@ -53,8 +53,18 @@ public class Manager : MonoBehaviour
                     Vector3 position = new Vector3(x * 3 + this.transform.position.x, y * 3 + this.transform.position.y, z * 3 + this.transform.position.z);
                     GameObject Child = Instantiate(tilePrefab, position, Quaternion.identity, transform);
                     Tile tile = new Tile();
-                    tile.Initialize((x, y, z), maxX, maxY, maxZ, entropy, this.gameObject.GetComponent<Manager>(),Child);
+                    tile.Initialize((x, y, z), maxX, maxY, maxZ, entropy, this.gameObject.GetComponent<Manager>(), Child);
                     map[(x, y, z)] = tile;
+                }
+            }
+        }
+        for (int x = 0; x < maxX; x++)
+        {
+            for (int y = 0; y < maxY; y++)
+            {
+                for (int z = 0; z < maxZ; z++)
+                {
+                    map[(x,y,z)].InitSurroundings();
                 }
             }
         }

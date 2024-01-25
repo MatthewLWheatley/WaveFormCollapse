@@ -63,13 +63,11 @@ public class TileManager : MonoBehaviour
                     centre.SetActive(true);
                 }
             }
-            
         }
     }
 
     public void ResetExits()
     {
-
         Destroy(this.transform);
     }
 }

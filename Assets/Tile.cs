@@ -36,118 +36,46 @@ public class Tile
     }
 
 
+    List<Tile> tiles;
+    HashSet<byte[]> toRemove = new HashSet<byte[]>(new ByteArrayComparer());
+    List<byte> possbileExits = new List<byte>();
+
     public void InitSurroundings()
-    { }
-    //    tiles = new List<Tile>();
-    //    toRemove = new HashSet<byte[]>(new ByteArrayComparer());
-    //    for (int _dir = 0; _dir < 6; _dir++)
-    //    {
-    //        // Calculate the target position based on the direction
-    //        var _targetPos = pos;
-    //        _targetPos.x = (_targetPos.x + Dirs[_dir].x + maxX) % maxX;
-    //        _targetPos.y = (_targetPos.y + Dirs[_dir].y + maxY) % maxY;
-    //        _targetPos.z = (_targetPos.z + Dirs[_dir].z + maxZ) % maxZ;
-    //        tiles.Add(Parent.GetTile(_targetPos));
-    //    }
-    //}
-
-    //List<Tile> tiles;
-    //HashSet<byte[]> toRemove = new HashSet<byte[]>(new ByteArrayComparer());
-    //List<byte> possbileExits = new List<byte>();
-
-
-
-    public void UpdateEntropy()
-    {
-
-        // Loop through all directions and check entropy
-        for (int _dir = 0; _dir < 6; _dir++)
+    { 
+        tiles = new List<Tile>();
+        toRemove = new HashSet<byte[]>(new ByteArrayComparer());
+        for (int _dir = 0; _dir< 6; _dir++)
         {
-            //Debug.Log($"{_dir}");
             // Calculate the target position based on the direction
             var _targetPos = pos;
             _targetPos.x = (_targetPos.x + Dirs[_dir].x + maxX) % maxX;
             _targetPos.y = (_targetPos.y + Dirs[_dir].y + maxY) % maxY;
             _targetPos.z = (_targetPos.z + Dirs[_dir].z + maxZ) % maxZ;
-
-            // Get the target tile and its entropy
-            var _targetTile = Parent.GetTile(_targetPos);
-            var _targetEntropy = _targetTile.GetEntropy();
-            HashSet<byte[]> _toRemove = new HashSet<byte[]>(new ByteArrayComparer());
-            var _correspondingExit = (_dir + 3) % 6;
-            List<byte> _possibleExits = new List<byte>();
-
-            //find all the possible exits
-            foreach (var _exit in _targetEntropy)
-            {
-                if (!_possibleExits.Contains(_exit[_correspondingExit]))
-                {
-                    _possibleExits.Add(_exit[_correspondingExit]);
-                }
-            }
-
-            //filter through entropy adding to the remove HashSet
-            foreach (var ent in entropy)
-            {
-                if (!_possibleExits.Contains(ent[_dir]))
-                {
-                    _toRemove.Add(ent);
-                }
-            }
-
-            //remove everything in the remove list
-            foreach (var item in _toRemove)
-            {
-                entropy.Remove(item);
-            }
-
-            //Debug.Log($"{_dir}");
+            tiles.Add(Parent.GetTile(_targetPos));
+            //Debug.Log($"dir:{_dir}  pos:{pos.x},{pos.y},{pos.z} dir");
+            //Debug.Log($"pos: {tiles[_dir].pos.x},{tiles[_dir].pos.y},{tiles[_dir].pos.z}");
+            //Debug.Log($"{Parent.GetTile(_targetPos).pos.x}");
         }
     }
 
-    public void UpdateEntropyDir(int _dir)
+    public void UpdateEntropy()
     {
-        // Calculate the target position based on the direction
-        var _targetPos = pos;
-        _targetPos.x = (_targetPos.x + Dirs[_dir].x + maxX) % maxX;
-        _targetPos.y = (_targetPos.y + Dirs[_dir].y + maxY) % maxY;
-        _targetPos.z = (_targetPos.z + Dirs[_dir].z + maxZ) % maxZ;
-
-        // Get the target tile and its entropy
-        var _targetTile = Parent.GetTile(_targetPos);
-        var _targetEntropy = _targetTile.GetEntropy();
-        HashSet<byte[]> _toRemove = new HashSet<byte[]>(new ByteArrayComparer());
-        var _correspondingExit = (_dir + 3) % 6;
-        List<byte> _possibleExits = new List<byte>();
-
-        //find all the possible exits
-        foreach (var _exit in _targetEntropy)
+        // Loop through all directions and check entropy
+        for (int _dir = 0; _dir < 6; _dir++)
         {
-            if (!_possibleExits.Contains(_exit[_correspondingExit]))
-            {
-                _possibleExits.Add(_exit[_correspondingExit]);
-            }
-        }
+            var _targetEntropy = tiles[_dir].GetEntropy();
+            toRemove = new HashSet<byte[]>(new ByteArrayComparer());
+            var _correspondingExit = (_dir + 3) % 6;
+            possbileExits = new List<byte>();
 
-        //exit if no removals will happen
-        if (_possibleExits.Count > 1)
-        {
-            return;
-        }
+            //find all the possible exits
+            foreach (var _exit in _targetEntropy) if (!possbileExits.Contains(_exit[_correspondingExit])) possbileExits.Add(_exit[_correspondingExit]);
 
-        //filter through entropy adding to the remove HashSet
-        foreach (var ent in entropy)
-        {
-            if (!_possibleExits.Contains(ent[_dir]))
-            {
-                _toRemove.Add(ent);
-            }
-        }
+            //filter through entropy adding to the remove HashSet
+            foreach (var ent in entropy) if (!possbileExits.Contains(ent[_dir])) toRemove.Add(ent);
 
-        //remove everything in the remove list
-        foreach (var item in _toRemove)
-        {
-            entropy.Remove(item);
+            //remove everything in the remove list
+            foreach (var item in toRemove) entropy.Remove(item);
         }
     }
 
