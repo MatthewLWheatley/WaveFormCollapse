@@ -364,11 +364,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   managerPrefab: {fileID: 1445259381991249452, guid: febfd4a9cf67efa44bbfa79d211f22d5,
     type: 3}
-  maxX: 25
+  maxX: 2
   maxY: 1
-  maxZ: 25
-  width: 1
-  depth: 1
+  maxZ: 2
+  width: 100
+  depth: 100
 --- !u!4 &351386169
 Transform:
   m_ObjectHideFlags: 0
@@ -377,7 +377,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 351386167}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 7.3359084, y: 3.0961716, z: 11.402283}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
