@@ -73,7 +73,7 @@ public class TileManager : MonoBehaviour
         if (done)
         {
             done = false;
-            //CombineMeshes();
+            CombineMeshes();
         }
     }
 

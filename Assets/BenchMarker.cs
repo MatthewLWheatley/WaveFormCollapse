@@ -18,6 +18,25 @@ public class BenchMarker : MonoBehaviour
         SpawnManagers();
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            DeleteManagers();
+            SpawnManagers();
+        }
+    }
+
+    void DeleteManagers()
+    {
+        // Assuming this function is part of a MonoBehaviour and you want to destroy all children of this GameObject
+        foreach (Transform child in transform)
+        {
+            Destroy(child.gameObject);
+        }
+    }
+
+
     void SpawnManagers()
     {
         for (int x = 0; x < width; x++)
@@ -28,7 +47,7 @@ public class BenchMarker : MonoBehaviour
                 Vector3 position = new Vector3(x * maxX * 3, 0, z * maxZ * 3);
 
                 // Instantiate the manager prefab
-                GameObject managerInstance = Instantiate(managerPrefab, position, Quaternion.identity);
+                GameObject managerInstance = Instantiate(managerPrefab, position, Quaternion.identity,this.transform);
 
                 // Assuming the Manager script is attached to the prefab and has public maxX, maxY, maxZ
                 Manager managerScript = managerInstance.GetComponent<Manager>();

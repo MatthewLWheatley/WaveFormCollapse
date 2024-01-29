@@ -128,27 +128,26 @@ public class Manager : MonoBehaviour
         }
     }
 
-    bool start = false;
-    bool end = true;
+    bool start = true;
+    bool end = false;
 
     public void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Space))
-        { 
-            if (start) 
-            {
-                StartAgain(true);
-                end = true;
-            }
-            
-            start = true;
+        if(start && !end)
+        {
+            //if (start)
+            //{
+            //    StartAgain(true);
+            //    end = true;
+            //}
             startTime = Time.realtimeSinceStartup;
             Debug.Log("started");
+            start = false;
         }
-        
 
-        if (!start) return;
-        if (Time.time - lastUpdateTime >= 0.00001f)
+
+        if (end) return;
+        if (Time.time - lastUpdateTime >= 0.000000001f)
         {
             //get all tiles entropy
             //find all with the lowest entropy
@@ -157,19 +156,18 @@ public class Manager : MonoBehaviour
             //randomly pick one
             if (_list.Count == 0)
             {
-                
-                if (end) 
-                {
-                    end = false;
-                    Debug.Log($"{(Time.realtimeSinceStartup - startTime)}");
-                    start = false;
-
-                    CombineMeshes();
-                }
+                end = true;
                 foreach (var tile in map)
                 {
                     tile.Value.CollapseEntropy();
                     tile.Value.SetExits();
+                }
+                if (end) 
+                {
+                    Debug.Log($"{(Time.realtimeSinceStartup - startTime)}");
+                    start = false;
+
+                    CombineMeshes();
                 }
                 //Reset(true);
                 return;
@@ -216,7 +214,6 @@ public class Manager : MonoBehaviour
     }
 
     public Tile GetTile((int x, int y, int z) _pos) => map[_pos];
-
 
     void CombineMeshes()
     {
