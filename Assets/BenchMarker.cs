@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -13,8 +15,13 @@ public class BenchMarker : MonoBehaviour
     public int width;
     public int depth;
 
+    public int RunCount;
+    public float totalTime = 0.000001f;
+    public TextMeshProUGUI BenchMarkText;
+
     void Start()
     {
+        Application.targetFrameRate = 1000;
         SpawnManagers();
     }
 
@@ -24,6 +31,29 @@ public class BenchMarker : MonoBehaviour
         {
             DeleteManagers();
             SpawnManagers();
+        }
+        List<Manager> list = new List<Manager>();
+        foreach (Manager intst in managerScripts) 
+        {
+            if (intst != null &&  intst.end) 
+            {
+                if (RunCount > (width*depth))
+                {
+                    Debug.Log($"{RunCount}");
+                    totalTime += intst.RunTime;
+                }
+                RunCount++;
+                BenchMarkText.text = string.Format($"{totalTime / RunCount} average");
+                foreach (Transform child in intst.transform)
+                {
+                    Destroy(child.gameObject);
+                }
+                list.Add(intst);
+            }
+        }
+        foreach (Manager intst in list)
+        {
+            managerScripts.Remove(intst);
         }
     }
 
@@ -37,6 +67,8 @@ public class BenchMarker : MonoBehaviour
     }
 
 
+    List<Manager> managerScripts = new List<Manager>();
+
     void SpawnManagers()
     {
         for (int x = 0; x < width; x++)
@@ -48,9 +80,10 @@ public class BenchMarker : MonoBehaviour
 
                 // Instantiate the manager prefab
                 GameObject managerInstance = Instantiate(managerPrefab, position, Quaternion.identity,this.transform);
-
+                
                 // Assuming the Manager script is attached to the prefab and has public maxX, maxY, maxZ
                 Manager managerScript = managerInstance.GetComponent<Manager>();
+                managerScripts.Add(managerScript);
                 if (managerScript != null)
                 {
                     managerScript.maxX = maxX;

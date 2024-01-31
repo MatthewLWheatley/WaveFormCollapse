@@ -18,7 +18,8 @@ public class Manager : MonoBehaviour
 
     private float lastUpdateTime = 0f;
 
-    private float startTime = 0f;
+    public float startTime = 0f;
+    public float RunTime = 0f;
 
     private void Start()
     {
@@ -98,13 +99,10 @@ public class Manager : MonoBehaviour
 
     public void StartAgain(bool fuck)
     {
-
-        
-
         if ((Time.realtimeSinceStartup - startTime) > 0.0f)
         {
             //Debug.Log($"{Time.realtimeSinceStartup - startTime}");
-            startTime = Time.realtimeSinceStartup;
+            //startTime = Time.realtimeSinceStartup;
 
             if (fuck)
             {
@@ -129,7 +127,7 @@ public class Manager : MonoBehaviour
     }
 
     bool start = true;
-    bool end = false;
+    public bool end = false;
 
     public void Update()
     {
@@ -162,13 +160,11 @@ public class Manager : MonoBehaviour
                     tile.Value.CollapseEntropy();
                     tile.Value.SetExits();
                 }
-                if (end) 
-                {
-                    Debug.Log($"{(Time.realtimeSinceStartup - startTime)}");
-                    start = false;
+                RunTime = (Time.realtimeSinceStartup - startTime);
+                Debug.Log($"{(Time.realtimeSinceStartup - startTime)}");
+                start = false;
 
-                    CombineMeshes();
-                }
+                CombineMeshes();
                 //Reset(true);
                 return;
             }
