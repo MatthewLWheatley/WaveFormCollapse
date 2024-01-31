@@ -10,251 +10,251 @@ using UnityEngine.UIElements;
 
 public class Manager : MonoBehaviour
 {
-    [SerializeField] private GameObject tilePrefab;
-    [SerializeField] public int maxX = 5, maxY = 5, maxZ = 5;
+    //[SerializeField] private GameObject tilePrefab;
+    //[SerializeField] public int maxX = 5, maxY = 5, maxZ = 5;
 
-    private Dictionary<(int, int, int), Tile> map = new Dictionary<(int, int, int), Tile>();
-    private List<byte[]> entropy = new List<byte[]>();
+    //private Dictionary<(int, int, int), Tile> map = new Dictionary<(int, int, int), Tile>();
+    //private List<byte[]> entropy = new List<byte[]>();
 
-    private float lastUpdateTime = 0f;
+    //private float lastUpdateTime = 0f;
 
-    public float startTime = 0f;
-    public float RunTime = 0f;
+    //public float startTime = 0f;
+    //public float RunTime = 0f;
 
-    private void Start()
-    {
-        startTime = Time.realtimeSinceStartup;
-        CreateRules();
-        SpawnTiles();
-    }
+    //private void Start()
+    //{
+    //    startTime = Time.realtimeSinceStartup;
+    //    CreateRules();
+    //    SpawnTiles();
+    //}
 
-    private void CreateRules()
-    {
-        byte[] _r = { 0x00, 0x01 };
+    //private void CreateRules()
+    //{
+    //    byte[] _r = { 0x00, 0x01 };
 
-        entropy.Add(new byte[] { _r[1], _r[0], _r[1], _r[1], _r[0], _r[1]});
-        entropy.Add(new byte[] { _r[1], _r[0], _r[1], _r[0], _r[0], _r[0]});
-        entropy.Add(new byte[] { _r[1], _r[0], _r[0], _r[1], _r[0], _r[0]});
-        entropy.Add(new byte[] { _r[1], _r[0], _r[0], _r[0], _r[0], _r[1]});
-        entropy.Add(new byte[] { _r[0], _r[0], _r[1], _r[1], _r[0], _r[0]});
-        entropy.Add(new byte[] { _r[0], _r[0], _r[1], _r[0], _r[0], _r[1]});
-        entropy.Add(new byte[] { _r[0], _r[0], _r[0], _r[1], _r[0], _r[1]});
-        entropy.Add(new byte[] { _r[1], _r[0], _r[1], _r[1], _r[0], _r[0]});
-        entropy.Add(new byte[] { _r[0], _r[0], _r[1], _r[1], _r[0], _r[1]});
-    }
+    //    entropy.Add(new byte[] { _r[1], _r[0], _r[1], _r[1], _r[0], _r[1]});
+    //    entropy.Add(new byte[] { _r[1], _r[0], _r[1], _r[0], _r[0], _r[0]});
+    //    entropy.Add(new byte[] { _r[1], _r[0], _r[0], _r[1], _r[0], _r[0]});
+    //    entropy.Add(new byte[] { _r[1], _r[0], _r[0], _r[0], _r[0], _r[1]});
+    //    entropy.Add(new byte[] { _r[0], _r[0], _r[1], _r[1], _r[0], _r[0]});
+    //    entropy.Add(new byte[] { _r[0], _r[0], _r[1], _r[0], _r[0], _r[1]});
+    //    entropy.Add(new byte[] { _r[0], _r[0], _r[0], _r[1], _r[0], _r[1]});
+    //    entropy.Add(new byte[] { _r[1], _r[0], _r[1], _r[1], _r[0], _r[0]});
+    //    entropy.Add(new byte[] { _r[0], _r[0], _r[1], _r[1], _r[0], _r[1]});
+    //}
 
-    private void SpawnTiles()
-    {
-        for (int x = 0; x < maxX; x++)
-        {
-            for (int y = 0; y < maxY; y++)
-            {
-                for (int z = 0; z < maxZ; z++)
-                {
-                    Vector3 position = new Vector3(x * 3 + this.transform.position.x, y * 3 + this.transform.position.y, z * 3 + this.transform.position.z);
-                    GameObject Child = Instantiate(tilePrefab, position, Quaternion.identity, transform);
-                    Tile tile = new Tile();
-                    tile.Initialize((x, y, z), maxX, maxY, maxZ, entropy, this.gameObject.GetComponent<Manager>(), Child);
-                    map[(x, y, z)] = tile;
-                }
-            }
-        }
-        for (int x = 0; x < maxX; x++)
-        {
-            for (int y = 0; y < maxY; y++)
-            {
-                for (int z = 0; z < maxZ; z++)
-                {
-                    map[(x,y,z)].InitSurroundings();
-                }
-            }
-        }
-    }
+    //private void SpawnTiles()
+    //{
+    //    for (int x = 0; x < maxX; x++)
+    //    {
+    //        for (int y = 0; y < maxY; y++)
+    //        {
+    //            for (int z = 0; z < maxZ; z++)
+    //            {
+    //                Vector3 position = new Vector3(x * 3 + this.transform.position.x, y * 3 + this.transform.position.y, z * 3 + this.transform.position.z);
+    //                GameObject Child = Instantiate(tilePrefab, position, Quaternion.identity, transform);
+    //                Tile tile = new Tile();
+    //                tile.Initialize((x, y, z), maxX, maxY, maxZ, entropy, this.gameObject.GetComponent<Manager>(), Child);
+    //                map[(x, y, z)] = tile;
+    //            }
+    //        }
+    //    }
+    //    for (int x = 0; x < maxX; x++)
+    //    {
+    //        for (int y = 0; y < maxY; y++)
+    //        {
+    //            for (int z = 0; z < maxZ; z++)
+    //            {
+    //                map[(x,y,z)].InitSurroundings();
+    //            }
+    //        }
+    //    }
+    //}
 
-    private List<(int,int,int)> GetLowestEntropyList() 
-    {
-        List<(int, int, int)> lowEntopyList = new List<(int, int, int)>();
-        int tempLowNum = entropy.Count+2;
-        foreach (var tile in map) 
-        {
-            var temp = tile.Value.GetEntropyCount();
-            if (tile.Value.GetCollapsed())
-            {
-                continue;
-            }
-            if (temp < tempLowNum)
-            {
-                lowEntopyList = new List<(int, int, int)>();
-                lowEntopyList.Add(tile.Key);
-                tempLowNum = temp;
-            }
-            else if (temp == tempLowNum) 
-            {
-                lowEntopyList.Add(tile.Key);
-            }
-        }
+    //private List<(int,int,int)> GetLowestEntropyList() 
+    //{
+    //    List<(int, int, int)> lowEntopyList = new List<(int, int, int)>();
+    //    int tempLowNum = entropy.Count+2;
+    //    foreach (var tile in map) 
+    //    {
+    //        var temp = tile.Value.GetEntropyCount();
+    //        if (tile.Value.GetCollapsed())
+    //        {
+    //            continue;
+    //        }
+    //        if (temp < tempLowNum)
+    //        {
+    //            lowEntopyList = new List<(int, int, int)>();
+    //            lowEntopyList.Add(tile.Key);
+    //            tempLowNum = temp;
+    //        }
+    //        else if (temp == tempLowNum) 
+    //        {
+    //            lowEntopyList.Add(tile.Key);
+    //        }
+    //    }
 
-        return lowEntopyList;
-    }
+    //    return lowEntopyList;
+    //}
 
-    public void StartAgain(bool fuck)
-    {
-        if ((Time.realtimeSinceStartup - startTime) > 0.0f)
-        {
-            //Debug.Log($"{Time.realtimeSinceStartup - startTime}");
-            //startTime = Time.realtimeSinceStartup;
+    //public void StartAgain(bool fuck)
+    //{
+    //    if ((Time.realtimeSinceStartup - startTime) > 0.0f)
+    //    {
+    //        //Debug.Log($"{Time.realtimeSinceStartup - startTime}");
+    //        //startTime = Time.realtimeSinceStartup;
 
-            if (fuck)
-            {
-                Debug.Log("respawn");
-            }
-            else
-            {
-                Debug.Log("fuck");
-            }
+    //        if (fuck)
+    //        {
+    //            Debug.Log("respawn");
+    //        }
+    //        else
+    //        {
+    //            Debug.Log("fuck");
+    //        }
 
-            foreach (var tile in map)
-            {
-                Destroy(tile.Value.Child);
-            }
+    //        foreach (var tile in map)
+    //        {
+    //            Destroy(tile.Value.Child);
+    //        }
 
-            map = new Dictionary<(int, int, int), Tile>();
-            entropy = new List<byte[]>();
-            CreateRules();
-            SpawnTiles();
+    //        map = new Dictionary<(int, int, int), Tile>();
+    //        entropy = new List<byte[]>();
+    //        CreateRules();
+    //        SpawnTiles();
 
-        }
-    }
+    //    }
+    //}
 
-    bool start = true;
-    public bool end = false;
+    //bool start = true;
+    //public bool end = false;
 
-    public void Update()
-    {
-        if(start && !end)
-        {
-            //if (start)
-            //{
-            //    StartAgain(true);
-            //    end = true;
-            //}
-            startTime = Time.realtimeSinceStartup;
-            Debug.Log("started");
-            start = false;
-        }
+    //public void Update()
+    //{
+    //    if(start && !end)
+    //    {
+    //        //if (start)
+    //        //{
+    //        //    StartAgain(true);
+    //        //    end = true;
+    //        //}
+    //        startTime = Time.realtimeSinceStartup;
+    //        Debug.Log("started");
+    //        start = false;
+    //    }
 
 
-        if (end) return;
-        if (Time.time - lastUpdateTime >= 0.000000001f)
-        {
-            //get all tiles entropy
-            //find all with the lowest entropy
-            var _list = GetLowestEntropyList();
+    //    if (end) return;
+    //    if (Time.time - lastUpdateTime >= 0.000000001f)
+    //    {
+    //        //get all tiles entropy
+    //        //find all with the lowest entropy
+    //        var _list = GetLowestEntropyList();
 
-            //randomly pick one
-            if (_list.Count == 0)
-            {
-                end = true;
-                foreach (var tile in map)
-                {
-                    tile.Value.CollapseEntropy();
-                    tile.Value.SetExits();
-                }
-                RunTime = (Time.realtimeSinceStartup - startTime);
-                Debug.Log($"{(Time.realtimeSinceStartup - startTime)}");
-                start = false;
+    //        //randomly pick one
+    //        if (_list.Count == 0)
+    //        {
+    //            end = true;
+    //            foreach (var tile in map)
+    //            {
+    //                tile.Value.CollapseEntropy();
+    //                tile.Value.SetExits();
+    //            }
+    //            RunTime = (Time.realtimeSinceStartup - startTime);
+    //            Debug.Log($"{(Time.realtimeSinceStartup - startTime)}");
+    //            start = false;
 
-                CombineMeshes();
-                //Reset(true);
-                return;
-            }
+    //            CombineMeshes();
+    //            //Reset(true);
+    //            return;
+    //        }
 
-            int _randNum = Random.Range(0, _list.Count);
-            (int x, int y, int z) _tilePos = _list[_randNum];
-            var _tile = map[_tilePos];
+    //        int _randNum = Random.Range(0, _list.Count);
+    //        (int x, int y, int z) _tilePos = _list[_randNum];
+    //        var _tile = map[_tilePos];
 
-            //collapse the entropy for that one
-            //by picking the one of the possible entropy
-            _tile.CollapseEntropy();
+    //        //collapse the entropy for that one
+    //        //by picking the one of the possible entropy
+    //        _tile.CollapseEntropy();
 
-            for (int x = 0; x < maxX; x++) 
-            {
-                for (int y = 0; y < maxY; y++)
-                {
-                    for (int z = 0; z < maxZ; z++)
-                    {
-                        (int x, int y, int z) _targetPos = (x,y,z);
+    //        for (int x = 0; x < maxX; x++) 
+    //        {
+    //            for (int y = 0; y < maxY; y++)
+    //            {
+    //                for (int z = 0; z < maxZ; z++)
+    //                {
+    //                    (int x, int y, int z) _targetPos = (x,y,z);
 
-                        _tile = map[_targetPos];
-                        _tile.UpdateEntropy();
-                    }
-                }
-            }
+    //                    _tile = map[_targetPos];
+    //                    _tile.UpdateEntropy();
+    //                }
+    //            }
+    //        }
 
-            for (int x = 0; x < maxX; x++)
-            {
-                for (int y = 0; y < maxY; y++)
-                {
-                    for (int z = 0; z < maxZ; z++)
-                    {
-                        (int x, int y, int z) _targetPos = (x, y, z);
+    //        for (int x = 0; x < maxX; x++)
+    //        {
+    //            for (int y = 0; y < maxY; y++)
+    //            {
+    //                for (int z = 0; z < maxZ; z++)
+    //                {
+    //                    (int x, int y, int z) _targetPos = (x, y, z);
 
-                        _tile = map[_targetPos];
-                        _tile.UpdateEntropy();
-                    }
-                }
-            }
+    //                    _tile = map[_targetPos];
+    //                    _tile.UpdateEntropy();
+    //                }
+    //            }
+    //        }
 
-            lastUpdateTime = Time.time;
-        }
-    }
+    //        lastUpdateTime = Time.time;
+    //    }
+    //}
 
-    public Tile GetTile((int x, int y, int z) _pos) => map[_pos];
+    //public Tile GetTile((int x, int y, int z) _pos) => map[_pos];
 
-    void CombineMeshes()
-    {
-        // Ensure this GameObject has a MeshFilter component
-        MeshFilter meshFilter = GetComponent<MeshFilter>();
-        if (meshFilter == null)
-        {
-            meshFilter = gameObject.AddComponent<MeshFilter>();
-        }
+    //void CombineMeshes()
+    //{
+    //    // Ensure this GameObject has a MeshFilter component
+    //    MeshFilter meshFilter = GetComponent<MeshFilter>();
+    //    if (meshFilter == null)
+    //    {
+    //        meshFilter = gameObject.AddComponent<MeshFilter>();
+    //    }
 
-        // Get all MeshFilter components from child objects
-        MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>();
-        CombineInstance[] combine = new CombineInstance[meshFilters.Length - 1]; // Exclude the parent's MeshFilter
+    //    // Get all MeshFilter components from child objects
+    //    MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>();
+    //    CombineInstance[] combine = new CombineInstance[meshFilters.Length - 1]; // Exclude the parent's MeshFilter
 
-        int index = 0;
-        for (int i = 0; i < meshFilters.Length; i++)
-        {
-            if (meshFilters[i].sharedMesh == null) continue; // Skip if the sharedMesh is null
-            if (meshFilters[i] == meshFilter) continue; // Skip the parent's MeshFilter
+    //    int index = 0;
+    //    for (int i = 0; i < meshFilters.Length; i++)
+    //    {
+    //        if (meshFilters[i].sharedMesh == null) continue; // Skip if the sharedMesh is null
+    //        if (meshFilters[i] == meshFilter) continue; // Skip the parent's MeshFilter
 
-            combine[index].mesh = meshFilters[i].sharedMesh;
-            combine[index].transform = meshFilters[i].transform.localToWorldMatrix;
-            meshFilters[i].gameObject.SetActive(false); // Disable the child object
-            index++;
-        }
+    //        combine[index].mesh = meshFilters[i].sharedMesh;
+    //        combine[index].transform = meshFilters[i].transform.localToWorldMatrix;
+    //        meshFilters[i].gameObject.SetActive(false); // Disable the child object
+    //        index++;
+    //    }
 
-        // Create a new mesh and combine all the child meshes into it
-        meshFilter.mesh = new Mesh();
-        meshFilter.mesh.CombineMeshes(combine);
+    //    // Create a new mesh and combine all the child meshes into it
+    //    meshFilter.mesh = new Mesh();
+    //    meshFilter.mesh.CombineMeshes(combine);
 
-        // Ensure this GameObject has a MeshRenderer component
-        MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
-        if (meshRenderer == null)
-        {
-            meshRenderer = gameObject.AddComponent<MeshRenderer>();
-        }
+    //    // Ensure this GameObject has a MeshRenderer component
+    //    MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
+    //    if (meshRenderer == null)
+    //    {
+    //        meshRenderer = gameObject.AddComponent<MeshRenderer>();
+    //    }
 
-        // Set the material (assuming all child objects use the same material)
-        if (meshFilters.Length > 1 && meshFilters[1].GetComponent<MeshRenderer>())
-        {
-            meshRenderer.sharedMaterial = meshFilters[1].GetComponent<MeshRenderer>().sharedMaterial;
-        }
+    //    // Set the material (assuming all child objects use the same material)
+    //    if (meshFilters.Length > 1 && meshFilters[1].GetComponent<MeshRenderer>())
+    //    {
+    //        meshRenderer.sharedMaterial = meshFilters[1].GetComponent<MeshRenderer>().sharedMaterial;
+    //    }
 
-        meshRenderer.transform.position = new Vector3(0, 0, 0);
-    }
+    //    meshRenderer.transform.position = new Vector3(0, 0, 0);
+    //}
 }
 
 public class ByteArrayComparer : IEqualityComparer<byte[]>

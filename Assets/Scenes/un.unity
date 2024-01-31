@@ -413,8 +413,8 @@ MonoBehaviour:
   maxX: 5
   maxY: 1
   maxZ: 5
-  width: 2
-  depth: 2
+  width: 20
+  depth: 20
   RunCount: 0
   totalTime: 0
   BenchMarkText: {fileID: 1138292185}
