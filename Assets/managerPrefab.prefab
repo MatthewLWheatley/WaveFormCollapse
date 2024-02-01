@@ -9,9 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2788736029077558430}
-  - component: {fileID: 5191910044763921143}
+  - component: {fileID: 1916018616038239456}
   m_Layer: 0
-  m_Name: manager
+  m_Name: managerPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -30,9 +30,9 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5191910044763921143
+--- !u!114 &1916018616038239456
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -46,6 +46,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tilePrefab: {fileID: 2207604882340328436, guid: c1a13cee700145a4091bb760e65a613f,
     type: 3}
-  maxX: 3
-  maxY: 3
-  maxZ: 3
+  collapsed: 0
+  rendered: 0

@@ -16,8 +16,8 @@ public class BenchMarker : MonoBehaviour
     public int depth;
 
     public int RunCount;
-    public float totalTime = 0.000001f;
-    public TextMeshProUGUI BenchMarkText;
+    public float CollapseTime = 0.0f;
+    public TextMeshProUGUI CollapsedTime;
 
     void Start()
     {
@@ -32,29 +32,26 @@ public class BenchMarker : MonoBehaviour
             DeleteManagers();
             SpawnManagers();
         }
-        //List<Manager> list = new List<Manager>();
-        //foreach (Manager intst in managerScripts) 
-        //{
-        //    if (intst != null &&  intst.end) 
-        //    {
-        //        if (RunCount > (width*depth))
-        //        {
-        //            Debug.Log($"{RunCount}");
-        //            totalTime += intst.RunTime;
-        //        }
-        //        RunCount++;
-        //        BenchMarkText.text = string.Format($"{totalTime / RunCount} average");
-        //        foreach (Transform child in intst.transform)
-        //        {
-        //            Destroy(child.gameObject);
-        //        }
-        //        list.Add(intst);
-        //    }
-        //}
-        //foreach (Manager intst in list)
-        //{
-        //    managerScripts.Remove(intst);
-        //}
+        List<Manager> list = new List<Manager>();
+        foreach (Manager intst in managerScripts)
+        {
+
+            if (intst.collapsed && intst.rendered)
+            {
+                if (RunCount >= width * depth)
+                {
+                    CollapseTime += intst.FinishCollapseTime - intst.StartTime;
+                    CollapsedTime.text = string.Format($"{CollapseTime / RunCount}");
+                }
+                RunCount++;
+                list.Add(intst);
+                //Debug.Log(RunCount);
+            }
+        }
+        foreach (Manager intst in list)
+        {
+            managerScripts.Remove(intst);
+        }
     }
 
     void DeleteManagers()
@@ -86,9 +83,7 @@ public class BenchMarker : MonoBehaviour
                 managerScripts.Add(managerScript);
                 if (managerScript != null)
                 {
-                    //managerScript.maxX = maxX;
-                    //managerScript.maxY = maxY;
-                    //managerScript.maxZ = maxZ;
+                    managerScript.max = (maxX,maxY,maxZ);
                 }
             }
         }

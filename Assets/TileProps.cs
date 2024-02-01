@@ -8,7 +8,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class TileManager : MonoBehaviour
+public class TileProps : MonoBehaviour
 {
     public GameObject Parent { get; private set; }
     private byte[] exits = new byte[6];
@@ -27,16 +27,11 @@ public class TileManager : MonoBehaviour
 
     public void SetExits(byte[] _exits)
     {
+        edges = new GameObject[6];
         exits = _exits;
         for (int i = 0; i < exits.Length; i++)
         {
-            // WTF
-            try 
-            {
-                if (edges[i].name == "") 
-                { }
-            }
-            catch(NullReferenceException) 
+            if (exits[i] > 0)
             {
                 if (exits[i] == 1)
                 {
@@ -63,12 +58,12 @@ public class TileManager : MonoBehaviour
                             break;
                     }
                     GameObject edgeInstance = Instantiate(edge, this.transform.position + Target, Quaternion.identity, this.transform);
+                    //Debug.Log(i);
                     edges[i] = edgeInstance;
                     centre.SetActive(true);
                     done = true;
                 }
             }
-
         }
         if (done)
         {
