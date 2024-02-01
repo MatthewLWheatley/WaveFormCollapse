@@ -14,11 +14,10 @@ public class Manager : MonoBehaviour
     public (int x, int y, int z) max;
     private Dictionary<(int x, int y, int z), Tile> mTile;
     private Dictionary<(int x, int y, int z), GameObject> mGameObject;
-    private List<(int x, int y, int z)> mNotCollapsesed;
-
+    private HashSet<(int x, int y, int z)> mNotCollapsesed;
     [SerializeField] private GameObject tilePrefab;
 
-    private List<byte[]> entropy = new List<byte[]>();
+    private HashSet<byte[]> entropy = new HashSet<byte[]>();
     public bool collapsed = false;
     public bool rendered = false;
 
@@ -36,7 +35,7 @@ public class Manager : MonoBehaviour
     {
         mTile = new Dictionary<(int x, int y, int z), Tile>();
         mGameObject = new Dictionary<(int x, int y, int z), GameObject>();
-        mNotCollapsesed = new List<(int x, int y, int z)>();
+        mNotCollapsesed = new HashSet<(int x, int y, int z)>();
         mStack = new Stack<(int x, int y, int z)>();
 
         StartTime = Time.time;
@@ -51,37 +50,36 @@ public class Manager : MonoBehaviour
         {
             if (mNotCollapsesed.Count == 0)
             {
-
                 collapsed = true;
                 return;
             }
-            else 
+            else
             {
                 bool failed = false;
-                //impliment recursive backtracking?
+
                 foreach (var tile in mNotCollapsesed)
                 {
                     if (mTile[tile].GetEntropyCount() == 0)
                     {
                         failed = true;
-                    } 
+                    }
                 }
                 if (failed)
                 {
                     failCount++;
+                    HashSet<(int x, int y, int z)> tempList = new HashSet<(int x, int y, int z)>();
                     for (int i = 0; i < failCount; i++)
                     {
                         Debug.Log($"{mStack.Count} {failCount}");
                         var temp = mStack.Pop();
                         mTile[temp].SetEntropy(entropy);
+                        tempList.Add(temp);
                         mNotCollapsesed.Add(temp);
                     }
-
                     Parallel.ForEach(mNotCollapsesed, temp =>
                     {
                         mTile[temp].SetEntropy(entropy);
                     });
-
                     return;
                 }
             }
@@ -92,7 +90,7 @@ public class Manager : MonoBehaviour
             var list = GetLowestEntropyList();
             //Debug.Log($"{mNotCollapsesed.Count}");
 
-            CollapseEntropy(list[Random.Range(0, list.Count)]);
+            CollapseEntropy(list.ElementAt(Random.Range(0, list.Count)));
         }
         else if (!rendered)
         {
@@ -153,10 +151,10 @@ public class Manager : MonoBehaviour
             _targetPosition.x = (_targetPosition.x + Dirs[_dir].x + max.x) % max.x;
             _targetPosition.y = (_targetPosition.y + Dirs[_dir].y + max.y) % max.y;
             _targetPosition.z = (_targetPosition.z + Dirs[_dir].z + max.z) % max.z;
-            List<byte[]> _targetEntropy = mTile[_targetPosition].GetEntropy();
-            List<byte[]> toRemove = new List<byte[]>();
+            HashSet<byte[]> _targetEntropy = mTile[_targetPosition].GetEntropy();
+            HashSet<byte[]> toRemove = new HashSet<byte[]>();
             var _correspondingExit = (_dir + 3) % 6;
-            List<byte> possbileExits = new List<byte>();
+            HashSet<byte> possbileExits = new HashSet<byte>();
 
             //find all the possible exits
             foreach (var _exit in _targetEntropy) if (!possbileExits.Contains(_exit[_correspondingExit])) possbileExits.Add(_exit[_correspondingExit]);
@@ -175,23 +173,23 @@ public class Manager : MonoBehaviour
         if (entropyCount == 0) return;
 
         int _randNum = Random.Range(0, entropyCount);
-        byte[] randomEntropyElement = mTile[pos].GetEntropy()[_randNum];
-        mTile[pos].entropy = new List<byte[]>();
+        byte[] randomEntropyElement = mTile[pos].GetEntropy().ElementAt(_randNum);
+        mTile[pos].entropy = new HashSet<byte[]>();
         mTile[pos].entropy.Add(randomEntropyElement);
         mNotCollapsesed.Remove(pos);
         mStack.Push(pos);
     }
 
-    private List<(int, int, int)> GetLowestEntropyList()
+    private HashSet<(int, int, int)> GetLowestEntropyList()
     {
-        List<(int, int, int)> lowEntopyList = new List<(int, int, int)>();
+       HashSet<(int, int, int)> lowEntopyList = new HashSet<(int, int, int)>();
         int tempLowNum = entropy.Count + 2;
         foreach (var pos in mNotCollapsesed)
         {
             var temp = mTile[pos].GetEntropyCount();
             if (temp < tempLowNum)
             {
-                lowEntopyList = new List<(int, int, int)>();
+                lowEntopyList = new HashSet<(int, int, int)>();
                 lowEntopyList.Add(pos);
                 tempLowNum = temp;
             }

@@ -5,21 +5,20 @@ using System.Linq;
 using System.Threading.Tasks;
 using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEditor.PlayerSettings;
 
 [System.Serializable]
 public class Tile
 {
     private (int x, int y, int z) max;
     private (int x, int y, int z) pos;
-    public List<byte[]> entropy;
+    public HashSet<byte[]> entropy;
 
-    public void Initialize((int x, int y, int z) _position, (int x, int y, int z) _max, List<byte[]> _ent)
+    public void Initialize((int x, int y, int z) _position, (int x, int y, int z) _max, HashSet<byte[]> _ent)
     {
         pos = _position;
         max = _max;
 
-        entropy = new List<byte[]>();
+        entropy = new HashSet<byte[]>();
         foreach (var en in _ent)
         {
             entropy.Add(en);
@@ -28,7 +27,7 @@ public class Tile
 
     public void SetExits(byte[] Exits)
     {
-        entropy = new List<byte[]>();
+        entropy = new HashSet<byte[]>();
         entropy.Add(Exits);
     }
 
@@ -46,14 +45,14 @@ public class Tile
         return entropy.Count == 1;
     }
 
-    public List<byte[]> GetEntropy()
+    public HashSet<byte[]> GetEntropy()
     {
-        return new List<byte[]>(entropy);
+        return new HashSet<byte[]>(entropy);
     }
 
-    public void SetEntropy(List<byte[]> ent)
+    public void SetEntropy(HashSet<byte[]> ent)
     {
-        entropy = new List<byte[]>();
+        entropy = new HashSet<byte[]>();
         foreach (var en in ent) 
         { 
             entropy.Add(en);

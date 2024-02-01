@@ -32,7 +32,7 @@ public class BenchMarker : MonoBehaviour
             DeleteManagers();
             SpawnManagers();
         }
-        List<Manager> list = new List<Manager>();
+        HashSet<Manager> HashSet = new HashSet<Manager>();
         foreach (Manager intst in managerScripts)
         {
 
@@ -44,11 +44,11 @@ public class BenchMarker : MonoBehaviour
                     CollapsedTime.text = string.Format($"{CollapseTime / RunCount}");
                 }
                 RunCount++;
-                list.Add(intst);
+                HashSet.Add(intst);
                 //Debug.Log(RunCount);
             }
         }
-        foreach (Manager intst in list)
+        foreach (Manager intst in HashSet)
         {
             managerScripts.Remove(intst);
         }
@@ -64,7 +64,7 @@ public class BenchMarker : MonoBehaviour
     }
 
 
-    List<Manager> managerScripts = new List<Manager>();
+    HashSet<Manager> managerScripts = new HashSet<Manager>();
 
     void SpawnManagers()
     {
