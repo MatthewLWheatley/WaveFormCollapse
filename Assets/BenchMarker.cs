@@ -32,7 +32,7 @@ public class BenchMarker : MonoBehaviour
             DeleteManagers();
             SpawnManagers();
         }
-        HashSet<Manager> HashSet = new HashSet<Manager>();
+        List<Manager> list = new List<Manager>();
         foreach (Manager intst in managerScripts)
         {
 
@@ -44,11 +44,11 @@ public class BenchMarker : MonoBehaviour
                     CollapsedTime.text = string.Format($"{CollapseTime / RunCount}");
                 }
                 RunCount++;
-                HashSet.Add(intst);
+                list.Add(intst);
                 //Debug.Log(RunCount);
             }
         }
-        foreach (Manager intst in HashSet)
+        foreach (Manager intst in list)
         {
             managerScripts.Remove(intst);
         }
@@ -64,7 +64,7 @@ public class BenchMarker : MonoBehaviour
     }
 
 
-    HashSet<Manager> managerScripts = new HashSet<Manager>();
+    List<Manager> managerScripts = new List<Manager>();
 
     void SpawnManagers()
     {
@@ -76,14 +76,14 @@ public class BenchMarker : MonoBehaviour
                 Vector3 position = new Vector3(x * maxX * 3, 0, z * maxZ * 3);
 
                 // Instantiate the manager prefab
-                GameObject managerInstance = Instantiate(managerPrefab, position, Quaternion.identity,this.transform);
-                
+                GameObject managerInstance = Instantiate(managerPrefab, position, Quaternion.identity, this.transform);
+
                 // Assuming the Manager script is attached to the prefab and has public maxX, maxY, maxZ
                 Manager managerScript = managerInstance.GetComponent<Manager>();
                 managerScripts.Add(managerScript);
                 if (managerScript != null)
                 {
-                    managerScript.max = (maxX,maxY,maxZ);
+                    managerScript.max = (maxX, maxY, maxZ);
                 }
             }
         }
