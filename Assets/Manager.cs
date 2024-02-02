@@ -17,7 +17,7 @@ public class Manager : MonoBehaviour
     private HashSet<(int x, int y, int z)> mNotCollapsesed;
     [SerializeField] private GameObject tilePrefab;
 
-    private HashSet<byte[]> entropy = new HashSet<byte[]>();
+    private Dictionary<int, byte[]> entropy = new Dictionary<int, byte[]>();
     public bool collapsed = false;
     public bool rendered = false;
 
@@ -72,15 +72,19 @@ public class Manager : MonoBehaviour
                     {
                         Debug.Log($"{mStack.Count} {failCount}");
                         var temp = mStack.Pop();
-                        mTile[temp].SetEntropy(entropy);
+                        mTile[temp].SetEntropy(entropy.Keys.ToList());
                         tempList.Add(temp);
                         mNotCollapsesed.Add(temp);
                     }
                     Parallel.ForEach(mNotCollapsesed, temp =>
                     {
-                        mTile[temp].SetEntropy(entropy);
+                        mTile[temp].SetEntropy(entropy.Keys.ToList());
                     });
                     return;
+                }
+                else 
+                { 
+                    failCount = 0;
                 }
             }
             foreach (var pos in mNotCollapsesed)
@@ -100,9 +104,9 @@ public class Manager : MonoBehaviour
             {
                 Vector3 _targetPos = new Vector3((float)tile.Key.x*3 + transform.position.x, (float)tile.Key.y * 3 + transform.position.y, (float)tile.Key.z * 3 + transform.position.z);
                 GameObject TempTile = Instantiate(tilePrefab,_targetPos,Quaternion.identity,this.transform);
-                
-                var temp = TempTile.GetComponent<TileProps>();
-                temp.SetExits(tile.Value.GetExits());
+
+                TileProps temp = TempTile.GetComponent<TileProps>();
+                temp.SetExits(entropy[tile.Value.GetExits()]);
             }
             CombineMeshes();
 
@@ -115,14 +119,14 @@ public class Manager : MonoBehaviour
         byte[] _r = { 0x00, 0x01 };
 
         
-        entropy.Add(new byte[] { _r[0], _r[0], _r[1], _r[1], _r[0], _r[1] });
-        entropy.Add(new byte[] { _r[1], _r[0], _r[0], _r[1], _r[0], _r[1] });
-        entropy.Add(new byte[] { _r[1], _r[0], _r[1], _r[0], _r[0], _r[1] });
-        entropy.Add(new byte[] { _r[1], _r[0], _r[1], _r[1], _r[0], _r[0] });
-        entropy.Add(new byte[] { _r[1], _r[0], _r[1], _r[0], _r[0], _r[0] });
-        entropy.Add(new byte[] { _r[0], _r[0], _r[1], _r[1], _r[0], _r[0] });
-        entropy.Add(new byte[] { _r[0], _r[0], _r[0], _r[1], _r[0], _r[1] });
-        entropy.Add(new byte[] { _r[1], _r[0], _r[0], _r[0], _r[0], _r[1] });
+        entropy.Add(0, new byte[] { _r[0], _r[0], _r[1], _r[1], _r[0], _r[1] });
+        entropy.Add(1, new byte[] { _r[1], _r[0], _r[0], _r[1], _r[0], _r[1] });
+        entropy.Add(2, new byte[] { _r[1], _r[0], _r[1], _r[0], _r[0], _r[1] });
+        entropy.Add(3, new byte[] { _r[1], _r[0], _r[1], _r[1], _r[0], _r[0] });
+        entropy.Add(4, new byte[] { _r[1], _r[0], _r[1], _r[0], _r[0], _r[0] });
+        entropy.Add(5, new byte[] { _r[0], _r[0], _r[1], _r[1], _r[0], _r[0] });
+        entropy.Add(6, new byte[] { _r[0], _r[0], _r[0], _r[1], _r[0], _r[1] });
+        entropy.Add(7, new byte[] { _r[1], _r[0], _r[0], _r[0], _r[0], _r[1] });
     }
 
     private void InitTiles()
@@ -134,7 +138,7 @@ public class Manager : MonoBehaviour
                 for (int z = 0; z < max.z; z++)
                 {
                     Tile TempTile = new Tile();
-                    TempTile.Initialize((x, y, z), max, entropy);
+                    TempTile.Initialize((x, y, z), max, entropy.Keys.ToList());
                     mTile.Add((x, y, z), TempTile);
                     mNotCollapsesed.Add((x, y, z));
                 }
@@ -151,16 +155,16 @@ public class Manager : MonoBehaviour
             _targetPosition.x = (_targetPosition.x + Dirs[_dir].x + max.x) % max.x;
             _targetPosition.y = (_targetPosition.y + Dirs[_dir].y + max.y) % max.y;
             _targetPosition.z = (_targetPosition.z + Dirs[_dir].z + max.z) % max.z;
-            HashSet<byte[]> _targetEntropy = mTile[_targetPosition].GetEntropy();
-            HashSet<byte[]> toRemove = new HashSet<byte[]>();
+            List<int> _targetEntropy = mTile[_targetPosition].GetEntropy();
+            List<int> toRemove = new List<int>();
             var _correspondingExit = (_dir + 3) % 6;
             HashSet<byte> possbileExits = new HashSet<byte>();
 
             //find all the possible exits
-            foreach (var _exit in _targetEntropy) if (!possbileExits.Contains(_exit[_correspondingExit])) possbileExits.Add(_exit[_correspondingExit]);
+            foreach (var _exit in _targetEntropy) if (!possbileExits.Contains(entropy[_exit][_correspondingExit])) possbileExits.Add(entropy[_exit][_correspondingExit]);
 
 
-            foreach (var ent in mTile[pos].entropy) if (!possbileExits.Contains(ent[_dir])) toRemove.Add(ent);
+            foreach (var ent in mTile[pos].entropy) if (!possbileExits.Contains(entropy[ent][_dir])) toRemove.Add(ent);
 
             //remove everything in the remove list
             foreach (var item in toRemove) mTile[pos].entropy.Remove(item);
@@ -173,8 +177,8 @@ public class Manager : MonoBehaviour
         if (entropyCount == 0) return;
 
         int _randNum = Random.Range(0, entropyCount);
-        byte[] randomEntropyElement = mTile[pos].GetEntropy().ElementAt(_randNum);
-        mTile[pos].entropy = new HashSet<byte[]>();
+        int randomEntropyElement = mTile[pos].GetEntropy().ElementAt(_randNum);
+        mTile[pos].entropy = new List<int>();
         mTile[pos].entropy.Add(randomEntropyElement);
         mNotCollapsesed.Remove(pos);
         mStack.Push(pos);

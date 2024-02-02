@@ -11,33 +11,33 @@ public class Tile
 {
     private (int x, int y, int z) max;
     private (int x, int y, int z) pos;
-    public HashSet<byte[]> entropy;
+    public List<int> entropy;
 
-    public void Initialize((int x, int y, int z) _position, (int x, int y, int z) _max, HashSet<byte[]> _ent)
+    public void Initialize((int x, int y, int z) _position, (int x, int y, int z) _max, List<int> _ent)
     {
         pos = _position;
         max = _max;
 
-        entropy = new HashSet<byte[]>();
+        entropy = new List<int>();
         foreach (var en in _ent)
         {
             entropy.Add(en);
         }
     }
 
-    public void SetExits(byte[] Exits)
+    public void SetExits(int Exits)
     {
-        entropy = new HashSet<byte[]>();
+        entropy = new List<int>();
         entropy.Add(Exits);
     }
 
-    public byte[] GetExits()
+    public int GetExits()
     {
         if (entropy.Count == 1)
         {
             return entropy.First();
         }
-        return new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+        return 0;
     }
 
     public bool GetCollapsed()
@@ -45,14 +45,14 @@ public class Tile
         return entropy.Count == 1;
     }
 
-    public HashSet<byte[]> GetEntropy()
+    public List<int> GetEntropy()
     {
-        return new HashSet<byte[]>(entropy);
+        return new List<int>(entropy);
     }
 
-    public void SetEntropy(HashSet<byte[]> ent)
+    public void SetEntropy(List<int> ent)
     {
-        entropy = new HashSet<byte[]>();
+        entropy = new List<int>();
         foreach (var en in ent) 
         { 
             entropy.Add(en);
