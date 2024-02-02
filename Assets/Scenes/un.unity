@@ -413,8 +413,8 @@ MonoBehaviour:
   maxX: 5
   maxY: 1
   maxZ: 5
-  width: 5
-  depth: 5
+  width: 10
+  depth: 10
   RunCount: 0
   CollapseTime: 0.000001
   CollapsedTime: {fileID: 1138292185}
