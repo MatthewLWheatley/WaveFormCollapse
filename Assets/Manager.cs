@@ -78,12 +78,9 @@ public class Manager : MonoBehaviour
                     });
                     return;
                 }
-                else 
-                { 
-                    //failCount = 0;
-                }
             }
-            foreach (var pos in mNotCollapsesed)
+            var temp2 = GetLowestEntropyFullList();
+            foreach (var pos in temp2)
             {
                 UpdateEntropy(pos);
             }
@@ -95,11 +92,11 @@ public class Manager : MonoBehaviour
         else if (!rendered)
         {
             FinishCollapseTime = Time.time;
-            //Debug.Log($"rendering");
+            Debug.Log($"rendering");
             foreach (var tile in mTile)
             {
-                Vector3 _targetPos = new Vector3((float)tile.Key.x*3 + transform.position.x, (float)tile.Key.y * 3 + transform.position.y, (float)tile.Key.z * 3 + transform.position.z);
-                GameObject TempTile = Instantiate(tilePrefab,_targetPos,Quaternion.identity,this.transform);
+                Vector3 _targetPos = new Vector3((float)tile.Key.x * 3 + transform.position.x, (float)tile.Key.y * 3 + transform.position.y, (float)tile.Key.z * 3 + transform.position.z);
+                GameObject TempTile = Instantiate(tilePrefab, _targetPos, Quaternion.identity, this.transform);
 
                 TileProps temp = TempTile.GetComponent<TileProps>();
                 temp.SetExits(entropy[tile.Value.GetExits()]);
@@ -124,32 +121,32 @@ public class Manager : MonoBehaviour
         entropy.Add(6, new byte[] { _r[0], _r[0], _r[0], _r[1], _r[0], _r[1] });
         entropy.Add(7, new byte[] { _r[1], _r[0], _r[0], _r[0], _r[0], _r[1] });
 
-        //entropy.Add(8, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[0], _r[1] });
-        //entropy.Add(9, new byte[] { _r[1], _r[1], _r[0], _r[1], _r[0], _r[1] });
-        //entropy.Add(10, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[0], _r[1] });
-        //entropy.Add(11, new byte[] { _r[1], _r[1], _r[1], _r[1], _r[0], _r[0] });
-        //entropy.Add(12, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[0], _r[0] });
-        //entropy.Add(13, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[0], _r[0] });
-        //entropy.Add(14, new byte[] { _r[0], _r[1], _r[0], _r[1], _r[0], _r[1] });
-        //entropy.Add(15, new byte[] { _r[1], _r[1], _r[0], _r[0], _r[0], _r[1] });
+        entropy.Add(8, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[0], _r[1] });
+        entropy.Add(9, new byte[] { _r[1], _r[1], _r[0], _r[1], _r[0], _r[1] });
+        entropy.Add(10, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[0], _r[1] });
+        entropy.Add(11, new byte[] { _r[1], _r[1], _r[1], _r[1], _r[0], _r[0] });
+        entropy.Add(12, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[0], _r[0] });
+        entropy.Add(13, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[0], _r[0] });
+        entropy.Add(14, new byte[] { _r[0], _r[1], _r[0], _r[1], _r[0], _r[1] });
+        entropy.Add(15, new byte[] { _r[1], _r[1], _r[0], _r[0], _r[0], _r[1] });
 
-        //entropy.Add(16, new byte[] { _r[0], _r[0], _r[1], _r[1], _r[1], _r[1] });
-        //entropy.Add(17, new byte[] { _r[1], _r[0], _r[0], _r[1], _r[1], _r[1] });
-        //entropy.Add(18, new byte[] { _r[1], _r[0], _r[1], _r[0], _r[1], _r[1] });
-        //entropy.Add(19, new byte[] { _r[1], _r[0], _r[1], _r[1], _r[1], _r[0] });
-        //entropy.Add(20, new byte[] { _r[1], _r[0], _r[1], _r[0], _r[1], _r[0] });
-        //entropy.Add(21, new byte[] { _r[0], _r[0], _r[1], _r[1], _r[1], _r[0] });
-        //entropy.Add(22, new byte[] { _r[0], _r[0], _r[0], _r[1], _r[1], _r[1] });
-        //entropy.Add(23, new byte[] { _r[1], _r[0], _r[0], _r[0], _r[1], _r[1] });
+        entropy.Add(16, new byte[] { _r[0], _r[0], _r[1], _r[1], _r[1], _r[1] });
+        entropy.Add(17, new byte[] { _r[1], _r[0], _r[0], _r[1], _r[1], _r[1] });
+        entropy.Add(18, new byte[] { _r[1], _r[0], _r[1], _r[0], _r[1], _r[1] });
+        entropy.Add(19, new byte[] { _r[1], _r[0], _r[1], _r[1], _r[1], _r[0] });
+        entropy.Add(20, new byte[] { _r[1], _r[0], _r[1], _r[0], _r[1], _r[0] });
+        entropy.Add(21, new byte[] { _r[0], _r[0], _r[1], _r[1], _r[1], _r[0] });
+        entropy.Add(22, new byte[] { _r[0], _r[0], _r[0], _r[1], _r[1], _r[1] });
+        entropy.Add(23, new byte[] { _r[1], _r[0], _r[0], _r[0], _r[1], _r[1] });
 
-        //entropy.Add(24, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[1], _r[1] });
-        //entropy.Add(25, new byte[] { _r[1], _r[1], _r[0], _r[1], _r[1], _r[1] });
-        //entropy.Add(26, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[1], _r[1] });
-        //entropy.Add(27, new byte[] { _r[1], _r[1], _r[1], _r[1], _r[1], _r[0] });
-        //entropy.Add(28, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[1], _r[0] });
-        //entropy.Add(29, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[1], _r[0] });
-        //entropy.Add(30, new byte[] { _r[0], _r[1], _r[0], _r[1], _r[1], _r[1] });
-        //entropy.Add(31, new byte[] { _r[1], _r[1], _r[0], _r[0], _r[1], _r[1] });
+        entropy.Add(24, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[1], _r[1] });
+        entropy.Add(25, new byte[] { _r[1], _r[1], _r[0], _r[1], _r[1], _r[1] });
+        entropy.Add(26, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[1], _r[1] });
+        entropy.Add(27, new byte[] { _r[1], _r[1], _r[1], _r[1], _r[1], _r[0] });
+        entropy.Add(28, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[1], _r[0] });
+        entropy.Add(29, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[1], _r[0] });
+        entropy.Add(30, new byte[] { _r[0], _r[1], _r[0], _r[1], _r[1], _r[1] });
+        entropy.Add(31, new byte[] { _r[1], _r[1], _r[0], _r[0], _r[1], _r[1] });
     }
 
     private void InitTiles()
@@ -209,7 +206,7 @@ public class Manager : MonoBehaviour
 
     private HashSet<(int, int, int)> GetLowestEntropyList()
     {
-       HashSet<(int, int, int)> lowEntopyList = new HashSet<(int, int, int)>();
+        HashSet<(int, int, int)> lowEntopyList = new HashSet<(int, int, int)>();
         int tempLowNum = entropy.Count + 2;
         foreach (var pos in mNotCollapsesed)
         {
@@ -227,6 +224,31 @@ public class Manager : MonoBehaviour
         }
         return lowEntopyList;
     }
+
+    private List<(int, int, int)> GetLowestEntropyFullList()
+    {
+        List<(int, int, int)> orderedList = new List<(int, int, int)>();
+
+        // Calculate entropy for each position and store in a dictionary
+        Dictionary<(int, int, int), int> entropyMap = new Dictionary<(int, int, int), int>();
+        foreach (var pos in mNotCollapsesed)
+        {
+            var temp = mTile[pos].GetEntropyCount();
+            entropyMap[pos] = temp;
+        }
+
+        // Sort positions by entropy (ascending order)
+        var sortedPositions = entropyMap.OrderBy(pair => pair.Value);
+
+        // Add sorted positions to the ordered list
+        foreach (var entry in sortedPositions)
+        {
+            orderedList.Add(entry.Key);
+        }
+
+        return orderedList;
+    }
+
 
     void CombineMeshes()
     {
