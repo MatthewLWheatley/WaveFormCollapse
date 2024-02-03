@@ -1,22 +1,25 @@
-
-
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class Manager : MonoBehaviour
 {
     public (int x, int y, int z) max;
-    private Dictionary<(int x, int y, int z), Tile> mTile;
-    private Dictionary<(int x, int y, int z), GameObject> mGameObject;
-    private HashSet<(int x, int y, int z)> mNotCollapsesed;
+    private Dictionary<(int x, int y, int z), Region> Regions;
+    private Dictionary<(int x, int y, int z), GameObject> GameObjects;
+    private HashSet<(int x, int y, int z)> NotCollapsedRegions;
     [SerializeField] private GameObject tilePrefab;
 
     private Dictionary<int, byte[]> entropy = new Dictionary<int, byte[]>();
     public bool collapsed = false;
     public bool rendered = false;
 
+    public int ChunkX = 5;
+    public int ChunkY = 5;
+    public int ChunkZ = 5;
 
     private (int x, int y, int z)[] Dirs = new (int x, int y, int z)[] { (1, 0, 0), (0, 1, 0), (0, 0, 1), (-1, 0, 0), (0, -1, 0), (0, 0, -1) };
 
@@ -29,78 +32,83 @@ public class Manager : MonoBehaviour
 
     private void Start()
     {
-        mTile = new Dictionary<(int x, int y, int z), Tile>();
-        mGameObject = new Dictionary<(int x, int y, int z), GameObject>();
-        mNotCollapsesed = new HashSet<(int x, int y, int z)>();
+        Regions = new Dictionary<(int x, int y, int z), Region>();
+        GameObjects = new Dictionary<(int x, int y, int z), GameObject>();
+        NotCollapsedRegions = new HashSet<(int x, int y, int z)>();
         mStack = new Stack<(int x, int y, int z)>();
 
         StartTime = Time.time;
         
         InitRules();
-        InitTiles();
+        InitRegions();
     }
 
     private void Update()
     {
-        if (!collapsed)
-        {
-            if (mNotCollapsesed.Count == 0)
-            {
-                collapsed = true;
-                return;
-            }
-            else
-            {
-                bool failed = false;
+        //if (!collapsed)
+        //{
+        //    if (mNotCollapsesed.Count == 0)
+        //    {
+        //        collapsed = true;
+        //        return;
+        //    }
+        //    else
+        //    {
+        //        bool failed = false;
 
-                foreach (var tile in mNotCollapsesed)
-                {
-                    if (mTile[tile].GetEntropyCount() == 0)
-                    {
-                        failed = true;
-                    }
-                }
-                if (failed)
-                {
-                    failCount++;
-                    HashSet<(int x, int y, int z)> tempList = new HashSet<(int x, int y, int z)>();
-                    for (int i = 0; i < failCount; i++)
-                    {
-                        //Debug.Log($"{mStack.Count} {failCount}");
-                        var temp = mStack.Pop();
-                        mTile[temp].SetEntropy(entropy.Keys.ToHashSet());
-                        tempList.Add(temp);
-                        mNotCollapsesed.Add(temp);
-                    }
-                    Parallel.ForEach(mNotCollapsesed, temp =>
-                    {
-                        mTile[temp].SetEntropy(entropy.Keys.ToHashSet());
-                    });
-                    return;
-                }
-            }
-            var temp2 = GetLowestEntropyFullList();
-            foreach (var pos in temp2)
-            {
-                UpdateEntropy(pos);
-            }
-            var list = GetLowestEntropyList();
-            //Debug.Log($"{mNotCollapsesed.Count}");
+        //        foreach (var tile in mNotCollapsesed)
+        //        {
+        //            if (mTile[tile].GetEntropyCount() == 0)
+        //            {
+        //                failed = true;
+        //            }
+        //        }
+        //        if (failed)
+        //        {
+        //            failCount++;
+        //            HashSet<(int x, int y, int z)> tempList = new HashSet<(int x, int y, int z)>();
+        //            for (int i = 0; i < failCount; i++)
+        //            {
+        //                Debug.Log($"{mStack.Count} {failCount}");
+        //                var temp = mStack.Pop();
+        //                mTile[temp].SetEntropy(entropy.Keys.ToHashSet());
+        //                tempList.Add(temp);
+        //                mNotCollapsesed.Add(temp);
+        //            }
+        //            Parallel.ForEach(mNotCollapsesed, temp =>
+        //            {
+        //                mTile[temp].SetEntropy(entropy.Keys.ToHashSet());
+        //            });
+        //            return;
+        //        }
+        //    }
+        //    var temp2 = GetLowestEntropyFullList();
+        //    foreach (var pos in temp2)
+        //    {
+        //        UpdateEntropy(pos);
+        //    }
+        //    var list = GetLowestEntropyList();
 
-            CollapseEntropy(list.ElementAt(Random.Range(0, list.Count)));
-        }
-        else if (!rendered)
+        //    CollapseEntropy(list.ElementAt(Random.Range(0, list.Count)));
+        //}
+        ///else 
+        if (!rendered)
         {
             FinishCollapseTime = Time.time;
             Debug.Log($"rendering");
-            foreach (var tile in mTile)
+            foreach (var region in Regions)
             {
-                Vector3 _targetPos = new Vector3((float)tile.Key.x * 3 + transform.position.x, (float)tile.Key.y * 3 + transform.position.y, (float)tile.Key.z * 3 + transform.position.z);
-                GameObject TempTile = Instantiate(tilePrefab, _targetPos, Quaternion.identity, this.transform);
+                var Tiles = region.Value.GetTiles();
+                foreach (var tile in Tiles)
+                {
+                    Vector3 _targetPos = new Vector3((float)tile.Key.x * 3 + transform.position.x, (float)tile.Key.y * 3 + transform.position.y, (float)tile.Key.z * 3 + transform.position.z);
+                    GameObject TempTile = Instantiate(tilePrefab, _targetPos, Quaternion.identity, this.transform);
 
-                TileProps temp = TempTile.GetComponent<TileProps>();
-                temp.SetExits(entropy[tile.Value.GetExits()]);
+                    TileProps temp = TempTile.GetComponent<TileProps>();
+                    temp.SetExits(entropy[tile.Value.GetExits()]);
+                }
             }
+            //to many vertices re enable once fixed
             CombineMeshes();
 
             rendered = true;
@@ -110,7 +118,6 @@ public class Manager : MonoBehaviour
     private void InitRules()
     {
         byte[] _r = { 0x00, 0x01 };
-
 
         entropy.Add(0, new byte[] { _r[0], _r[0], _r[1], _r[1], _r[0], _r[1] });
         entropy.Add(1, new byte[] { _r[1], _r[0], _r[0], _r[1], _r[0], _r[1] });
@@ -149,79 +156,96 @@ public class Manager : MonoBehaviour
         entropy.Add(31, new byte[] { _r[1], _r[1], _r[0], _r[0], _r[1], _r[1] });
     }
 
-    private void InitTiles()
+    private void InitRegions()
     {
-        for (int x = 0; x < max.x; x++)
+        Dictionary<(int x, int y, int z),(int minX, int minY, int minZ, int maxX, int maxY, int maxZ)> chunks = new Dictionary<(int x, int y, int z),(int minX, int minY, int minZ, int maxX, int maxY, int maxZ)>();
+        int posX = 0, posY = 0, posZ = 0; // Trackers for the chunk's position
+
+        for (int x = 0; x < max.x; x += ChunkX, posX++)
         {
-            for (int y = 0; y < max.y; y++)
+            posY = 0; // Reset Y position for each new X level
+            for (int y = 0; y < max.y; y += ChunkY, posY++)
             {
-                for (int z = 0; z < max.z; z++)
+                posZ = 0; // Reset Z position for each new Y level in the current X
+                for (int z = 0; z < max.z; z += ChunkZ, posZ++)
                 {
-                    Tile TempTile = new Tile();
-                    TempTile.Initialize((x, y, z), max, entropy.Keys.ToHashSet());
-                    mTile.Add((x, y, z), TempTile);
-                    mNotCollapsesed.Add((x, y, z));
+                    int endX = Math.Min(x + ChunkX, max.x);
+                    int endY = Math.Min(y + ChunkY, max.y);
+                    int endZ = Math.Min(z + ChunkZ, max.z);
+
+                    // Use the position as the key and the chunk boundaries as the value
+                    chunks.Add((posX, posY, posZ), (x, y, z, endX, endY, endZ));
                 }
             }
+        }
+
+
+        foreach (var chunk in chunks)
+        {
+            Region region = new Region();
+            var min = (chunk.Value.minX, chunk.Value.minY, chunk.Value.minZ);
+            var max = (chunk.Value.maxX, chunk.Value.maxY, chunk.Value.maxZ);
+            region.Initialize(chunk.Key,max,min,entropy.Keys.ToHashSet());
+            Regions.Add(chunk.Key,region);
         }
     }
 
     private void UpdateEntropy((int x, int y, int z) pos)
     {
-        // Loop through all directions and check entropy
-        for (int _dir = 0; _dir < 6; _dir++)
-        {
-            (int x, int y, int z) _targetPosition = pos;
-            _targetPosition.x = (_targetPosition.x + Dirs[_dir].x + max.x) % max.x;
-            _targetPosition.y = (_targetPosition.y + Dirs[_dir].y + max.y) % max.y;
-            _targetPosition.z = (_targetPosition.z + Dirs[_dir].z + max.z) % max.z;
-            List<int> _targetEntropy = mTile[_targetPosition].GetEntropy();
-            List<int> toRemove = new List<int>();
-            var _correspondingExit = (_dir + 3) % 6;
-            HashSet<byte> possbileExits = new HashSet<byte>();
+        //// Loop through all directions and check entropy
+        //for (int _dir = 0; _dir < 6; _dir++)
+        //{
+        //    (int x, int y, int z) _targetPosition = pos;
+        //    _targetPosition.x = (_targetPosition.x + Dirs[_dir].x + max.x) % max.x;
+        //    _targetPosition.y = (_targetPosition.y + Dirs[_dir].y + max.y) % max.y;
+        //    _targetPosition.z = (_targetPosition.z + Dirs[_dir].z + max.z) % max.z;
+        //    List<int> _targetEntropy = mTile[_targetPosition].GetEntropy();
+        //    List<int> toRemove = new List<int>();
+        //    var _correspondingExit = (_dir + 3) % 6;
+        //    HashSet<byte> possbileExits = new HashSet<byte>();
 
-            //find all the possible exits
-            foreach (var _exit in _targetEntropy) if (!possbileExits.Contains(entropy[_exit][_correspondingExit])) possbileExits.Add(entropy[_exit][_correspondingExit]);
+        //    //find all the possible exits
+        //    foreach (var _exit in _targetEntropy) if (!possbileExits.Contains(entropy[_exit][_correspondingExit])) possbileExits.Add(entropy[_exit][_correspondingExit]);
 
 
-            foreach (var ent in mTile[pos].entropy) if (!possbileExits.Contains(entropy[ent][_dir])) toRemove.Add(ent);
+        //    foreach (var ent in mTile[pos].entropy) if (!possbileExits.Contains(entropy[ent][_dir])) toRemove.Add(ent);
 
-            //remove everything in the remove list
-            foreach (var item in toRemove) mTile[pos].entropy.Remove(item);
-        }
+        //    //remove everything in the remove list
+        //    foreach (var item in toRemove) mTile[pos].entropy.Remove(item);
+        //}
     }
 
     private void CollapseEntropy((int x, int y, int z) pos)
     {
-        int entropyCount = mTile[pos].GetEntropyCount();
-        if (entropyCount == 0) return;
+        //int entropyCount = mTile[pos].GetEntropyCount();
+        //if (entropyCount == 0) return;
 
-        int _randNum = Random.Range(0, entropyCount);
-        int randomEntropyElement = mTile[pos].GetEntropy().ElementAt(_randNum);
-        mTile[pos].entropy = new HashSet<int>();
-        mTile[pos].entropy.Add(randomEntropyElement);
-        mNotCollapsesed.Remove(pos);
-        mStack.Push(pos);
+        //int _randNum = Random.Range(0, entropyCount);
+        //int randomEntropyElement = mTile[pos].GetEntropy().ElementAt(_randNum);
+        //mTile[pos].entropy = new HashSet<int>();
+        //mTile[pos].entropy.Add(randomEntropyElement);
+        //mNotCollapsesed.Remove(pos);
+        //mStack.Push(pos);
     }
 
     private HashSet<(int, int, int)> GetLowestEntropyList()
     {
         HashSet<(int, int, int)> lowEntopyList = new HashSet<(int, int, int)>();
-        int tempLowNum = entropy.Count + 2;
-        foreach (var pos in mNotCollapsesed)
-        {
-            var temp = mTile[pos].GetEntropyCount();
-            if (temp < tempLowNum)
-            {
-                lowEntopyList = new HashSet<(int, int, int)>();
-                lowEntopyList.Add(pos);
-                tempLowNum = temp;
-            }
-            else if (temp == tempLowNum)
-            {
-                lowEntopyList.Add(pos);
-            }
-        }
+        //int tempLowNum = entropy.Count + 2;
+        //foreach (var pos in mNotCollapsesed)
+        //{
+        //    var temp = mTile[pos].GetEntropyCount();
+        //    if (temp < tempLowNum)
+        //    {
+        //        lowEntopyList = new HashSet<(int, int, int)>();
+        //        lowEntopyList.Add(pos);
+        //        tempLowNum = temp;
+        //    }
+        //    else if (temp == tempLowNum)
+        //    {
+        //        lowEntopyList.Add(pos);
+        //    }
+        //}
         return lowEntopyList;
     }
 
@@ -229,26 +253,25 @@ public class Manager : MonoBehaviour
     {
         List<(int, int, int)> orderedList = new List<(int, int, int)>();
 
-        // Calculate entropy for each position and store in a dictionary
-        Dictionary<(int, int, int), int> entropyMap = new Dictionary<(int, int, int), int>();
-        foreach (var pos in mNotCollapsesed)
-        {
-            var temp = mTile[pos].GetEntropyCount();
-            entropyMap[pos] = temp;
-        }
+        //// Calculate entropy for each position and store in a dictionary
+        //Dictionary<(int, int, int), int> entropyMap = new Dictionary<(int, int, int), int>();
+        //foreach (var pos in mNotCollapsesed)
+        //{
+        //    var temp = mTile[pos].GetEntropyCount();
+        //    entropyMap[pos] = temp;
+        //}
 
-        // Sort positions by entropy (ascending order)
-        var sortedPositions = entropyMap.OrderBy(pair => pair.Value);
+        //// Sort positions by entropy (ascending order)
+        //var sortedPositions = entropyMap.OrderBy(pair => pair.Value);
 
-        // Add sorted positions to the ordered list
-        foreach (var entry in sortedPositions)
-        {
-            orderedList.Add(entry.Key);
-        }
+        //// Add sorted positions to the ordered list
+        //foreach (var entry in sortedPositions)
+        //{
+        //    orderedList.Add(entry.Key);
+        //}
 
         return orderedList;
     }
-
 
     void CombineMeshes()
     {
@@ -278,6 +301,7 @@ public class Manager : MonoBehaviour
 
         // Create a new mesh and combine all the child meshes into it
         meshFilter.mesh = new Mesh();
+        meshFilter.mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
         meshFilter.mesh.CombineMeshes(combine);
 
         // Ensure this GameObject has a MeshRenderer component
@@ -295,18 +319,4 @@ public class Manager : MonoBehaviour
 
         meshRenderer.transform.position = new Vector3(0, 0, 0);
     }
-
-    //private void OnDestroy()
-    //{
-    //    entropy.Clear();
-    //    Dirs = new (int x, int y, int z)[0];
-    //    mStack.Clear();
-    //    mTile.Clear();
-    //    mNotCollapsesed.Clear();
-    //    for (int i = 0; i < mGameObject.Count; i++)
-    //    {
-    //        Destroy(mGameObject.ElementAt(i).Value);
-    //    }
-    //    mGameObject.Clear();
-    //}
 }

@@ -12,14 +12,12 @@ public class Tile
     //list is 0.089 5*5 5*5
     //hashset is 0.083 5*5 5*5
 
-    private (int x, int y, int z) max;
     private (int x, int y, int z) pos;
     public HashSet<int> entropy;
 
-    public void Initialize((int x, int y, int z) _position, (int x, int y, int z) _max, HashSet<int> _ent)
+    public void Initialize((int x, int y, int z) _position, HashSet<int> _ent)
     {
         pos = _position;
-        max = _max;
 
         entropy = new HashSet<int>();
         foreach (var en in _ent)

@@ -15,6 +15,10 @@ public class BenchMarker : MonoBehaviour
     public int width;
     public int depth;
 
+    public int chunkX;
+    public int chunkY;
+    public int chunkZ;
+
     public int RunCount;
     public float CollapseTime = 0.0f;
     public TextMeshProUGUI CollapsedTime;
