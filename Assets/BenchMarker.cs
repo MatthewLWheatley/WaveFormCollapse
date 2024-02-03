@@ -18,11 +18,14 @@ public class BenchMarker : MonoBehaviour
     public int RunCount;
     public float CollapseTime = 0.0f;
     public TextMeshProUGUI CollapsedTime;
+    public TextMeshProUGUI RunText;
+    public TextMeshProUGUI RunningTotal;
+
+    List<Manager> managerScripts = new List<Manager>();
 
     void Start()
     {
-        Application.targetFrameRate = 1000;
-        SpawnManagers();
+        Application.targetFrameRate = 60;
     }
 
     private void Update()
@@ -35,14 +38,11 @@ public class BenchMarker : MonoBehaviour
         List<Manager> list = new List<Manager>();
         foreach (Manager intst in managerScripts)
         {
-
             if (intst.collapsed && intst.rendered)
             {
-                if (RunCount >= width * depth)
-                {
-                    CollapseTime += intst.FinishCollapseTime - intst.StartTime;
-                    CollapsedTime.text = string.Format($"{CollapseTime / RunCount}");
-                }
+                CollapseTime += intst.FinishCollapseTime - intst.StartTime;
+                CollapsedTime.text = string.Format($"{CollapseTime / RunCount}");
+
                 RunCount++;
                 list.Add(intst);
                 //Debug.Log(RunCount);
@@ -52,6 +52,14 @@ public class BenchMarker : MonoBehaviour
         {
             managerScripts.Remove(intst);
         }
+        if (managerScripts.Count == 0) 
+        {
+            DeleteManagers();
+            SpawnManagers();
+        }
+
+        RunText.text = string.Format(RunCount.ToString());
+        RunningTotal.text = string.Format(CollapseTime.ToString());
     }
 
     void DeleteManagers()
@@ -62,9 +70,6 @@ public class BenchMarker : MonoBehaviour
             Destroy(child.gameObject);
         }
     }
-
-
-    List<Manager> managerScripts = new List<Manager>();
 
     void SpawnManagers()
     {

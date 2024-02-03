@@ -1,13 +1,9 @@
-using System.Collections;
+
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Unity.Jobs;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
-using UnityEngine.UIElements;
 
 public class Manager : MonoBehaviour
 {
@@ -70,21 +66,21 @@ public class Manager : MonoBehaviour
                     HashSet<(int x, int y, int z)> tempList = new HashSet<(int x, int y, int z)>();
                     for (int i = 0; i < failCount; i++)
                     {
-                        Debug.Log($"{mStack.Count} {failCount}");
+                        //Debug.Log($"{mStack.Count} {failCount}");
                         var temp = mStack.Pop();
-                        mTile[temp].SetEntropy(entropy.Keys.ToList());
+                        mTile[temp].SetEntropy(entropy.Keys.ToHashSet());
                         tempList.Add(temp);
                         mNotCollapsesed.Add(temp);
                     }
                     Parallel.ForEach(mNotCollapsesed, temp =>
                     {
-                        mTile[temp].SetEntropy(entropy.Keys.ToList());
+                        mTile[temp].SetEntropy(entropy.Keys.ToHashSet());
                     });
                     return;
                 }
                 else 
                 { 
-                    failCount = 0;
+                    //failCount = 0;
                 }
             }
             foreach (var pos in mNotCollapsesed)
@@ -138,7 +134,7 @@ public class Manager : MonoBehaviour
                 for (int z = 0; z < max.z; z++)
                 {
                     Tile TempTile = new Tile();
-                    TempTile.Initialize((x, y, z), max, entropy.Keys.ToList());
+                    TempTile.Initialize((x, y, z), max, entropy.Keys.ToHashSet());
                     mTile.Add((x, y, z), TempTile);
                     mNotCollapsesed.Add((x, y, z));
                 }
@@ -178,7 +174,7 @@ public class Manager : MonoBehaviour
 
         int _randNum = Random.Range(0, entropyCount);
         int randomEntropyElement = mTile[pos].GetEntropy().ElementAt(_randNum);
-        mTile[pos].entropy = new List<int>();
+        mTile[pos].entropy = new HashSet<int>();
         mTile[pos].entropy.Add(randomEntropyElement);
         mNotCollapsesed.Remove(pos);
         mStack.Push(pos);
