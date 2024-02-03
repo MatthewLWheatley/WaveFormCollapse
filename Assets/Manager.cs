@@ -295,18 +295,4 @@ public class Manager : MonoBehaviour
 
         meshRenderer.transform.position = new Vector3(0, 0, 0);
     }
-
-    //private void OnDestroy()
-    //{
-    //    entropy.Clear();
-    //    Dirs = new (int x, int y, int z)[0];
-    //    mStack.Clear();
-    //    mTile.Clear();
-    //    mNotCollapsesed.Clear();
-    //    for (int i = 0; i < mGameObject.Count; i++)
-    //    {
-    //        Destroy(mGameObject.ElementAt(i).Value);
-    //    }
-    //    mGameObject.Clear();
-    //}
 }
