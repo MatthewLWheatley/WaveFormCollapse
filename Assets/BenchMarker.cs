@@ -11,7 +11,9 @@ public class BenchMarker : MonoBehaviour
     public int maxX;
     public int maxY;
     public int maxZ;
-
+    public int RegionX;
+    public int RegionY;
+    public int RegionZ;
     public int width;
     public int depth;
 
@@ -89,6 +91,7 @@ public class BenchMarker : MonoBehaviour
                 if (managerScript != null)
                 {
                     managerScript.max = (maxX, maxY, maxZ);
+                    managerScript.regionSize = (RegionX, RegionY, RegionZ);
                 }
             }
         }
