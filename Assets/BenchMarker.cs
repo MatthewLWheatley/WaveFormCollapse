@@ -54,7 +54,7 @@ public class BenchMarker : MonoBehaviour
         {
             managerScripts.Remove(intst);
         }
-        if (managerScripts.Count == 0) 
+        if (managerScripts.Count == 0)
         {
             DeleteManagers();
             SpawnManagers();

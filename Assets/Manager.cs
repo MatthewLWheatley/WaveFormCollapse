@@ -45,12 +45,41 @@ public class Manager : MonoBehaviour
         InitRegions();
     }
 
+    int collapseCount = 0;
+    int renderedCount = 0;
+
     private void Update()
     {
-        Parallel.ForEach(mRegion, region =>
+        //Parallel.ForEach(mRegion, region =>
+        //{
+        //    mRegion[region.Key].RunUpdate();
+        //}); 
+        //foreach (var region in mRegion)
+        //{
+        //    mRegion[region.Key].RunUpdate();
+        //}
+        //Debug.Log($"{count}");
+        if (collapseCount >= mRegion.Count) collapsed = true;
+        if (renderedCount >= mRegion.Count) rendered = true;
+        if (!collapsed)
         {
-            mRegion[region.Key].RunUpdate();
-        });
+            var r = mRegion[mRegion.ElementAt(collapseCount).Key];
+            r.RunUpdate();
+            Debug.Log($"{collapseCount}");
+            if (r.collapsed)
+            {
+                collapseCount++;
+            }
+        }
+        else if (!rendered)
+        {
+            var r = mRegion[mRegion.ElementAt(renderedCount).Key];
+            r.RunRenderer();
+            if (r.rendered)
+            {
+                renderedCount++;
+            }
+        }
     }
 
     private void InitRules()
@@ -67,32 +96,32 @@ public class Manager : MonoBehaviour
         entropy.Add(6, new byte[] { _r[0], _r[0], _r[0], _r[1], _r[0], _r[1] });
         entropy.Add(7, new byte[] { _r[1], _r[0], _r[0], _r[0], _r[0], _r[1] });
 
-        entropy.Add(8, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[0], _r[1] });
-        entropy.Add(9, new byte[] { _r[1], _r[1], _r[0], _r[1], _r[0], _r[1] });
-        entropy.Add(10, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[0], _r[1] });
-        entropy.Add(11, new byte[] { _r[1], _r[1], _r[1], _r[1], _r[0], _r[0] });
-        entropy.Add(12, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[0], _r[0] });
-        entropy.Add(13, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[0], _r[0] });
-        entropy.Add(14, new byte[] { _r[0], _r[1], _r[0], _r[1], _r[0], _r[1] });
-        entropy.Add(15, new byte[] { _r[1], _r[1], _r[0], _r[0], _r[0], _r[1] });
+        //entropy.Add(8, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[0], _r[1] });
+        //entropy.Add(9, new byte[] { _r[1], _r[1], _r[0], _r[1], _r[0], _r[1] });
+        //entropy.Add(10, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[0], _r[1] });
+        //entropy.Add(11, new byte[] { _r[1], _r[1], _r[1], _r[1], _r[0], _r[0] });
+        //entropy.Add(12, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[0], _r[0] });
+        //entropy.Add(13, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[0], _r[0] });
+        //entropy.Add(14, new byte[] { _r[0], _r[1], _r[0], _r[1], _r[0], _r[1] });
+        //entropy.Add(15, new byte[] { _r[1], _r[1], _r[0], _r[0], _r[0], _r[1] });
 
-        entropy.Add(16, new byte[] { _r[0], _r[0], _r[1], _r[1], _r[1], _r[1] });
-        entropy.Add(17, new byte[] { _r[1], _r[0], _r[0], _r[1], _r[1], _r[1] });
-        entropy.Add(18, new byte[] { _r[1], _r[0], _r[1], _r[0], _r[1], _r[1] });
-        entropy.Add(19, new byte[] { _r[1], _r[0], _r[1], _r[1], _r[1], _r[0] });
-        entropy.Add(20, new byte[] { _r[1], _r[0], _r[1], _r[0], _r[1], _r[0] });
-        entropy.Add(21, new byte[] { _r[0], _r[0], _r[1], _r[1], _r[1], _r[0] });
-        entropy.Add(22, new byte[] { _r[0], _r[0], _r[0], _r[1], _r[1], _r[1] });
-        entropy.Add(23, new byte[] { _r[1], _r[0], _r[0], _r[0], _r[1], _r[1] });
+        //entropy.Add(16, new byte[] { _r[0], _r[0], _r[1], _r[1], _r[1], _r[1] });
+        //entropy.Add(17, new byte[] { _r[1], _r[0], _r[0], _r[1], _r[1], _r[1] });
+        //entropy.Add(18, new byte[] { _r[1], _r[0], _r[1], _r[0], _r[1], _r[1] });
+        //entropy.Add(19, new byte[] { _r[1], _r[0], _r[1], _r[1], _r[1], _r[0] });
+        //entropy.Add(20, new byte[] { _r[1], _r[0], _r[1], _r[0], _r[1], _r[0] });
+        //entropy.Add(21, new byte[] { _r[0], _r[0], _r[1], _r[1], _r[1], _r[0] });
+        //entropy.Add(22, new byte[] { _r[0], _r[0], _r[0], _r[1], _r[1], _r[1] });
+        //entropy.Add(23, new byte[] { _r[1], _r[0], _r[0], _r[0], _r[1], _r[1] });
 
-        entropy.Add(24, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[1], _r[1] });
-        entropy.Add(25, new byte[] { _r[1], _r[1], _r[0], _r[1], _r[1], _r[1] });
-        entropy.Add(26, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[1], _r[1] });
-        entropy.Add(27, new byte[] { _r[1], _r[1], _r[1], _r[1], _r[1], _r[0] });
-        entropy.Add(28, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[1], _r[0] });
-        entropy.Add(29, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[1], _r[0] });
-        entropy.Add(30, new byte[] { _r[0], _r[1], _r[0], _r[1], _r[1], _r[1] });
-        entropy.Add(31, new byte[] { _r[1], _r[1], _r[0], _r[0], _r[1], _r[1] });
+        //entropy.Add(24, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[1], _r[1] });
+        //entropy.Add(25, new byte[] { _r[1], _r[1], _r[0], _r[1], _r[1], _r[1] });
+        //entropy.Add(26, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[1], _r[1] });
+        //entropy.Add(27, new byte[] { _r[1], _r[1], _r[1], _r[1], _r[1], _r[0] });
+        //entropy.Add(28, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[1], _r[0] });
+        //entropy.Add(29, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[1], _r[0] });
+        //entropy.Add(30, new byte[] { _r[0], _r[1], _r[0], _r[1], _r[1], _r[1] });
+        //entropy.Add(31, new byte[] { _r[1], _r[1], _r[0], _r[0], _r[1], _r[1] });
     }
 
     private void InitRegions() 
@@ -114,16 +143,19 @@ public class Manager : MonoBehaviour
                     int endZ = Math.Min(z + regionSize.z, max.z);
 
                     // Use the position as the key and the chunk boundaries as the value
-                    Debug.Log($"({posX}, {posY}, {posZ}), ({x}, {y}, {z}, {endX}, {endY}, {endZ})");
+                    //Debug.Log($"({posX}, {posY}, {posZ}), ({x}, {y}, {z}, {endX}, {endY}, {endZ})");
 
                     regions.Add((posX, posY, posZ), (x, y, z, endX, endY, endZ));
                 }
             }
         }
 
+
         foreach (var region in regions)
         {
-            Vector3 position = new Vector3(region.Value.minX * 3, region.Value.minY * 3, region.Value.minZ * 3);
+            //Debug.Log($"{region.Value.minX},{region.Value.minY},{region.Value.minZ},{region.Value.maxX},{region.Value.maxY},{region.Value.maxZ}");
+
+            Vector3 position = new Vector3(0, 0, 0);//new Vector3(region.Value.minX * 3, region.Value.minY * 3, region.Value.minZ * 3);
 
             // Instantiate the manager prefab
             GameObject RegionInstance = Instantiate(RegionPrefab, position, Quaternion.identity, this.transform);
@@ -133,8 +165,22 @@ public class Manager : MonoBehaviour
             mRegion.Add(region.Key, RegionScript);
             var min = (region.Value.minX, region.Value.minY, region.Value.minZ);
             var max = (region.Value.maxX, region.Value.maxY, region.Value.maxZ);
-            RegionScript.Initialize(region.Key, max, min, entropy);
+            RegionScript.Initialize(region.Key, max, min, entropy, this,transform.position);
         }
+    }
+
+    public List<int> GetTileEntopry((int x, int y, int z) _tP) 
+    {
+        _tP.x = (_tP.x + max.x) % max.x;
+        _tP.y = (_tP.y + max.y) % max.y;
+        _tP.z = (_tP.z + max.z) % max.z;
+        (int x, int y, int z) _targetRegion = (_tP.x & regionSize.x, _tP.y & regionSize.y, _tP.z & regionSize.z);
+        //Debug.Log($"& {_targetRegion.x},{_targetRegion.y},{_targetRegion.z},  {_tP.x},{_tP.y},{_tP.z}");
+        _targetRegion = (_tP.x % regionSize.x, _tP.y % regionSize.y, _tP.z % regionSize.z);
+        //Debug.Log($"% {_targetRegion.x},{_targetRegion.y},{_targetRegion.z},  {_tP.x},{_tP.y},{_tP.z}");
+        _targetRegion = (_tP.x / regionSize.x, _tP.y / regionSize.y, _tP.z / regionSize.z);
+        //Debug.Log($"/ {_targetRegion.x},{_targetRegion.y},{_targetRegion.z},  {_tP.x},{_tP.y},{_tP.z}");
+        return mRegion[_targetRegion].GetTile(_tP);
     }
 
     void CombineMeshes()

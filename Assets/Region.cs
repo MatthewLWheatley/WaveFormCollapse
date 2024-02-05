@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
-using static UnityEditor.PlayerSettings;
+using static System.Net.WebRequestMethods;
 
 public class Region : MonoBehaviour
 {
-    public Manager Manager;
+    public Manager manager;
     private Dictionary<(int x, int y, int z), Tile> mTile;
     public (int x, int y, int z) max;
     public (int x, int y, int z) min;
@@ -18,6 +18,8 @@ public class Region : MonoBehaviour
     private HashSet<(int x, int y, int z)> mNotCollapsesed;
     private int failCount = 0;
 
+    private Vector3 transPosisiton = Vector3.zero;
+
     [SerializeField] private GameObject tilePrefab;
 
     private Stack<(int x, int y, int z)> mStack;
@@ -26,8 +28,11 @@ public class Region : MonoBehaviour
     public float StartTime;
     public float FinishCollapseTime;
 
+    private System.Random rnd;
+
     public void RunUpdate()
     {
+        //Debug.Log($"{pos.x},{pos.y},{pos.z}running");
         if (!collapsed)
         {
             if (mNotCollapsesed.Count == 0)
@@ -50,6 +55,14 @@ public class Region : MonoBehaviour
                 {
                     failCount++;
                     HashSet<(int x, int y, int z)> tempList = new HashSet<(int x, int y, int z)>();
+                    if (failCount >= mStack.Count) 
+                    { 
+                        failCount = mStack.Count - 1;
+                    }
+                    if (mStack.Count == 0) 
+                    {
+                        failCount = 0;
+                    }
                     for (int i = 0; i < failCount; i++)
                     {
                         //Debug.Log($"{mStack.Count} {failCount}");
@@ -70,32 +83,43 @@ public class Region : MonoBehaviour
             {
                 UpdateEntropy(pos);
             }
+            rnd = new System.Random();
             var list = GetLowestEntropyList();
-            //Debug.Log($"{mNotCollapsesed.Count}");
-
-            CollapseEntropy(list.ElementAt(Random.Range(0, list.Count)));
+            var num = rnd.Next(0, list.Count);
+            var num2 = list.ElementAt(rnd.Next(0, list.Count));
+            //Debug.Log($"{list.Count} {num} {num2}"); 
+            CollapseEntropy(num2);
         }
-        else if (!rendered)
+    }
+
+    public void RunRenderer() 
+    {
+        if (!rendered)
         {
             Debug.Log($"rendering");
             foreach (var tile in mTile)
             {
-                Vector3 _targetPos = new Vector3((float)tile.Key.x * 3 + transform.position.x, (float)tile.Key.y * 3 + transform.position.y, (float)tile.Key.z * 3 + transform.position.z);
-                GameObject TempTile = Instantiate(tilePrefab, _targetPos, Quaternion.identity, this.transform);
+                Vector3 _targetPos = new Vector3((float)tile.Key.x * 3 + transPosisiton.x, (float)tile.Key.y * 3 + transPosisiton.y, (float)tile.Key.z * 3 + transPosisiton.z);
+                GameObject TempTile = Instantiate(tilePrefab, _targetPos, Quaternion.identity, transform);
 
                 TileProps temp = TempTile.GetComponent<TileProps>();
                 temp.SetExits(entropy[tile.Value.GetExits()]);
             }
+
             CombineMeshes();
 
             rendered = true;
         }
     }
 
-    public void Initialize((int x, int y, int z) _position, (int x, int y, int z) _max, (int x, int y, int z) _min, Dictionary<int, byte[]> _ent)
+    public void Initialize((int x, int y, int z) _position, (int x, int y, int z) _max, (int x, int y, int z) _min, Dictionary<int, byte[]> _ent, Manager _man, Vector3 _transPos)
     {
         pos = _position;
+        min = _min;
         max = _max;
+        manager = _man;
+
+
 
         mTile = new Dictionary<(int x, int y, int z), Tile>();
         mNotCollapsesed = new HashSet<(int x, int y, int z)>();
@@ -107,15 +131,18 @@ public class Region : MonoBehaviour
             if(!entropy.ContainsKey(en.Key))
             entropy.Add(en.Key,en.Value);
         }
+        InitTiles();
+
+        System.Random rnd = new System.Random();
     }
 
     private void InitTiles()
     {
-        for (int x = 0; x < max.x; x++)
+        for (int x = min.x; x < max.x; x++)
         {
-            for (int y = 0; y < max.y; y++)
+            for (int y = min.y; y < max.y; y++)
             {
-                for (int z = 0; z < max.z; z++)
+                for (int z = min.z; z < max.z; z++)
                 {
                     Tile TempTile = new Tile();
                     TempTile.Initialize((x, y, z), max, entropy.Keys.ToHashSet());
@@ -131,11 +158,19 @@ public class Region : MonoBehaviour
         // Loop through all directions and check entropy
         for (int _dir = 0; _dir < 6; _dir++)
         {
-            (int x, int y, int z) _targetPosition = pos;
-            _targetPosition.x = (_targetPosition.x + Dirs[_dir].x + max.x) % max.x;
-            _targetPosition.y = (_targetPosition.y + Dirs[_dir].y + max.y) % max.y;
-            _targetPosition.z = (_targetPosition.z + Dirs[_dir].z + max.z) % max.z;
-            List<int> _targetEntropy = mTile[_targetPosition].GetEntropy();
+            (int x, int y, int z) _tP = pos;
+            _tP.x = (_tP.x + Dirs[_dir].x);
+            _tP.y = (_tP.y + Dirs[_dir].y);
+            _tP.z = (_tP.z + Dirs[_dir].z);
+            List<int> _targetEntropy;
+            if (_tP.x >= max.x || _tP.x <= min.x || _tP.y >= max.y || _tP.y <= min.y || _tP.z >= max.z || _tP.z <= min.z)
+            {
+                _targetEntropy = manager.GetTileEntopry(_tP);
+            }
+            else
+            {
+                _targetEntropy = mTile[_tP].GetEntropy();
+            }
             List<int> toRemove = new List<int>();
             var _correspondingExit = (_dir + 3) % 6;
             HashSet<byte> possbileExits = new HashSet<byte>();
@@ -156,7 +191,7 @@ public class Region : MonoBehaviour
         int entropyCount = mTile[pos].GetEntropyCount();
         if (entropyCount == 0) return;
 
-        int _randNum = Random.Range(0, entropyCount);
+        int _randNum = rnd.Next(0, entropyCount);
         int randomEntropyElement = mTile[pos].GetEntropy().ElementAt(_randNum);
         mTile[pos].entropy = new HashSet<int>();
         mTile[pos].entropy.Add(randomEntropyElement);
@@ -211,47 +246,52 @@ public class Region : MonoBehaviour
 
     void CombineMeshes()
     {
-        //// Ensure this GameObject has a MeshFilter component
-        //MeshFilter meshFilter = GetComponent<MeshFilter>();
-        //if (meshFilter == null)
-        //{
-        //    meshFilter = gameObject.AddComponent<MeshFilter>();
-        //}
+        // Ensure this GameObject has a MeshFilter component
+        MeshFilter meshFilter = GetComponent<MeshFilter>();
+        if (meshFilter == null)
+        {
+            meshFilter = gameObject.AddComponent<MeshFilter>();
+        }
 
-        //// Get all MeshFilter components from child objects
-        //MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>();
-        //CombineInstance[] combine = new CombineInstance[meshFilters.Length - 1]; // Exclude the parent's MeshFilter
+        // Get all MeshFilter components from child objects
+        MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>();
+        CombineInstance[] combine = new CombineInstance[meshFilters.Length - 1]; // Exclude the parent's MeshFilter
 
-        //int index = 0;
-        //for (int i = 0; i < meshFilters.Length; i++)
-        //{
-        //    if (meshFilters[i].sharedMesh == null) continue; // Skip if the sharedMesh is null
-        //    if (meshFilters[i] == meshFilter) continue; // Skip the parent's MeshFilter
+        int index = 0;
+        for (int i = 0; i < meshFilters.Length; i++)
+        {
+            if (meshFilters[i].sharedMesh == null) continue; // Skip if the sharedMesh is null
+            if (meshFilters[i] == meshFilter) continue; // Skip the parent's MeshFilter
 
-        //    combine[index].mesh = meshFilters[i].sharedMesh;
-        //    combine[index].transform = meshFilters[i].transform.localToWorldMatrix;
-        //    Destroy(meshFilters[i].gameObject); // Disable the child object
+            combine[index].mesh = meshFilters[i].sharedMesh;
+            combine[index].transform = meshFilters[i].transform.localToWorldMatrix;
+            Destroy(meshFilters[i].gameObject); // Disable the child object
 
-        //    index++;
-        //}
+            index++;
+        }
 
-        //// Create a new mesh and combine all the child meshes into it
-        //meshFilter.mesh = new Mesh();
-        //meshFilter.mesh.CombineMeshes(combine);
+        // Create a new mesh and combine all the child meshes into it
+        meshFilter.mesh = new Mesh();
+        meshFilter.mesh.CombineMeshes(combine);
 
-        //// Ensure this GameObject has a MeshRenderer component
-        //MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
-        //if (meshRenderer == null)
-        //{
-        //    meshRenderer = gameObject.AddComponent<MeshRenderer>();
-        //}
+        // Ensure this GameObject has a MeshRenderer component
+        MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
+        if (meshRenderer == null)
+        {
+            meshRenderer = gameObject.AddComponent<MeshRenderer>();
+        }
 
-        //// Set the material (assuming all child objects use the same material)
-        //if (meshFilters.Length > 1 && meshFilters[1].GetComponent<MeshRenderer>())
-        //{
-        //    meshRenderer.sharedMaterial = meshFilters[1].GetComponent<MeshRenderer>().sharedMaterial;
-        //}
+        // Set the material (assuming all child objects use the same material)
+        if (meshFilters.Length > 1 && meshFilters[1].GetComponent<MeshRenderer>())
+        {
+            meshRenderer.sharedMaterial = meshFilters[1].GetComponent<MeshRenderer>().sharedMaterial;
+        }
 
-        //meshRenderer.transform.position = new Vector3(0, 0, 0);
+        meshRenderer.transform.position = new Vector3(0, 0, 0);
     }
+
+    public List<int> GetTile((int x, int y, int z) _targetTile)
+    {
+        return mTile[_targetTile].GetEntropy();
+    } 
 }
