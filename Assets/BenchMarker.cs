@@ -22,6 +22,8 @@ public class BenchMarker : MonoBehaviour
     public TextMeshProUGUI CollapsedTime;
     public TextMeshProUGUI RunText;
     public TextMeshProUGUI RunningTotal;
+    public TextMeshProUGUI colapseTotal;
+    public TextMeshProUGUI renderTotal;
 
     List<Manager> managerScripts = new List<Manager>();
 
@@ -42,6 +44,9 @@ public class BenchMarker : MonoBehaviour
         List<Manager> list = new List<Manager>();
         foreach (Manager intst in managerScripts)
         {
+            colapseTotal.text = string.Format(intst.renderedCount.ToString());
+            renderTotal.text = string.Format(intst.collapseCount.ToString());
+            
             if (intst.collapsed && intst.rendered)
             {
 

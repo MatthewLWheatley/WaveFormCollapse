@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TMPro;
 using UnityEngine;
 
 public class Manager : MonoBehaviour
@@ -16,6 +17,9 @@ public class Manager : MonoBehaviour
     private Dictionary<(int x, int y, int z), GameObject> mGameObject;
     private HashSet<(int x, int y, int z)> mNotCollapsesed;
     [SerializeField] private GameObject RegionPrefab;
+
+
+    public TextMeshProUGUI RunningTotal;
 
     private Dictionary<int, byte[]> entropy = new Dictionary<int, byte[]>();
     public bool collapsed = false;
@@ -45,8 +49,8 @@ public class Manager : MonoBehaviour
         InitRegions();
     }
 
-    int collapseCount = 0;
-    int renderedCount = 0;
+    public int collapseCount = 0;
+    public int renderedCount = 0;
 
     private void Update()
     {
@@ -70,6 +74,7 @@ public class Manager : MonoBehaviour
             {
                 collapseCount++;
             }
+            RunningTotal.text = string.Format(collapseCount.ToString());
         }
         else if (!rendered)
         {
@@ -78,7 +83,10 @@ public class Manager : MonoBehaviour
             if (r.rendered)
             {
                 renderedCount++;
+
             }
+
+            RunningTotal.text = string.Format(renderedCount.ToString());
         }
     }
 
