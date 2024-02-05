@@ -30,6 +30,8 @@ public class BenchMarker : MonoBehaviour
         Application.targetFrameRate = 60;
     }
 
+    float startTime = 0.0f;
+
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
@@ -42,10 +44,9 @@ public class BenchMarker : MonoBehaviour
         {
             if (intst.collapsed && intst.rendered)
             {
-                CollapseTime += intst.FinishCollapseTime - intst.StartTime;
-                CollapsedTime.text = string.Format($"{CollapseTime / RunCount}");
 
                 RunCount++;
+                
                 list.Add(intst);
                 //Debug.Log(RunCount);
             }
@@ -56,12 +57,16 @@ public class BenchMarker : MonoBehaviour
         }
         if (managerScripts.Count == 0)
         {
+            startTime = Time.time;
+            CollapseTime += Time.time - startTime;
+
+            RunText.text = string.Format(RunCount.ToString());
+            RunningTotal.text = string.Format(CollapseTime.ToString());
+
+            CollapsedTime.text = string.Format($"{CollapseTime / RunCount}");
             DeleteManagers();
             SpawnManagers();
         }
-
-        RunText.text = string.Format(RunCount.ToString());
-        RunningTotal.text = string.Format(CollapseTime.ToString());
     }
 
     void DeleteManagers()
