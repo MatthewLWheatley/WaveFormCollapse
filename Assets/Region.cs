@@ -244,6 +244,19 @@ public class Region : MonoBehaviour
         return orderedList;
     }
 
+    public int GetEntropy() 
+    {
+        int _ent = 0;
+        // Calculate entropy for each position and store in a dictionary
+        foreach (var pos in mNotCollapsesed)
+        {
+            UpdateEntropy(pos);
+            var temp = mTile[pos].GetEntropyCount();
+            _ent += temp;
+        }
+        return _ent;
+    }
+
     void CombineMeshes()
     {
         // Ensure this GameObject has a MeshFilter component

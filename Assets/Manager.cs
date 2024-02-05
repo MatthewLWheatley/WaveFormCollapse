@@ -12,19 +12,16 @@ public class Manager : MonoBehaviour
     public (int x, int y, int z) max;
     public (int x, int y, int z) regionSize;
 
-    private Dictionary<(int x, int y, int z), Tile> mTile;
     private Dictionary<(int x, int y, int z), Region> mRegion;
     private Dictionary<(int x, int y, int z), GameObject> mGameObject;
     private HashSet<(int x, int y, int z)> mNotCollapsesed;
     [SerializeField] private GameObject RegionPrefab;
-
 
     public TextMeshProUGUI RunningTotal;
 
     private Dictionary<int, byte[]> entropy = new Dictionary<int, byte[]>();
     public bool collapsed = false;
     public bool rendered = false;
-
 
     private (int x, int y, int z)[] Dirs = new (int x, int y, int z)[] { (1, 0, 0), (0, 1, 0), (0, 0, 1), (-1, 0, 0), (0, -1, 0), (0, 0, -1) };
 
@@ -37,7 +34,6 @@ public class Manager : MonoBehaviour
 
     private void Start()
     {
-        mTile = new Dictionary<(int x, int y, int z), Tile>();
         mGameObject = new Dictionary<(int x, int y, int z), GameObject>();
         mNotCollapsesed = new HashSet<(int x, int y, int z)>();
         mStack = new Stack<(int x, int y, int z)>();
@@ -51,6 +47,9 @@ public class Manager : MonoBehaviour
 
     public int collapseCount = 0;
     public int renderedCount = 0;
+    int collapseNum = 0;
+    (int x, int y, int z) targetRegion = (0, 0, 0);
+
 
     private void Update()
     {
@@ -65,16 +64,25 @@ public class Manager : MonoBehaviour
         //Debug.Log($"{count}");
         if (collapseCount >= mRegion.Count) collapsed = true;
         if (renderedCount >= mRegion.Count) rendered = true;
+
+        
+
         if (!collapsed)
         {
-            var r = mRegion[mRegion.ElementAt(collapseCount).Key];
+            var r = mRegion[targetRegion];
             r.RunUpdate();
-            Debug.Log($"{collapseCount}");
+            //Debug.Log($"{collapseCount}");
             if (r.collapsed)
             {
+                r.RunRenderer();
                 collapseCount++;
+                mNotCollapsesed.Remove(targetRegion);
+                UpdateRegionEntropyList();
             }
             RunningTotal.text = string.Format(collapseCount.ToString());
+
+
+
         }
         else if (!rendered)
         {
@@ -83,7 +91,6 @@ public class Manager : MonoBehaviour
             if (r.rendered)
             {
                 renderedCount++;
-
             }
 
             RunningTotal.text = string.Format(renderedCount.ToString());
@@ -92,7 +99,7 @@ public class Manager : MonoBehaviour
 
     private void InitRules()
     {
-        byte[] _r = { 0x00, 0x01 };
+        byte[] _r = { 0x00, 0x01, 0x02};
 
 
         entropy.Add(0, new byte[] { _r[0], _r[0], _r[1], _r[1], _r[0], _r[1] });
@@ -103,6 +110,15 @@ public class Manager : MonoBehaviour
         entropy.Add(5, new byte[] { _r[0], _r[0], _r[1], _r[1], _r[0], _r[0] });
         entropy.Add(6, new byte[] { _r[0], _r[0], _r[0], _r[1], _r[0], _r[1] });
         entropy.Add(7, new byte[] { _r[1], _r[0], _r[0], _r[0], _r[0], _r[1] });
+
+        //entropy.Add(8, new byte[] { _r[0], _r[0], _r[2], _r[2], _r[0], _r[2] });
+        //entropy.Add(9, new byte[] { _r[2], _r[0], _r[0], _r[2], _r[0], _r[2] });
+        //entropy.Add(10, new byte[] { _r[2], _r[0], _r[2], _r[0], _r[0], _r[2] });
+        //entropy.Add(11, new byte[] { _r[2], _r[0], _r[2], _r[2], _r[0], _r[0] });
+        //entropy.Add(12, new byte[] { _r[2], _r[0], _r[2], _r[0], _r[0], _r[0] });
+        //entropy.Add(13, new byte[] { _r[0], _r[0], _r[2], _r[2], _r[0], _r[0] });
+        //entropy.Add(14, new byte[] { _r[0], _r[0], _r[0], _r[2], _r[0], _r[2] });
+        //entropy.Add(15, new byte[] { _r[2], _r[0], _r[0], _r[0], _r[0], _r[2] });
 
         entropy.Add(8, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[0], _r[1] });
         entropy.Add(9, new byte[] { _r[1], _r[1], _r[0], _r[1], _r[0], _r[1] });
@@ -174,6 +190,7 @@ public class Manager : MonoBehaviour
             var min = (region.Value.minX, region.Value.minY, region.Value.minZ);
             var max = (region.Value.maxX, region.Value.maxY, region.Value.maxZ);
             RegionScript.Initialize(region.Key, max, min, entropy, this,transform.position);
+            mNotCollapsesed.Add(region.Key);
         }
     }
 
@@ -189,6 +206,47 @@ public class Manager : MonoBehaviour
         _targetRegion = (_tP.x / regionSize.x, _tP.y / regionSize.y, _tP.z / regionSize.z);
         //Debug.Log($"/ {_targetRegion.x},{_targetRegion.y},{_targetRegion.z},  {_tP.x},{_tP.y},{_tP.z}");
         return mRegion[_targetRegion].GetTile(_tP);
+    }
+
+    public void ResetRegion((int x, int y, int z) _targetRegion) 
+    { 
+
+        
+    }
+
+    public void UpdateRegionEntropyList() 
+    {
+        Dictionary<(int x, int y, int z), int> mRegionEntropy = new Dictionary<(int x, int y, int z), int>();
+
+        foreach (var region in mRegion)
+        {
+            if (mNotCollapsesed.Contains(region.Key))
+            {
+                var _ent = region.Value.GetEntropy();
+                Debug.Log($"{_ent}");
+                mRegionEntropy[region.Key] = _ent;
+            }
+        }
+
+        HashSet<(int, int, int)> lowEntropyList = new HashSet<(int, int, int)>();
+        int tempLowNum = int.MaxValue;
+        foreach (var pos in mRegionEntropy)
+        {
+            var temp = pos.Value;
+            if (temp < tempLowNum)
+            {
+                lowEntropyList = new HashSet<(int, int, int)>();
+                lowEntropyList.Add(pos.Key);
+                tempLowNum = temp;
+            }
+            else if (temp == tempLowNum)
+            {
+                lowEntropyList.Add(pos.Key);
+            }
+        }
+        //Debug.Log($"{lowEntropyList.Count}");
+
+        if(lowEntropyList.Count > 0)targetRegion = lowEntropyList.ElementAt(0);
     }
 
     void CombineMeshes()

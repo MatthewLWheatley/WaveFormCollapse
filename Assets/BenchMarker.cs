@@ -29,7 +29,8 @@ public class BenchMarker : MonoBehaviour
 
     void Start()
     {
-        Application.targetFrameRate = 60;
+        Application.targetFrameRate = 100000;
+
     }
 
     float startTime = 0.0f;
@@ -62,12 +63,12 @@ public class BenchMarker : MonoBehaviour
         }
         if (managerScripts.Count == 0)
         {
+            
+            CollapseTime += (Time.time - startTime);
             startTime = Time.time;
-            CollapseTime += Time.time - startTime;
 
             RunText.text = string.Format(RunCount.ToString());
             RunningTotal.text = string.Format(CollapseTime.ToString());
-
             CollapsedTime.text = string.Format($"{CollapseTime / RunCount}");
             DeleteManagers();
             SpawnManagers();
