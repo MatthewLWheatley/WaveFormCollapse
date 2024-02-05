@@ -1,6 +1,7 @@
 
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -40,7 +41,8 @@ public class Manager : MonoBehaviour
         mRegion = new Dictionary<(int x, int y, int z), Region> ();
 
         StartTime = Time.time;
-        
+        time = Time.time;
+
         InitRules();
         InitRegions();
     }
@@ -51,8 +53,11 @@ public class Manager : MonoBehaviour
     (int x, int y, int z) targetRegion = (0, 0, 0);
 
 
+    float time;
+
     private void Update()
     {
+        time = Time.time;
         //Parallel.ForEach(mRegion, region =>
         //{
         //    mRegion[region.Key].RunUpdate();
@@ -65,36 +70,37 @@ public class Manager : MonoBehaviour
         if (collapseCount >= mRegion.Count) collapsed = true;
         if (renderedCount >= mRegion.Count) rendered = true;
 
-        
+
 
         if (!collapsed)
         {
             var r = mRegion[targetRegion];
-            r.RunUpdate();
+            r.running = true;
             //Debug.Log($"{collapseCount}");
             if (r.collapsed)
             {
+                r.running = false;
                 r.RunRenderer();
+                Debug.Log($"{StartTime - Time.time}");
                 collapseCount++;
                 mNotCollapsesed.Remove(targetRegion);
+                Debug.Log($"{StartTime - Time.time}");
                 UpdateRegionEntropyList();
+                Debug.Log($"{StartTime - Time.time}");
             }
             RunningTotal.text = string.Format(collapseCount.ToString());
-
-
-
         }
-        else if (!rendered)
-        {
-            var r = mRegion[mRegion.ElementAt(renderedCount).Key];
-            r.RunRenderer();
-            if (r.rendered)
-            {
-                renderedCount++;
-            }
+        //else if (!rendered)
+        //{
+        //    var r = mRegion[mRegion.ElementAt(renderedCount).Key];
+        //    r.RunRenderer();
+        //    if (r.rendered)
+        //    {
+        //        renderedCount++;
+        //    }
 
-            RunningTotal.text = string.Format(renderedCount.ToString());
-        }
+        //    RunningTotal.text = string.Format(renderedCount.ToString());
+        //}
     }
 
     private void InitRules()
@@ -208,6 +214,7 @@ public class Manager : MonoBehaviour
         return mRegion[_targetRegion].GetTile(_tP);
     }
 
+    //TODO:
     public void ResetRegion((int x, int y, int z) _targetRegion) 
     { 
 
@@ -216,16 +223,18 @@ public class Manager : MonoBehaviour
 
     public void UpdateRegionEntropyList() 
     {
-        Dictionary<(int x, int y, int z), int> mRegionEntropy = new Dictionary<(int x, int y, int z), int>();
 
-        foreach (var region in mRegion)
+        ConcurrentDictionary<(int x, int y, int z), int> mRegionEntropy = new ConcurrentDictionary<(int x, int y, int z), int>();
+
+        //Parallel.ForEach(mNotCollapsesed, key =>
+        //{
+        //    var _ent = mRegion[key].GetEntropy();
+        //    mRegionEntropy[key] = _ent; // ConcurrentDictionary handles the thread safety
+        //});
+        foreach (var key in mNotCollapsesed) 
         {
-            if (mNotCollapsesed.Contains(region.Key))
-            {
-                var _ent = region.Value.GetEntropy();
-                Debug.Log($"{_ent}");
-                mRegionEntropy[region.Key] = _ent;
-            }
+            var _ent = mRegion[key].GetEntropy();
+            mRegionEntropy[key] = _ent; // ConcurrentDictionary handles the thread safety
         }
 
         HashSet<(int, int, int)> lowEntropyList = new HashSet<(int, int, int)>();
@@ -246,7 +255,9 @@ public class Manager : MonoBehaviour
         }
         //Debug.Log($"{lowEntropyList.Count}");
 
-        if(lowEntropyList.Count > 0)targetRegion = lowEntropyList.ElementAt(0);
+        if (lowEntropyList.Count > 0)targetRegion = lowEntropyList.ElementAt(0);
+
+        Debug.Log($"{StartTime - Time.time}");
     }
 
     void CombineMeshes()

@@ -30,9 +30,11 @@ public class Region : MonoBehaviour
 
     private System.Random rnd;
 
-    public void RunUpdate()
+    public bool running = false;
+
+    private void Update()
     {
-        //Debug.Log($"{pos.x},{pos.y},{pos.z}running");
+        if(running)
         if (!collapsed)
         {
             if (mNotCollapsesed.Count == 0)
@@ -55,11 +57,11 @@ public class Region : MonoBehaviour
                 {
                     failCount++;
                     HashSet<(int x, int y, int z)> tempList = new HashSet<(int x, int y, int z)>();
-                    if (failCount >= mStack.Count) 
-                    { 
+                    if (failCount >= mStack.Count)
+                    {
                         failCount = mStack.Count - 1;
                     }
-                    if (mStack.Count == 0) 
+                    if (mStack.Count == 0)
                     {
                         failCount = 0;
                     }
@@ -81,7 +83,7 @@ public class Region : MonoBehaviour
             var temp2 = GetLowestEntropyFullList();
             foreach (var pos in temp2)
             {
-                UpdateEntropy(pos);
+                UpdateEntropy(pos,true);
             }
             rnd = new System.Random();
             var list = GetLowestEntropyList();
@@ -90,6 +92,11 @@ public class Region : MonoBehaviour
             //Debug.Log($"{list.Count} {num} {num2}"); 
             CollapseEntropy(num2);
         }
+    }
+
+    public void RunUpdate()
+    {
+        
     }
 
     public void RunRenderer() 
@@ -153,7 +160,7 @@ public class Region : MonoBehaviour
         }
     }
      
-    private void UpdateEntropy((int x, int y, int z) pos)
+    private void UpdateEntropy((int x, int y, int z) pos, bool full)
     {
         // Loop through all directions and check entropy
         for (int _dir = 0; _dir < 6; _dir++)
@@ -163,13 +170,20 @@ public class Region : MonoBehaviour
             _tP.y = (_tP.y + Dirs[_dir].y);
             _tP.z = (_tP.z + Dirs[_dir].z);
             List<int> _targetEntropy;
-            if (_tP.x >= max.x || _tP.x <= min.x || _tP.y >= max.y || _tP.y <= min.y || _tP.z >= max.z || _tP.z <= min.z)
+            if (full || !full)
             {
-                _targetEntropy = manager.GetTileEntopry(_tP);
+                if (_tP.x >= max.x || _tP.x <= min.x || _tP.y >= max.y || _tP.y <= min.y || _tP.z >= max.z || _tP.z <= min.z)
+                {
+                    _targetEntropy = manager.GetTileEntopry(_tP);
+                }
+                else
+                {
+                    _targetEntropy = mTile[_tP].GetEntropy();
+                }
             }
-            else
+            else 
             {
-                _targetEntropy = mTile[_tP].GetEntropy();
+                _targetEntropy = entropy.Keys.ToList();
             }
             List<int> toRemove = new List<int>();
             var _correspondingExit = (_dir + 3) % 6;
@@ -250,7 +264,7 @@ public class Region : MonoBehaviour
         // Calculate entropy for each position and store in a dictionary
         foreach (var pos in mNotCollapsesed)
         {
-            UpdateEntropy(pos);
+            //UpdateEntropy(pos,false);
             var temp = mTile[pos].GetEntropyCount();
             _ent += temp;
         }
