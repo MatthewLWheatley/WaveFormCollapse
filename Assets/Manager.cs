@@ -80,27 +80,27 @@ public class Manager : MonoBehaviour
             if (r.collapsed)
             {
                 r.running = false;
-                r.RunRenderer();
-                Debug.Log($"{StartTime - Time.time}");
+                //r.RunRenderer();
+                //Debug.Log($"{StartTime - Time.time}");
                 collapseCount++;
                 mNotCollapsesed.Remove(targetRegion);
-                Debug.Log($"{StartTime - Time.time}");
+                //Debug.Log($"{StartTime - Time.time}");
                 UpdateRegionEntropyList();
-                Debug.Log($"{StartTime - Time.time}");
+                //Debug.Log($"{StartTime - Time.time}");
             }
             RunningTotal.text = string.Format(collapseCount.ToString());
         }
-        //else if (!rendered)
-        //{
-        //    var r = mRegion[mRegion.ElementAt(renderedCount).Key];
-        //    r.RunRenderer();
-        //    if (r.rendered)
-        //    {
-        //        renderedCount++;
-        //    }
+        else if (!rendered)
+        {
+            var r = mRegion[mRegion.ElementAt(renderedCount).Key];
+            r.RunRenderer();
+            if (r.rendered)
+            {
+                renderedCount++;
+            }
 
-        //    RunningTotal.text = string.Format(renderedCount.ToString());
-        //}
+            RunningTotal.text = string.Format(renderedCount.ToString());
+        }
     }
 
     private void InitRules()
@@ -226,16 +226,16 @@ public class Manager : MonoBehaviour
 
         ConcurrentDictionary<(int x, int y, int z), int> mRegionEntropy = new ConcurrentDictionary<(int x, int y, int z), int>();
 
-        //Parallel.ForEach(mNotCollapsesed, key =>
-        //{
-        //    var _ent = mRegion[key].GetEntropy();
-        //    mRegionEntropy[key] = _ent; // ConcurrentDictionary handles the thread safety
-        //});
-        foreach (var key in mNotCollapsesed) 
+        Parallel.ForEach(mNotCollapsesed, key =>
         {
             var _ent = mRegion[key].GetEntropy();
             mRegionEntropy[key] = _ent; // ConcurrentDictionary handles the thread safety
-        }
+        });
+        //foreach (var key in mNotCollapsesed) 
+        //{
+        //    var _ent = mRegion[key].GetEntropy();
+        //    mRegionEntropy[key] = _ent; // ConcurrentDictionary handles the thread safety
+        //}
 
         HashSet<(int, int, int)> lowEntropyList = new HashSet<(int, int, int)>();
         int tempLowNum = int.MaxValue;
@@ -253,11 +253,10 @@ public class Manager : MonoBehaviour
                 lowEntropyList.Add(pos.Key);
             }
         }
-        //Debug.Log($"{lowEntropyList.Count}");
 
         if (lowEntropyList.Count > 0)targetRegion = lowEntropyList.ElementAt(0);
 
-        Debug.Log($"{StartTime - Time.time}");
+        //Debug.Log($"{StartTime - Time.time}");
     }
 
     void CombineMeshes()

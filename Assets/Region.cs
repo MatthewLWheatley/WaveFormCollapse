@@ -264,9 +264,18 @@ public class Region : MonoBehaviour
         // Calculate entropy for each position and store in a dictionary
         foreach (var pos in mNotCollapsesed)
         {
-            //UpdateEntropy(pos,false);
-            var temp = mTile[pos].GetEntropyCount();
-            _ent += temp;
+            if (pos.x == min.x || pos.x == max.x)
+            {   
+                if (pos.y == min.y || pos.y == max.y)
+                {
+                    if (pos.z == min.z || pos.z == max.z)
+                    {
+                        UpdateEntropy(pos, false);
+                        var temp = mTile[pos].GetEntropyCount();
+                        _ent += temp;
+                    }
+                }
+            }
         }
         return _ent;
     }
