@@ -77,11 +77,26 @@ public class BenchMarker : MonoBehaviour
 
     void DeleteManagers()
     {
-        // Assuming this function is part of a MonoBehaviour and you want to destroy all children of this GameObject
         foreach (Transform child in transform)
         {
-            Destroy(child.gameObject);
+            DestroyChildAndMesh(child);
         }
+    }
+
+    void DestroyChildAndMesh(Transform parent)
+    {
+        foreach (Transform child in parent)
+        {
+            DestroyChildAndMesh(child); // Recursively destroy children
+        }
+
+        MeshFilter meshFilter = parent.GetComponent<MeshFilter>();
+        if (meshFilter != null)
+        {
+            Destroy(meshFilter.mesh); // Destroy the mesh
+        }
+
+        Destroy(parent.gameObject); // Destroy the child GameObject
     }
 
     void SpawnManagers()

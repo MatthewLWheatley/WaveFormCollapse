@@ -113,7 +113,7 @@ public class Region : MonoBehaviour
                 temp.SetExits(entropy[tile.Value.GetExits()]);
             }
 
-            CombineMeshes();
+            //CombineMeshes();
 
             rendered = true;
         }

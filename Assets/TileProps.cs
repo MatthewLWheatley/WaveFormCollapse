@@ -74,7 +74,10 @@ public class TileProps : MonoBehaviour
 
     public void ResetExits()
     {
-        Destroy(this.transform);
+        foreach (Transform child in transform)
+        {
+            Destroy(child.gameObject);
+        }
     }
 
     void CombineMeshes()
