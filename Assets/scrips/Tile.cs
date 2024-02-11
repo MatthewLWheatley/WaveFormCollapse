@@ -40,7 +40,7 @@ public class Tile
         {
             return entropy.First();
         }
-        return 0;
+        return -1;
     }
 
     public bool GetCollapsed()

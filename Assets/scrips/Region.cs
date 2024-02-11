@@ -1,12 +1,16 @@
+using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using static System.Net.WebRequestMethods;
 
 public class Region : MonoBehaviour
 {
+    public int seed;
     public Manager manager;
     private Dictionary<(int x, int y, int z), Tile> mTile;
     public (int x, int y, int z) max;
@@ -16,7 +20,7 @@ public class Region : MonoBehaviour
     public bool collapsed = false;
     public bool rendered = false;
     private HashSet<(int x, int y, int z)> mNotCollapsesed;
-    private int failCount = 0;
+    public int failCount = 0;
 
     private Vector3 transPosisiton = Vector3.zero;
 
@@ -32,90 +36,149 @@ public class Region : MonoBehaviour
 
     public bool running = false;
 
-    private void Update()
-    {
-        if(running)
-        if (!collapsed)
-        {
-            if (mNotCollapsesed.Count == 0)
-            {
-                collapsed = true;
-                return;
-            }
-            else
-            {
-                bool failed = false;
 
-                foreach (var tile in mNotCollapsesed)
-                {
-                    if (mTile[tile].GetEntropyCount() == 0)
-                    {
-                        failed = true;
-                    }
-                }
-                if (failed)
-                {
-                    failCount++;
-                    HashSet<(int x, int y, int z)> tempList = new HashSet<(int x, int y, int z)>();
-                    if (failCount >= mStack.Count)
-                    {
-                        failCount = mStack.Count - 1;
-                    }
-                    if (mStack.Count == 0)
-                    {
-                        failCount = 0;
-                    }
-                    for (int i = 0; i < failCount; i++)
-                    {
-                        //Debug.Log($"{mStack.Count} {failCount}");
-                        var temp = mStack.Pop();
-                        mTile[temp].SetEntropy(entropy.Keys.ToHashSet());
-                        tempList.Add(temp);
-                        mNotCollapsesed.Add(temp);
-                    }
-                    Parallel.ForEach(mNotCollapsesed, temp =>
-                    {
-                        mTile[temp].SetEntropy(entropy.Keys.ToHashSet());
-                    });
-                    return;
-                }
-            }
-            var temp2 = GetLowestEntropyFullList();
-            foreach (var pos in temp2)
-            {
-                UpdateEntropy(pos,true);
-            }
-            rnd = new System.Random();
-            var list = GetLowestEntropyList();
-            var num = rnd.Next(0, list.Count);
-            var num2 = list.ElementAt(rnd.Next(0, list.Count));
-            //Debug.Log($"{list.Count} {num} {num2}"); 
-            CollapseEntropy(num2);
-        }
+    private void Start()
+    {
+        rnd = new System.Random(seed);
     }
 
-    public void RunUpdate()
+    private void Update()
     {
-        
+        //rnd = new System.Random(seed);
+        FinishCollapseTime += Time.deltaTime;
+        if (FinishCollapseTime <= 0.01)
+        {
+            return;
+        }    
+
+        if (running)
+        {
+            FinishCollapseTime = 0;
+            if (!collapsed)
+            {
+                var temp4 = GetLowestEntropyFullList();
+
+                foreach ((int x, int y, int z) pos in temp4)
+                {
+                    UpdateEntropy(pos, true);
+                }
+                if (mNotCollapsesed.Count == 0)
+                {
+                    collapsed = true;
+                    return;
+                }
+                else
+                {
+                    bool failed = false;
+
+                    foreach (var tile in mNotCollapsesed)
+                    {
+                        //Debug.Log($"a.{mTile[tile].GetEntropyCount()}");
+                        if (mTile[tile].GetEntropyCount() == 0)
+                        {
+                            failed = true;
+                            //Debug.Log($"{tile.x},{tile.y},{tile.z} failed");
+                            //mTile[tile].SetEntropy(entropy.Keys.ToHashSet());
+                            //Debug.Log($"b.{mTile[tile].GetEntropyCount()}");
+                        }
+                    }
+                    if (failed)
+                    {
+                        //Debug.Log($" {failCount} {mStack.Count} {mNotCollapsesed.Count}");
+                        failCount++;
+                        HashSet<(int x, int y, int z)> tempList = new HashSet<(int x, int y, int z)>();
+                        if (failCount > mStack.Count)
+                        {
+                            failCount = mStack.Count;
+                            //Debug.Log("fuck");
+                        }
+                        if (mStack.Count == 0)
+                        {
+                            failCount = 0;
+                        }
+                        for (int i = 0; i < failCount; i++)
+                        {
+                            Debug.Log($"{mStack.Count} {failCount}");
+                            var temp = mStack.Pop();
+                            mTile[temp].SetEntropy(entropy.Keys.ToHashSet());
+                            tempList.Add(temp);
+                            mNotCollapsesed.Add(temp);
+                        }
+                        Parallel.ForEach(mNotCollapsesed, temp =>
+                        {
+                            mTile[temp].SetEntropy(entropy.Keys.ToHashSet());
+                        });
+                        //foreach (var tile in mNotCollapsesed)
+                        //{
+                        //    mTile[tile].SetEntropy(entropy.Keys.ToHashSet());
+                        //}
+                        //return;
+                    }
+                }
+                var temp2 = GetLowestEntropyFullList();
+
+                foreach ((int x, int y, int z) pos in temp2)
+                {
+                    UpdateEntropy(pos, true);
+                }
+                //rnd = new System.Random(seed);
+
+                var list = GetLowestEntropyList();
+                var num = rnd.Next(0, list.Count);
+                var num2 = list.ElementAt(rnd.Next(0, list.Count));
+                //Debug.Log($"{list.Count} {num} {num2}");
+                CollapseEntropy(num2);
+
+                //Debug.Log($"{mNotCollapsesed.Count}");
+
+                //foreach (var tile in mNotCollapsesed)
+                //{
+                //    //Debug.Log($"a.{mTile[tile].GetEntropyCount()}");
+                //    if (mTile[tile].GetEntropyCount() == 0)
+                //    {
+                //        //mTile[tile].SetEntropy(entropy.Keys.ToHashSet());
+                //        //Debug.Log($"b.{tile.x},{tile.y},{tile.z}");
+                //    }
+                //}
+            }
+            RunRenderer();
+        }
     }
 
     public void RunRenderer() 
     {
         if (!rendered)
         {
-            Debug.Log($"rendering");
+            // Iterate backwards through the child list
+            for (int i = transform.childCount - 1; i >= 0; i--)
+            {
+                // Destroy the child GameObject
+                Destroy(transform.GetChild(i).gameObject);
+            }
+
+            //Debug.Log($"rendering");
             foreach (var tile in mTile)
             {
                 Vector3 _targetPos = new Vector3((float)tile.Key.x * 3 + transPosisiton.x, (float)tile.Key.y * 3 + transPosisiton.y, (float)tile.Key.z * 3 + transPosisiton.z);
                 GameObject TempTile = Instantiate(tilePrefab, _targetPos, Quaternion.identity, transform);
 
                 TileProps temp = TempTile.GetComponent<TileProps>();
-                temp.SetExits(entropy[tile.Value.GetExits()]);
+                var e = tile.Value.GetExits();
+                byte[] ent;
+                if (e == -1)
+                { 
+                    ent = new byte[6] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+                }
+                else
+                {
+                    ent = entropy[e];
+                }
+                temp.SetExits(ent, tile.Key);
             }
 
-            //CombineMeshes();
+            CombineMeshes();
 
-            rendered = true;
+            //rendered = true;
         }
     }
 
@@ -140,7 +203,9 @@ public class Region : MonoBehaviour
         }
         InitTiles();
 
-        System.Random rnd = new System.Random();
+        StartTime = Time.time;
+
+        rnd = new System.Random(seed);
     }
 
     private void InitTiles()
@@ -159,7 +224,17 @@ public class Region : MonoBehaviour
             }
         }
     }
-     
+
+    public void UpdateAllEntropy() 
+    {
+        var temp = GetLowestEntropyFullList();
+
+        foreach ((int x, int y, int z) pos in temp)
+        {
+            UpdateEntropy(pos, true);
+        }
+    }
+
     private void UpdateEntropy((int x, int y, int z) pos, bool full)
     {
         // Loop through all directions and check entropy
@@ -280,6 +355,11 @@ public class Region : MonoBehaviour
         return _ent;
     }
 
+    public List<int> GetTile((int x, int y, int z) _targetTile)
+    {
+        return mTile[_targetTile].GetEntropy();
+    }
+
     void CombineMeshes()
     {
         // Ensure this GameObject has a MeshFilter component
@@ -289,27 +369,6 @@ public class Region : MonoBehaviour
             meshFilter = gameObject.AddComponent<MeshFilter>();
         }
 
-        // Get all MeshFilter components from child objects
-        MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>();
-        CombineInstance[] combine = new CombineInstance[meshFilters.Length - 1]; // Exclude the parent's MeshFilter
-
-        int index = 0;
-        for (int i = 0; i < meshFilters.Length; i++)
-        {
-            if (meshFilters[i].sharedMesh == null) continue; // Skip if the sharedMesh is null
-            if (meshFilters[i] == meshFilter) continue; // Skip the parent's MeshFilter
-
-            combine[index].mesh = meshFilters[i].sharedMesh;
-            combine[index].transform = meshFilters[i].transform.localToWorldMatrix;
-            Destroy(meshFilters[i].gameObject); // Disable the child object
-
-            index++;
-        }
-
-        // Create a new mesh and combine all the child meshes into it
-        meshFilter.mesh = new Mesh();
-        meshFilter.mesh.CombineMeshes(combine);
-
         // Ensure this GameObject has a MeshRenderer component
         MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
         if (meshRenderer == null)
@@ -317,17 +376,57 @@ public class Region : MonoBehaviour
             meshRenderer = gameObject.AddComponent<MeshRenderer>();
         }
 
-        // Set the material (assuming all child objects use the same material)
-        if (meshFilters.Length > 1 && meshFilters[1].GetComponent<MeshRenderer>())
+        // Get all MeshFilter components from child objects
+        MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>(false);
+
+        // Group meshes by material
+        Dictionary<Material, List<MeshFilter>> materialGroups = new Dictionary<Material, List<MeshFilter>>();
+
+        foreach (MeshFilter mf in meshFilters)
         {
-            meshRenderer.sharedMaterial = meshFilters[1].GetComponent<MeshRenderer>().sharedMaterial;
+            if (mf.sharedMesh == null || mf == meshFilter) continue; // Skip if the sharedMesh is null or it's the parent MeshFilter
+
+            MeshRenderer mr = mf.GetComponent<MeshRenderer>();
+            if (mr == null || mr.sharedMaterial == null) continue; // Skip if there's no MeshRenderer or sharedMaterial
+
+            if (!materialGroups.ContainsKey(mr.sharedMaterial))
+            {
+                materialGroups[mr.sharedMaterial] = new List<MeshFilter>();
+            }
+            materialGroups[mr.sharedMaterial].Add(mf);
         }
 
-        meshRenderer.transform.position = new Vector3(0, 0, 0);
-    }
+        // Combine meshes for each material group
+        CombineInstance[] combine = new CombineInstance[materialGroups.Count];
+        Material[] materials = new Material[materialGroups.Count];
+        int materialIndex = 0;
+        foreach (KeyValuePair<Material, List<MeshFilter>> kvp in materialGroups)
+        {
+            CombineInstance[] materialCombines = new CombineInstance[kvp.Value.Count];
+            for (int i = 0; i < kvp.Value.Count; i++)
+            {
+                materialCombines[i].mesh = kvp.Value[i].sharedMesh;
+                materialCombines[i].transform = kvp.Value[i].transform.localToWorldMatrix;
+                kvp.Value[i].gameObject.SetActive(false); // Disable the child object
+            }
 
-    public List<int> GetTile((int x, int y, int z) _targetTile)
-    {
-        return mTile[_targetTile].GetEntropy();
-    } 
+            // Combine meshes for the current material
+            Mesh combinedMesh = new Mesh();
+            combinedMesh.CombineMeshes(materialCombines, true, true);
+
+            combine[materialIndex].mesh = combinedMesh;
+            combine[materialIndex].transform = Matrix4x4.identity;
+            materials[materialIndex] = kvp.Key;
+            materialIndex++;
+        }
+
+        // Create a new mesh and combine all the grouped meshes into it
+        Mesh finalMesh = new Mesh();
+        finalMesh.CombineMeshes(combine, false, false);
+        meshFilter.mesh = finalMesh;
+        meshRenderer.materials = materials; // Set the materials array
+
+        // Optionally, reset the position if needed
+        meshRenderer.transform.position = Vector3.zero;
+    }
 }

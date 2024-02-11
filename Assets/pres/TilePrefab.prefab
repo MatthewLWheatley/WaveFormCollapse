@@ -47,7 +47,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   centre: {fileID: 8802913604164252845}
   edges: []
-  edge: {fileID: 8860712798457698093, guid: e844381171a427e48a5df7aaa54be29e, type: 3}
+  edge: {fileID: 7310942344303385605, guid: e844381171a427e48a5df7aaa54be29e, type: 3}
+  mats:
+  - {fileID: 2100000, guid: 66cc3185df69d5e4fa4325fa1d494036, type: 2}
+  - {fileID: 2100000, guid: 369e2ba8ec94f284dba7b3f11391e8b1, type: 2}
 --- !u!1 &8802913604164252845
 GameObject:
   m_ObjectHideFlags: 0

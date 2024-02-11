@@ -7,6 +7,9 @@ using UnityEngine.Rendering;
 
 public class BenchMarker : MonoBehaviour
 {
+    public int seed;
+    public bool randomSeed = false;
+
     public GameObject managerPrefab;
     public int maxX;
     public int maxY;
@@ -27,10 +30,16 @@ public class BenchMarker : MonoBehaviour
 
     List<Manager> managerScripts = new List<Manager>();
 
+    System.Random rnd;
+
     void Start()
     {
         Application.targetFrameRate = 100000;
-
+        System.Random rnd = new System.Random(seed);
+        if (randomSeed) 
+        { 
+            seed = rnd.Next();
+        }
     }
 
     float startTime = 0.0f;
@@ -39,8 +48,12 @@ public class BenchMarker : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            DeleteManagers();
+            DeleteManagers(); 
+            rnd = new System.Random(seed);
+            seed = randomSeed ? seed = rnd.Next() : seed;
+            
             SpawnManagers();
+
         }
         List<Manager> list = new List<Manager>();
         foreach (Manager intst in managerScripts)
@@ -118,6 +131,7 @@ public class BenchMarker : MonoBehaviour
                 {
                     managerScript.max = (maxX, maxY, maxZ);
                     managerScript.regionSize = (RegionX, RegionY, RegionZ);
+                    managerScript.seed = seed;
                 }
             }
         }

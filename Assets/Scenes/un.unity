@@ -495,17 +495,22 @@ PrefabInstance:
     - target: {fileID: 7668789440186061114, guid: 4a94a313ed07e624e85610827de8a69d,
         type: 3}
       propertyPath: maxX
-      value: 5
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7668789440186061114, guid: 4a94a313ed07e624e85610827de8a69d,
         type: 3}
       propertyPath: maxY
-      value: 5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7668789440186061114, guid: 4a94a313ed07e624e85610827de8a69d,
         type: 3}
       propertyPath: maxZ
-      value: 5
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 7668789440186061114, guid: 4a94a313ed07e624e85610827de8a69d,
+        type: 3}
+      propertyPath: seed
+      value: 818577319
       objectReference: {fileID: 0}
     - target: {fileID: 7668789440186061114, guid: 4a94a313ed07e624e85610827de8a69d,
         type: 3}
@@ -525,7 +530,7 @@ PrefabInstance:
     - target: {fileID: 7668789440186061114, guid: 4a94a313ed07e624e85610827de8a69d,
         type: 3}
       propertyPath: RegionY
-      value: 5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7668789440186061114, guid: 4a94a313ed07e624e85610827de8a69d,
         type: 3}
@@ -537,6 +542,11 @@ PrefabInstance:
       propertyPath: RunText
       value: 
       objectReference: {fileID: 1326362477}
+    - target: {fileID: 7668789440186061114, guid: 4a94a313ed07e624e85610827de8a69d,
+        type: 3}
+      propertyPath: randomSeed
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7668789440186061114, guid: 4a94a313ed07e624e85610827de8a69d,
         type: 3}
       propertyPath: renderTotal

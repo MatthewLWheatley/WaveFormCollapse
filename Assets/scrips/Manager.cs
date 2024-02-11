@@ -6,12 +6,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Manager : MonoBehaviour
 {
+    public int seed;
     public (int x, int y, int z) max;
     public (int x, int y, int z) regionSize;
+
 
     private Dictionary<(int x, int y, int z), Region> mRegion;
     private Dictionary<(int x, int y, int z), GameObject> mGameObject;
@@ -43,6 +46,9 @@ public class Manager : MonoBehaviour
         StartTime = Time.time;
         time = Time.time;
 
+        rnd = new System.Random(seed);
+
+
         InitRules();
         InitRegions();
     }
@@ -54,6 +60,8 @@ public class Manager : MonoBehaviour
 
 
     float time;
+
+    System.Random rnd;
 
     private void Update()
     {
@@ -80,13 +88,17 @@ public class Manager : MonoBehaviour
             if (r.collapsed)
             {
                 r.running = false;
-                //r.RunRenderer();
+                r.RunRenderer();
                 //Debug.Log($"{StartTime - Time.time}");
                 collapseCount++;
                 mNotCollapsesed.Remove(targetRegion);
                 //Debug.Log($"{StartTime - Time.time}");
                 UpdateRegionEntropyList();
                 //Debug.Log($"{StartTime - Time.time}");
+                //foreach (var region in mRegion) 
+                //{
+                //    region.Value.UpdateAllEntropy();
+                //}
             }
             RunningTotal.text = string.Format(collapseCount.ToString());
         }
@@ -107,51 +119,56 @@ public class Manager : MonoBehaviour
     {
         byte[] _r = { 0x00, 0x01, 0x02};
 
+        //entropy.Add(-1, new byte[] { _r[0], _r[0], _r[0], _r[0], _r[0], _r[0] });
 
         entropy.Add(0, new byte[] { _r[0], _r[0], _r[1], _r[1], _r[0], _r[1] });
         entropy.Add(1, new byte[] { _r[1], _r[0], _r[0], _r[1], _r[0], _r[1] });
         entropy.Add(2, new byte[] { _r[1], _r[0], _r[1], _r[0], _r[0], _r[1] });
         entropy.Add(3, new byte[] { _r[1], _r[0], _r[1], _r[1], _r[0], _r[0] });
         entropy.Add(4, new byte[] { _r[1], _r[0], _r[1], _r[0], _r[0], _r[0] });
-        entropy.Add(5, new byte[] { _r[0], _r[0], _r[1], _r[1], _r[0], _r[0] });
-        entropy.Add(6, new byte[] { _r[0], _r[0], _r[0], _r[1], _r[0], _r[1] });
-        entropy.Add(7, new byte[] { _r[1], _r[0], _r[0], _r[0], _r[0], _r[1] });
+        entropy.Add(5, new byte[] { _r[1], _r[0], _r[0], _r[1], _r[0], _r[0] });
+        entropy.Add(6, new byte[] { _r[1], _r[0], _r[0], _r[0], _r[0], _r[1] });
+        entropy.Add(7, new byte[] { _r[0], _r[0], _r[1], _r[1], _r[0], _r[0] });
+        entropy.Add(8, new byte[] { _r[0], _r[0], _r[1], _r[0], _r[0], _r[1] });
+        entropy.Add(9, new byte[] { _r[0], _r[0], _r[0], _r[1], _r[0], _r[1] });
 
-        //entropy.Add(8, new byte[] { _r[0], _r[0], _r[2], _r[2], _r[0], _r[2] });
-        //entropy.Add(9, new byte[] { _r[2], _r[0], _r[0], _r[2], _r[0], _r[2] });
-        //entropy.Add(10, new byte[] { _r[2], _r[0], _r[2], _r[0], _r[0], _r[2] });
-        //entropy.Add(11, new byte[] { _r[2], _r[0], _r[2], _r[2], _r[0], _r[0] });
-        //entropy.Add(12, new byte[] { _r[2], _r[0], _r[2], _r[0], _r[0], _r[0] });
-        //entropy.Add(13, new byte[] { _r[0], _r[0], _r[2], _r[2], _r[0], _r[0] });
-        //entropy.Add(14, new byte[] { _r[0], _r[0], _r[0], _r[2], _r[0], _r[2] });
-        //entropy.Add(15, new byte[] { _r[2], _r[0], _r[0], _r[0], _r[0], _r[2] });
+        entropy.Add(10, new byte[] { _r[0], _r[0], _r[2], _r[2], _r[0], _r[2] });
+        entropy.Add(11, new byte[] { _r[2], _r[0], _r[0], _r[2], _r[0], _r[2] });
+        entropy.Add(12, new byte[] { _r[2], _r[0], _r[2], _r[0], _r[0], _r[2] });
+        entropy.Add(13, new byte[] { _r[2], _r[0], _r[2], _r[2], _r[0], _r[0] });
+        entropy.Add(14, new byte[] { _r[2], _r[0], _r[2], _r[0], _r[0], _r[0] });
+        entropy.Add(15, new byte[] { _r[2], _r[0], _r[0], _r[2], _r[0], _r[0] });
+        entropy.Add(16, new byte[] { _r[2], _r[0], _r[0], _r[0], _r[0], _r[2] });
+        entropy.Add(17, new byte[] { _r[0], _r[0], _r[2], _r[2], _r[0], _r[0] });
+        entropy.Add(18, new byte[] { _r[0], _r[0], _r[2], _r[0], _r[0], _r[2] });
+        entropy.Add(19, new byte[] { _r[0], _r[0], _r[0], _r[2], _r[0], _r[2] });
 
-        entropy.Add(8, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[0], _r[1] });
-        entropy.Add(9, new byte[] { _r[1], _r[1], _r[0], _r[1], _r[0], _r[1] });
-        entropy.Add(10, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[0], _r[1] });
-        entropy.Add(11, new byte[] { _r[1], _r[1], _r[1], _r[1], _r[0], _r[0] });
-        entropy.Add(12, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[0], _r[0] });
-        entropy.Add(13, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[0], _r[0] });
-        entropy.Add(14, new byte[] { _r[0], _r[1], _r[0], _r[1], _r[0], _r[1] });
-        entropy.Add(15, new byte[] { _r[1], _r[1], _r[0], _r[0], _r[0], _r[1] });
+        //entropy.Add(8, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[0], _r[1] });
+        //entropy.Add(9, new byte[] { _r[1], _r[1], _r[0], _r[1], _r[0], _r[1] });
+        //entropy.Add(10, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[0], _r[1] });
+        //entropy.Add(11, new byte[] { _r[1], _r[1], _r[1], _r[1], _r[0], _r[0] });
+        //entropy.Add(12, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[0], _r[0] });
+        //entropy.Add(13, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[0], _r[0] });
+        //entropy.Add(14, new byte[] { _r[0], _r[1], _r[0], _r[1], _r[0], _r[1] });
+        //entropy.Add(15, new byte[] { _r[1], _r[1], _r[0], _r[0], _r[0], _r[1] });
 
-        entropy.Add(16, new byte[] { _r[0], _r[0], _r[1], _r[1], _r[1], _r[1] });
-        entropy.Add(17, new byte[] { _r[1], _r[0], _r[0], _r[1], _r[1], _r[1] });
-        entropy.Add(18, new byte[] { _r[1], _r[0], _r[1], _r[0], _r[1], _r[1] });
-        entropy.Add(19, new byte[] { _r[1], _r[0], _r[1], _r[1], _r[1], _r[0] });
-        entropy.Add(20, new byte[] { _r[1], _r[0], _r[1], _r[0], _r[1], _r[0] });
-        entropy.Add(21, new byte[] { _r[0], _r[0], _r[1], _r[1], _r[1], _r[0] });
-        entropy.Add(22, new byte[] { _r[0], _r[0], _r[0], _r[1], _r[1], _r[1] });
-        entropy.Add(23, new byte[] { _r[1], _r[0], _r[0], _r[0], _r[1], _r[1] });
+        //entropy.Add(16, new byte[] { _r[0], _r[0], _r[1], _r[1], _r[1], _r[1] });
+        //entropy.Add(17, new byte[] { _r[1], _r[0], _r[0], _r[1], _r[1], _r[1] });
+        //entropy.Add(18, new byte[] { _r[1], _r[0], _r[1], _r[0], _r[1], _r[1] });
+        //entropy.Add(19, new byte[] { _r[1], _r[0], _r[1], _r[1], _r[1], _r[0] });
+        //entropy.Add(20, new byte[] { _r[1], _r[0], _r[1], _r[0], _r[1], _r[0] });
+        //entropy.Add(21, new byte[] { _r[0], _r[0], _r[1], _r[1], _r[1], _r[0] });
+        //entropy.Add(22, new byte[] { _r[0], _r[0], _r[0], _r[1], _r[1], _r[1] });
+        //entropy.Add(23, new byte[] { _r[1], _r[0], _r[0], _r[0], _r[1], _r[1] });
 
-        entropy.Add(24, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[1], _r[1] });
-        entropy.Add(25, new byte[] { _r[1], _r[1], _r[0], _r[1], _r[1], _r[1] });
-        entropy.Add(26, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[1], _r[1] });
-        entropy.Add(27, new byte[] { _r[1], _r[1], _r[1], _r[1], _r[1], _r[0] });
-        entropy.Add(28, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[1], _r[0] });
-        entropy.Add(29, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[1], _r[0] });
-        entropy.Add(30, new byte[] { _r[0], _r[1], _r[0], _r[1], _r[1], _r[1] });
-        entropy.Add(31, new byte[] { _r[1], _r[1], _r[0], _r[0], _r[1], _r[1] });
+        //entropy.Add(24, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[1], _r[1] });
+        //entropy.Add(25, new byte[] { _r[1], _r[1], _r[0], _r[1], _r[1], _r[1] });
+        //entropy.Add(26, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[1], _r[1] });
+        //entropy.Add(27, new byte[] { _r[1], _r[1], _r[1], _r[1], _r[1], _r[0] });
+        //entropy.Add(28, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[1], _r[0] });
+        //entropy.Add(29, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[1], _r[0] });
+        //entropy.Add(30, new byte[] { _r[0], _r[1], _r[0], _r[1], _r[1], _r[1] });
+        //entropy.Add(31, new byte[] { _r[1], _r[1], _r[0], _r[0], _r[1], _r[1] });
     }
 
     private void InitRegions() 
@@ -189,7 +206,7 @@ public class Manager : MonoBehaviour
 
             // Instantiate the manager prefab
             GameObject RegionInstance = Instantiate(RegionPrefab, position, Quaternion.identity, this.transform);
-
+            RegionInstance.GetComponent<Region>().seed = seed;
             // Assuming the Manager script is attached to the prefab and has public maxX, maxY, maxZ
             Region RegionScript = RegionInstance.GetComponent<Region>();
             mRegion.Add(region.Key, RegionScript);
@@ -215,16 +232,38 @@ public class Manager : MonoBehaviour
     }
 
     //TODO:
-    public void ResetRegion((int x, int y, int z) _targetRegion) 
-    { 
+    public void ResetRegion((int x, int y, int z) _targetRegion)
+    {
+        ((int x, int y, int z) pos, (int x, int y, int z) min, (int x, int y, int z) max) region = (mRegion[_targetRegion].pos, mRegion[_targetRegion].min, mRegion[_targetRegion].max);
+        Destroy(mRegion[_targetRegion]);
+        mRegion.Remove(_targetRegion);
+        Destroy(mGameObject[_targetRegion]);
+        mGameObject.Remove(_targetRegion);
 
-        
+        //Debug.Log($"{region.Value.minX},{region.Value.minY},{region.Value.minZ},{region.Value.maxX},{region.Value.maxY},{region.Value.maxZ}");
+
+        Vector3 position = new Vector3(0, 0, 0);//new Vector3(region.Value.minX * 3, region.Value.minY * 3, region.Value.minZ * 3);
+
+
+        // Instantiate the manager prefab
+        GameObject RegionInstance = Instantiate(RegionPrefab, position, Quaternion.identity, this.transform);
+        RegionInstance.GetComponent<Region>().seed = seed;
+        // Assuming the Manager script is attached to the prefab and has public maxX, maxY, maxZ
+        Region RegionScript = RegionInstance.GetComponent<Region>();
+        mRegion.Add(_targetRegion, RegionScript);
+        RegionScript.Initialize(region.pos, region.max, region.max, entropy, this, transform.position);
+        mNotCollapsesed.Add(region.pos);
     }
 
     public void UpdateRegionEntropyList() 
     {
 
         ConcurrentDictionary<(int x, int y, int z), int> mRegionEntropy = new ConcurrentDictionary<(int x, int y, int z), int>();
+
+        foreach (var tile in mRegion)
+        {
+            mRegion[tile.Key].UpdateAllEntropy();
+        }
 
         Parallel.ForEach(mNotCollapsesed, key =>
         {
@@ -254,7 +293,9 @@ public class Manager : MonoBehaviour
             }
         }
 
+        
         if (lowEntropyList.Count > 0)targetRegion = lowEntropyList.ElementAt(0);
+
 
         //Debug.Log($"{StartTime - Time.time}");
     }
@@ -268,27 +309,6 @@ public class Manager : MonoBehaviour
             meshFilter = gameObject.AddComponent<MeshFilter>();
         }
 
-        // Get all MeshFilter components from child objects
-        MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>();
-        CombineInstance[] combine = new CombineInstance[meshFilters.Length - 1]; // Exclude the parent's MeshFilter
-
-        int index = 0;
-        for (int i = 0; i < meshFilters.Length; i++)
-        {
-            if (meshFilters[i].sharedMesh == null) continue; // Skip if the sharedMesh is null
-            if (meshFilters[i] == meshFilter) continue; // Skip the parent's MeshFilter
-
-            combine[index].mesh = meshFilters[i].sharedMesh;
-            combine[index].transform = meshFilters[i].transform.localToWorldMatrix;
-            Destroy(meshFilters[i].gameObject); // Disable the child object
-            
-            index++;
-        }
-
-        // Create a new mesh and combine all the child meshes into it
-        meshFilter.mesh = new Mesh();
-        meshFilter.mesh.CombineMeshes(combine);
-
         // Ensure this GameObject has a MeshRenderer component
         MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
         if (meshRenderer == null)
@@ -296,12 +316,64 @@ public class Manager : MonoBehaviour
             meshRenderer = gameObject.AddComponent<MeshRenderer>();
         }
 
-        // Set the material (assuming all child objects use the same material)
-        if (meshFilters.Length > 1 && meshFilters[1].GetComponent<MeshRenderer>())
+        // Get all MeshFilter components from child objects
+        MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>(false);
+
+        // Group meshes by material
+        Dictionary<Material, List<MeshFilter>> materialGroups = new Dictionary<Material, List<MeshFilter>>();
+
+        foreach (MeshFilter mf in meshFilters)
         {
-            meshRenderer.sharedMaterial = meshFilters[1].GetComponent<MeshRenderer>().sharedMaterial;
+            if (mf.sharedMesh == null || mf == meshFilter) continue; // Skip if the sharedMesh is null or it's the parent MeshFilter
+
+            MeshRenderer mr = mf.GetComponent<MeshRenderer>();
+            if (mr == null || mr.sharedMaterial == null) continue; // Skip if there's no MeshRenderer or sharedMaterial
+
+            if (!materialGroups.ContainsKey(mr.sharedMaterial))
+            {
+                materialGroups[mr.sharedMaterial] = new List<MeshFilter>();
+            }
+            materialGroups[mr.sharedMaterial].Add(mf);
         }
 
-        meshRenderer.transform.position = new Vector3(0, 0, 0);
+        // Combine meshes for each material group
+        CombineInstance[] combine = new CombineInstance[materialGroups.Count];
+        Material[] materials = new Material[materialGroups.Count];
+        int materialIndex = 0;
+        List<GameObject> objectsToDestroy = new List<GameObject>();
+        foreach (KeyValuePair<Material, List<MeshFilter>> kvp in materialGroups)
+        {
+            CombineInstance[] materialCombines = new CombineInstance[kvp.Value.Count];
+            for (int i = 0; i < kvp.Value.Count; i++)
+            {
+                materialCombines[i].mesh = kvp.Value[i].sharedMesh;
+                materialCombines[i].transform = kvp.Value[i].transform.localToWorldMatrix;
+                objectsToDestroy.Add(kvp.Value[i].gameObject); // Mark the child object for deletion
+            }
+
+            // Combine meshes for the current material
+            Mesh combinedMesh = new Mesh();
+            combinedMesh.CombineMeshes(materialCombines, true, true);
+
+            combine[materialIndex].mesh = combinedMesh;
+            combine[materialIndex].transform = Matrix4x4.identity;
+            materials[materialIndex] = kvp.Key;
+            materialIndex++;
+        }
+
+        // Create a new mesh and combine all the grouped meshes into it
+        Mesh finalMesh = new Mesh();
+        finalMesh.CombineMeshes(combine, false, false);
+        meshFilter.mesh = finalMesh;
+        meshRenderer.materials = materials; // Set the materials array
+
+        // Optionally, reset the position if needed
+        meshRenderer.transform.position = Vector3.zero;
+
+        // Destroy the child GameObjects
+        foreach (GameObject go in objectsToDestroy)
+        {
+            Destroy(go);
+        }
     }
 }
