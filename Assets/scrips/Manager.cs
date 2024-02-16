@@ -1,6 +1,5 @@
-
-
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +7,7 @@ using System.Threading.Tasks;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class Manager : MonoBehaviour
 {
@@ -18,7 +18,7 @@ public class Manager : MonoBehaviour
 
     private Dictionary<(int x, int y, int z), Region> mRegion;
     private Dictionary<(int x, int y, int z), GameObject> mGameObject;
-    private HashSet<(int x, int y, int z)> mNotCollapsesed;
+    public List<(int x, int y, int z)> mNotCollapsesed;
     [SerializeField] private GameObject RegionPrefab;
 
     public TextMeshProUGUI RunningTotal;
@@ -27,26 +27,27 @@ public class Manager : MonoBehaviour
     public bool collapsed = false;
     public bool rendered = false;
 
-    private (int x, int y, int z)[] Dirs = new (int x, int y, int z)[] { (1, 0, 0), (0, 1, 0), (0, 0, 1), (-1, 0, 0), (0, -1, 0), (0, 0, -1) };
+    private (int x, int y, int z)[] Dirs = new (int x, int y, int z)[] { (1, 0, 0), (0, 1, 0), (0, 0, 1), (-1, 0, 0), (0, -1, 0), (0, 0, -1)};
 
     private Stack<(int x, int y, int z)> mStack;
+
+    private (int x, int y, int z) maxRegion;
 
     public float StartTime; 
     public float FinishCollapseTime;
 
-    private int failCount = 0;
+    public int mCollapseCount = 0;
 
     private void Start()
     {
         mGameObject = new Dictionary<(int x, int y, int z), GameObject>();
-        mNotCollapsesed = new HashSet<(int x, int y, int z)>();
+        mNotCollapsesed = new List<(int x, int y, int z)>();
         mStack = new Stack<(int x, int y, int z)>();
         mRegion = new Dictionary<(int x, int y, int z), Region> ();
 
+
         StartTime = Time.time;
         time = Time.time;
-
-        rnd = new System.Random(seed);
 
 
         InitRules();
@@ -61,44 +62,61 @@ public class Manager : MonoBehaviour
 
     float time;
 
-    System.Random rnd;
-
     private void Update()
     {
+        mCollapseCount = mNotCollapsesed.Count;
+
         time = Time.time;
-        //Parallel.ForEach(mRegion, region =>
-        //{
-        //    mRegion[region.Key].RunUpdate();
-        //}); 
-        //foreach (var region in mRegion)
-        //{
-        //    mRegion[region.Key].RunUpdate();
-        //}
-        //Debug.Log($"{count}");
-        if (collapseCount >= mRegion.Count) collapsed = true;
+        
         if (renderedCount >= mRegion.Count) rendered = true;
-
-
 
         if (!collapsed)
         {
             var r = mRegion[targetRegion];
             r.running = true;
-            //Debug.Log($"{collapseCount}");
+            r.RunUpdate();
+            r.RunRenderer();
+            if (r.resetCount > 0) 
+            {
+                if (mStack.Count > 0)
+                {
+                    foreach (var tile in mNotCollapsesed)
+                    {
+                        ResetRegion(tile, 0);
+                        mRegion[tile].ResetRegionState();
+                    }
+                    //Debug.Log("pop");
+                    var temp5 = mStack.Pop();
+                    mNotCollapsesed.Add(temp5);
+                    targetRegion = temp5;
+                    ResetRegion(targetRegion, 0);
+                    //r.RunRenderer();
+                    foreach (var tile in mNotCollapsesed)
+                    {
+                        mRegion[tile].UpdateAllEntropy();
+                    }
+                }
+                else 
+                {
+                    Debug.Log("stack empty");
+                    Debug.Log($"{mNotCollapsesed.Count}");
+                    foreach (var tile in mNotCollapsesed)
+                    {
+                        Debug.Log($"{tile.x},{tile.y},{tile.z}");
+                        ResetRegion(tile, 0);
+                    }
+                }
+            }
             if (r.collapsed)
             {
+                r.CombineMeshes();
+                mStack.Push(targetRegion);
                 r.running = false;
-                r.RunRenderer();
-                //Debug.Log($"{StartTime - Time.time}");
+                //r.RunRenderer();
                 collapseCount++;
                 mNotCollapsesed.Remove(targetRegion);
-                //Debug.Log($"{StartTime - Time.time}");
-                UpdateRegionEntropyList();
-                //Debug.Log($"{StartTime - Time.time}");
-                //foreach (var region in mRegion) 
-                //{
-                //    region.Value.UpdateAllEntropy();
-                //}
+                UpdateRegionEntropyList(true);
+                
             }
             RunningTotal.text = string.Format(collapseCount.ToString());
         }
@@ -110,7 +128,7 @@ public class Manager : MonoBehaviour
             {
                 renderedCount++;
             }
-
+            r.rendered = true;
             RunningTotal.text = string.Format(renderedCount.ToString());
         }
     }
@@ -196,7 +214,7 @@ public class Manager : MonoBehaviour
                 }
             }
         }
-
+        maxRegion = (posX, posY, posZ);
 
         foreach (var region in regions)
         {
@@ -212,92 +230,120 @@ public class Manager : MonoBehaviour
             mRegion.Add(region.Key, RegionScript);
             var min = (region.Value.minX, region.Value.minY, region.Value.minZ);
             var max = (region.Value.maxX, region.Value.maxY, region.Value.maxZ);
-            RegionScript.Initialize(region.Key, max, min, entropy, this,transform.position);
+            RegionScript.Initialize(region.Key, max, min, entropy, this);
             mNotCollapsesed.Add(region.Key);
         }
     }
 
-    public List<int> GetTileEntopry((int x, int y, int z) _tP) 
+    public List<int> GetTileEntropy((int x, int y, int z) _tP)
     {
+        // Normalize the tile position within the bounds of the world.
         _tP.x = (_tP.x + max.x) % max.x;
         _tP.y = (_tP.y + max.y) % max.y;
         _tP.z = (_tP.z + max.z) % max.z;
-        (int x, int y, int z) _targetRegion = (_tP.x & regionSize.x, _tP.y & regionSize.y, _tP.z & regionSize.z);
-        //Debug.Log($"& {_targetRegion.x},{_targetRegion.y},{_targetRegion.z},  {_tP.x},{_tP.y},{_tP.z}");
-        _targetRegion = (_tP.x % regionSize.x, _tP.y % regionSize.y, _tP.z % regionSize.z);
-        //Debug.Log($"% {_targetRegion.x},{_targetRegion.y},{_targetRegion.z},  {_tP.x},{_tP.y},{_tP.z}");
-        _targetRegion = (_tP.x / regionSize.x, _tP.y / regionSize.y, _tP.z / regionSize.z);
-        //Debug.Log($"/ {_targetRegion.x},{_targetRegion.y},{_targetRegion.z},  {_tP.x},{_tP.y},{_tP.z}");
-        return mRegion[_targetRegion].GetTile(_tP);
+
+        // Calculate the target region coordinates based on the tile's position.
+        // This assumes that regionSize.{x,y,z} are greater than 0 to avoid division by zero.
+        (int x, int y, int z) _tR = (_tP.x / regionSize.x, _tP.y / regionSize.y, _tP.z / regionSize.z);
+
+
+        //if (mRegion[_tR].GetTile(_tP).Count == 0) Debug.Log($"{_tP.x},{_tP.y},{_tP.z} {mRegion[_tR].GetTile(_tP).Count}");
+
+        //mRegion[_tR]
+        // Fetch and return the entropy for the tile within the target region.
+        return mRegion[_tR].GetTile(_tP);
     }
 
-    //TODO:
-    public void ResetRegion((int x, int y, int z) _targetRegion)
+    public void ResetRegion((int x, int y, int z) _startRegion, int counter)
     {
-        ((int x, int y, int z) pos, (int x, int y, int z) min, (int x, int y, int z) max) region = (mRegion[_targetRegion].pos, mRegion[_targetRegion].min, mRegion[_targetRegion].max);
-        Destroy(mRegion[_targetRegion]);
-        mRegion.Remove(_targetRegion);
-        Destroy(mGameObject[_targetRegion]);
-        mGameObject.Remove(_targetRegion);
+        ((int x, int y, int z) pos, (int x, int y, int z) min, (int x, int y, int z) max) region = (mRegion[targetRegion].pos, mRegion[targetRegion].min, mRegion[targetRegion].max);
+        MeshFilter meshFilter;
+        if ((mRegion[targetRegion].transform.TryGetComponent<MeshFilter>(out meshFilter)))
+        {
+            Destroy(meshFilter.mesh); // Destroy the mesh
+        }
+        Destroy(mRegion[targetRegion].gameObject);
+        mRegion.Remove(targetRegion);
 
-        //Debug.Log($"{region.Value.minX},{region.Value.minY},{region.Value.minZ},{region.Value.maxX},{region.Value.maxY},{region.Value.maxZ}");
-
-        Vector3 position = new Vector3(0, 0, 0);//new Vector3(region.Value.minX * 3, region.Value.minY * 3, region.Value.minZ * 3);
-
-
-        // Instantiate the manager prefab
+        Vector3 position = new Vector3(0, 0, 0);
         GameObject RegionInstance = Instantiate(RegionPrefab, position, Quaternion.identity, this.transform);
-        RegionInstance.GetComponent<Region>().seed = seed;
-        // Assuming the Manager script is attached to the prefab and has public maxX, maxY, maxZ
         Region RegionScript = RegionInstance.GetComponent<Region>();
-        mRegion.Add(_targetRegion, RegionScript);
-        RegionScript.Initialize(region.pos, region.max, region.max, entropy, this, transform.position);
-        mNotCollapsesed.Add(region.pos);
+        mRegion.Add(targetRegion, RegionScript);
+        RegionScript.Initialize(region.pos, region.max, region.min, entropy, this);
+        collapseCount = (maxRegion.x * maxRegion.y * maxRegion.z) - mNotCollapsesed.Count;
     }
 
-    public void UpdateRegionEntropyList() 
+    public void ResetAllRegion()
     {
-
-        ConcurrentDictionary<(int x, int y, int z), int> mRegionEntropy = new ConcurrentDictionary<(int x, int y, int z), int>();
-
-        foreach (var tile in mRegion)
+        foreach (var GO in mGameObject) 
         {
-            mRegion[tile.Key].UpdateAllEntropy();
+            Destroy(GO.Value);
+        }
+        mGameObject = new Dictionary<(int x, int y, int z), GameObject>();
+        MeshFilter meshFilter;
+        foreach (var R in mRegion)
+        {
+            if ((mRegion[targetRegion].transform.TryGetComponent<MeshFilter>(out meshFilter)))
+            {
+                Destroy(meshFilter.mesh); // Destroy the mesh
+            }
+            Destroy(R.Value);
         }
 
-        Parallel.ForEach(mNotCollapsesed, key =>
-        {
-            var _ent = mRegion[key].GetEntropy();
-            mRegionEntropy[key] = _ent; // ConcurrentDictionary handles the thread safety
-        });
-        //foreach (var key in mNotCollapsesed) 
-        //{
-        //    var _ent = mRegion[key].GetEntropy();
-        //    mRegionEntropy[key] = _ent; // ConcurrentDictionary handles the thread safety
-        //}
+        mNotCollapsesed = new List<(int x, int y, int z)>();
+        mStack = new Stack<(int x, int y, int z)>();
+        mRegion = new Dictionary<(int x, int y, int z), Region>();
+        entropy = new Dictionary<int, byte[]>();
 
-        HashSet<(int, int, int)> lowEntropyList = new HashSet<(int, int, int)>();
-        int tempLowNum = int.MaxValue;
-        foreach (var pos in mRegionEntropy)
+        collapseCount = 0;
+
+        Start();
+    }
+
+    public void UpdateRegionEntropyList(bool change) 
+    {
+        if (mNotCollapsesed.Count > 0)
         {
-            var temp = pos.Value;
-            if (temp < tempLowNum)
+            // Update all entropy values first.
+            foreach (var tile in mNotCollapsesed)
             {
-                lowEntropyList = new HashSet<(int, int, int)>();
-                lowEntropyList.Add(pos.Key);
-                tempLowNum = temp;
+                mRegion[tile].ResetRegionState();
+                mRegion[tile].UpdateAllEntropy();
+                //mRegion[tile].UpdateAllEntropy();
             }
-            else if (temp == tempLowNum)
+
+            // Create a dictionary of regions and their entropy values.
+            var mRegionEntropy = mNotCollapsesed.ToDictionary(key => key, key => mRegion[key].GetEntropy());
+
+            // Find the minimum entropy value.
+            int minEntropy = mRegionEntropy.Values.Min();
+
+            // Select all regions that have this minimum entropy value.
+            var lowEntropyRegions = mRegionEntropy.Where(pair => pair.Value == minEntropy).Select(pair => pair.Key).ToList();
+
+            // Safely update targetRegion with the first region of the lowest entropy, if any.
+            if (lowEntropyRegions.Any())
             {
-                lowEntropyList.Add(pos.Key);
+                if (change) targetRegion = lowEntropyRegions[0];
             }
         }
+        else 
+        {
+            collapsed = true;
+        }
+    }
 
-        
-        if (lowEntropyList.Count > 0)targetRegion = lowEntropyList.ElementAt(0);
-
-
-        //Debug.Log($"{StartTime - Time.time}");
+    public void CheckDone() 
+    {
+        var count = 0;
+        foreach (var region in mRegion) 
+        {
+            if (region.Value.collapsed) 
+            {
+                count++;
+            }
+        }
+        if (count > max.x * max.y * max.z) collapsed = true;
     }
 
     void CombineMeshes()

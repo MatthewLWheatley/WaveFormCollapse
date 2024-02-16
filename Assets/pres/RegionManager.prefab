@@ -44,10 +44,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84168f25c0ac5ce45a1e8c80a48e8c8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Manager: {fileID: 0}
+  seed: 0
+  manager: {fileID: 0}
   collapsed: 0
   rendered: 0
+  failCount: 0
+  resetCount: 0
+  maxFailCount: 5
   tilePrefab: {fileID: 7223019185097040091, guid: c1a13cee700145a4091bb760e65a613f,
     type: 3}
   StartTime: 0
   FinishCollapseTime: 0
+  running: 0
+  mCollapseCount: 0
+  updateingEntropy: 0
+  tileCounter: 0

@@ -30,15 +30,15 @@ public class BenchMarker : MonoBehaviour
 
     List<Manager> managerScripts = new List<Manager>();
 
-    System.Random rnd;
+    
 
     void Start()
     {
         Application.targetFrameRate = 100000;
-        System.Random rnd = new System.Random(seed);
-        if (randomSeed) 
-        { 
-            seed = rnd.Next();
+
+        if (!randomSeed) 
+        {
+            Random.InitState(seed);
         }
     }
 
@@ -48,12 +48,11 @@ public class BenchMarker : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            DeleteManagers(); 
-            rnd = new System.Random(seed);
-            seed = randomSeed ? seed = rnd.Next() : seed;
-            
-            SpawnManagers();
+            DeleteManagers();
+            if (randomSeed) seed++;
+            Random.InitState(seed);
 
+            SpawnManagers();
         }
         List<Manager> list = new List<Manager>();
         foreach (Manager intst in managerScripts)
@@ -88,12 +87,18 @@ public class BenchMarker : MonoBehaviour
         }
     }
 
+    public void redo() 
+    { 
+        
+    }
+
     void DeleteManagers()
     {
         foreach (Transform child in transform)
         {
             DestroyChildAndMesh(child);
         }
+        System.GC.Collect();
     }
 
     void DestroyChildAndMesh(Transform parent)
@@ -104,9 +109,10 @@ public class BenchMarker : MonoBehaviour
         }
 
         MeshFilter meshFilter = parent.GetComponent<MeshFilter>();
-        if (meshFilter != null)
+        if (meshFilter != null && meshFilter.mesh != null)
         {
-            Destroy(meshFilter.mesh); // Destroy the mesh
+            DestroyImmediate(meshFilter.mesh); // Destroy the mesh immediately
+            meshFilter.mesh = null; // Clear the reference
         }
 
         Destroy(parent.gameObject); // Destroy the child GameObject

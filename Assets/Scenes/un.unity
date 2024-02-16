@@ -510,7 +510,7 @@ PrefabInstance:
     - target: {fileID: 7668789440186061114, guid: 4a94a313ed07e624e85610827de8a69d,
         type: 3}
       propertyPath: seed
-      value: 818577319
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 7668789440186061114, guid: 4a94a313ed07e624e85610827de8a69d,
         type: 3}
@@ -545,7 +545,7 @@ PrefabInstance:
     - target: {fileID: 7668789440186061114, guid: 4a94a313ed07e624e85610827de8a69d,
         type: 3}
       propertyPath: randomSeed
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7668789440186061114, guid: 4a94a313ed07e624e85610827de8a69d,
         type: 3}

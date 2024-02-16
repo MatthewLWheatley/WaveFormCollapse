@@ -59,15 +59,25 @@ public class TileProps : MonoBehaviour
                         Target.z -= 1;
                         break;
                 }
-                GameObject edgeInstance = Instantiate(edge, this.transform.position + Target, Quaternion.identity, this.transform);
-                //Debug.Log(i);
-                edges[i] = edgeInstance;
-                centre.SetActive(true);
-                done = true;
+                if (edges[i] == null)
+                {
+                    GameObject edgeInstance = Instantiate(edge, this.transform.position + Target, Quaternion.identity, this.transform);
+                    //Debug.Log(i);
+                    edges[i] = edgeInstance;
+                    centre.SetActive(true);
+                    done = true;
 
-                
-                edgeInstance.GetComponent<MeshRenderer>().material = mats[exits[i] - 1];
-                centre.GetComponent<MeshRenderer>().material = mats[exits[i] - 1];
+
+                    edgeInstance.GetComponent<MeshRenderer>().material = mats[exits[i] - 1];
+                    centre.GetComponent<MeshRenderer>().material = mats[exits[i] - 1];
+                }
+            }
+            else 
+            {
+                //if (edges[i] != null && edges[i].gameObject != null)
+                //{
+                //    edges[i].gameObject.SetActive(false);
+                //}
             }
         }
         if (done)

@@ -7,21 +7,22 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 [System.Serializable]
-public class Tile
+public class Tile : MonoBehaviour
 {
     //list is 0.089 5*5 5*5
     //hashset is 0.083 5*5 5*5
 
     private (int x, int y, int z) max;
-    private (int x, int y, int z) pos;
-    public HashSet<int> entropy;
+    public (int x, int y, int z) pos;
+    public List<int> entropy;
 
-    public void Initialize((int x, int y, int z) _position, (int x, int y, int z) _max, HashSet<int> _ent)
+    public void Initialize((int x, int y, int z) _position, (int x, int y, int z) _max, List<int> _ent)
     {
         pos = _position;
         max = _max;
 
-        entropy = new HashSet<int>();
+
+        entropy = new List<int>();
         foreach (var en in _ent)
         {
             entropy.Add(en);
@@ -30,7 +31,7 @@ public class Tile
 
     public void SetExits(int Exits)
     {
-        entropy = new HashSet<int>();
+        entropy = new List<int>();
         entropy.Add(Exits);
     }
 
@@ -53,9 +54,9 @@ public class Tile
         return new List<int>(entropy);
     }
 
-    public void SetEntropy(HashSet<int> ent)
+    public void SetEntropy(List<int> ent)
     {
-        entropy = new HashSet<int>();
+        entropy = new List<int>();
         foreach (var en in ent) 
         { 
             entropy.Add(en);
