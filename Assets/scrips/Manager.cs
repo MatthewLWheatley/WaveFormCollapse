@@ -109,7 +109,8 @@ public class Manager : MonoBehaviour
             }
             if (r.collapsed)
             {
-                r.CombineMeshes();
+                //r.RunRenderer();
+                //r.CombineMeshes();
                 mStack.Push(targetRegion);
                 r.running = false;
                 //r.RunRenderer();
@@ -348,78 +349,78 @@ public class Manager : MonoBehaviour
 
     void CombineMeshes()
     {
-        // Ensure this GameObject has a MeshFilter component
-        MeshFilter meshFilter = GetComponent<MeshFilter>();
-        if (meshFilter == null)
-        {
-            meshFilter = gameObject.AddComponent<MeshFilter>();
-        }
+        //// Ensure this GameObject has a MeshFilter component
+        //MeshFilter meshFilter = GetComponent<MeshFilter>();
+        //if (meshFilter == null)
+        //{
+        //    meshFilter = gameObject.AddComponent<MeshFilter>();
+        //}
 
-        // Ensure this GameObject has a MeshRenderer component
-        MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
-        if (meshRenderer == null)
-        {
-            meshRenderer = gameObject.AddComponent<MeshRenderer>();
-        }
+        //// Ensure this GameObject has a MeshRenderer component
+        //MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
+        //if (meshRenderer == null)
+        //{
+        //    meshRenderer = gameObject.AddComponent<MeshRenderer>();
+        //}
 
-        // Get all MeshFilter components from child objects
-        MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>(false);
+        //// Get all MeshFilter components from child objects
+        //MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>(false);
 
-        // Group meshes by material
-        Dictionary<Material, List<MeshFilter>> materialGroups = new Dictionary<Material, List<MeshFilter>>();
+        //// Group meshes by material
+        //Dictionary<Material, List<MeshFilter>> materialGroups = new Dictionary<Material, List<MeshFilter>>();
 
-        foreach (MeshFilter mf in meshFilters)
-        {
-            if (mf.sharedMesh == null || mf == meshFilter) continue; // Skip if the sharedMesh is null or it's the parent MeshFilter
+        //foreach (MeshFilter mf in meshFilters)
+        //{
+        //    if (mf.sharedMesh == null || mf == meshFilter) continue; // Skip if the sharedMesh is null or it's the parent MeshFilter
 
-            MeshRenderer mr = mf.GetComponent<MeshRenderer>();
-            if (mr == null || mr.sharedMaterial == null) continue; // Skip if there's no MeshRenderer or sharedMaterial
+        //    MeshRenderer mr = mf.GetComponent<MeshRenderer>();
+        //    if (mr == null || mr.sharedMaterial == null) continue; // Skip if there's no MeshRenderer or sharedMaterial
 
-            if (!materialGroups.ContainsKey(mr.sharedMaterial))
-            {
-                materialGroups[mr.sharedMaterial] = new List<MeshFilter>();
-            }
-            materialGroups[mr.sharedMaterial].Add(mf);
-        }
+        //    if (!materialGroups.ContainsKey(mr.sharedMaterial))
+        //    {
+        //        materialGroups[mr.sharedMaterial] = new List<MeshFilter>();
+        //    }
+        //    materialGroups[mr.sharedMaterial].Add(mf);
+        //}
 
-        // Combine meshes for each material group
-        CombineInstance[] combine = new CombineInstance[materialGroups.Count];
-        Material[] materials = new Material[materialGroups.Count];
-        int materialIndex = 0;
-        List<GameObject> objectsToDestroy = new List<GameObject>();
-        foreach (KeyValuePair<Material, List<MeshFilter>> kvp in materialGroups)
-        {
-            CombineInstance[] materialCombines = new CombineInstance[kvp.Value.Count];
-            for (int i = 0; i < kvp.Value.Count; i++)
-            {
-                materialCombines[i].mesh = kvp.Value[i].sharedMesh;
-                materialCombines[i].transform = kvp.Value[i].transform.localToWorldMatrix;
-                objectsToDestroy.Add(kvp.Value[i].gameObject); // Mark the child object for deletion
-            }
+        //// Combine meshes for each material group
+        //CombineInstance[] combine = new CombineInstance[materialGroups.Count];
+        //Material[] materials = new Material[materialGroups.Count];
+        //int materialIndex = 0;
+        //List<GameObject> objectsToDestroy = new List<GameObject>();
+        //foreach (KeyValuePair<Material, List<MeshFilter>> kvp in materialGroups)
+        //{
+        //    CombineInstance[] materialCombines = new CombineInstance[kvp.Value.Count];
+        //    for (int i = 0; i < kvp.Value.Count; i++)
+        //    {
+        //        materialCombines[i].mesh = kvp.Value[i].sharedMesh;
+        //        materialCombines[i].transform = kvp.Value[i].transform.localToWorldMatrix;
+        //        objectsToDestroy.Add(kvp.Value[i].gameObject); // Mark the child object for deletion
+        //    }
 
-            // Combine meshes for the current material
-            Mesh combinedMesh = new Mesh();
-            combinedMesh.CombineMeshes(materialCombines, true, true);
+        //    // Combine meshes for the current material
+        //    Mesh combinedMesh = new Mesh();
+        //    combinedMesh.CombineMeshes(materialCombines, true, true);
 
-            combine[materialIndex].mesh = combinedMesh;
-            combine[materialIndex].transform = Matrix4x4.identity;
-            materials[materialIndex] = kvp.Key;
-            materialIndex++;
-        }
+        //    combine[materialIndex].mesh = combinedMesh;
+        //    combine[materialIndex].transform = Matrix4x4.identity;
+        //    materials[materialIndex] = kvp.Key;
+        //    materialIndex++;
+        //}
 
-        // Create a new mesh and combine all the grouped meshes into it
-        Mesh finalMesh = new Mesh();
-        finalMesh.CombineMeshes(combine, false, false);
-        meshFilter.mesh = finalMesh;
-        meshRenderer.materials = materials; // Set the materials array
+        //// Create a new mesh and combine all the grouped meshes into it
+        //Mesh finalMesh = new Mesh();
+        //finalMesh.CombineMeshes(combine, false, false);
+        //meshFilter.mesh = finalMesh;
+        //meshRenderer.materials = materials; // Set the materials array
 
-        // Optionally, reset the position if needed
-        meshRenderer.transform.position = Vector3.zero;
+        //// Optionally, reset the position if needed
+        //meshRenderer.transform.position = Vector3.zero;
 
-        // Destroy the child GameObjects
-        foreach (GameObject go in objectsToDestroy)
-        {
-            Destroy(go);
-        }
+        //// Destroy the child GameObjects
+        //foreach (GameObject go in objectsToDestroy)
+        //{
+        //    Destroy(go);
+        //}
     }
 }

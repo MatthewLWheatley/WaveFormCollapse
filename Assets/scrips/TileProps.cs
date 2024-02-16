@@ -16,6 +16,7 @@ public class TileProps : MonoBehaviour
     [SerializeField] private GameObject[] edges;
     [SerializeField] private GameObject edge;
     [SerializeField] private Material[] mats;
+    public bool renderered = false;
 
     private Mesh[] meshes;
 
@@ -30,6 +31,7 @@ public class TileProps : MonoBehaviour
 
     public void SetExits(byte[] _exits,(int x, int y, int z) pos)
     {
+        if(renderered) { return; }
         poss.x = pos.x; poss.y = pos.y; poss.z = pos.z;
         edges = new GameObject[6];
         exits = _exits;
@@ -59,17 +61,18 @@ public class TileProps : MonoBehaviour
                         Target.z -= 1;
                         break;
                 }
-                if (edges[i] == null)
-                {
-                    GameObject edgeInstance = Instantiate(edge, this.transform.position + Target, Quaternion.identity, this.transform);
-                    //Debug.Log(i);
-                    edges[i] = edgeInstance;
+                if (!(edges[i] != null)) 
+                { 
+                    edges[i] = Instantiate(edge, transform.position + Target, Quaternion.identity, this.transform);
+                    // Debug.Log(i);
+
                     centre.SetActive(true);
                     done = true;
 
-
-                    edgeInstance.GetComponent<MeshRenderer>().material = mats[exits[i] - 1];
+                    edges[i].GetComponent<MeshRenderer>().material = mats[exits[i] - 1];
                     centre.GetComponent<MeshRenderer>().material = mats[exits[i] - 1];
+
+                    renderered = true;
                 }
             }
             else 
@@ -82,16 +85,36 @@ public class TileProps : MonoBehaviour
         }
         if (done)
         {
-            done = false;
-            //CombineMeshes();
+            CombineMeshes();
+            for (int i = 0; i < exits.Length; i++)
+            {
+                if (edges[i] != null)
+                    edges[i].SetActive(false);
+                
+            }
+            centre.SetActive(false);
         }
+    }
+
+    private void OnDestroy()
+    {
+        ResetExits();
     }
 
     public void ResetExits()
     {
+        MeshFilter meshFilter;
+        // Destroy all child GameObjects
         foreach (Transform child in transform)
         {
             Destroy(child.gameObject);
+        }
+
+        // Destroy associated meshes
+        meshFilter = GetComponent<MeshFilter>();
+        if (meshFilter != null && meshFilter.sharedMesh != null)
+        {
+            Destroy(meshFilter.sharedMesh);
         }
     }
 
