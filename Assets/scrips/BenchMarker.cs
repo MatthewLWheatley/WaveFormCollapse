@@ -21,6 +21,8 @@ public class BenchMarker : MonoBehaviour
     public int width;
     public int depth;
 
+    public int MaxRunCount = 100;
+
     public int RunCount;
     public float CollapseTime = 0.0f;
     public TextMeshProUGUI CollapsedTime;
@@ -47,6 +49,7 @@ public class BenchMarker : MonoBehaviour
 
     private void Update()
     {
+        if (RunCount >= MaxRunCount) return;
         if (Input.GetKeyDown(KeyCode.Space))
         {
             DeleteManagers();
@@ -80,7 +83,6 @@ public class BenchMarker : MonoBehaviour
             CollapseTime += (Time.time - startTime);
 
             runTimes.Add((Time.time - startTime));
-            startTime = Time.time;
 
             RunText.text = string.Format(RunCount.ToString());
             RunningTotal.text = string.Format(CollapseTime.ToString());
@@ -88,6 +90,7 @@ public class BenchMarker : MonoBehaviour
             CollapsedTime.text = string.Format(CalculateAverageExcludingOutliers().ToString());
             DeleteManagers();
             SpawnManagers();
+            startTime = Time.time;
         }
     }
 

@@ -57,19 +57,19 @@ public class Region : MonoBehaviour
 
         FinishCollapseTime = 0;
         if (CheckAndHandleCollapse()) return; // If all tiles have collapsed or a failure occurred, exit early.
-        if (updateingEntropy) return;
-        string temp = "";
-        foreach (var tile in mNotCollapsesed)
-        {
-            temp += $" {mTile[tile].GetEntropyCount()}";
-        }
+        //if (updateingEntropy) return;
+        //string temp = "";
+        //foreach (var tile in mNotCollapsesed)
+        //{
+        //    temp += $" {mTile[tile].GetEntropyCount()}";
+        //}
         //Debug.Log(temp);
         UpdateAllEntropy();
-        temp = "";
-        foreach (var tile in mNotCollapsesed)
-        {
-            temp += $" {mTile[tile].GetEntropyCount()}";
-        }
+        //temp = "";
+        //foreach (var tile in mNotCollapsesed)
+        //{
+        //    temp += $" {mTile[tile].GetEntropyCount()}";
+        //}
         //Debug.Log(temp);
         AttemptCollapseRandomTile();
         //RunRenderer();
@@ -84,11 +84,11 @@ public class Region : MonoBehaviour
             UpdateEntropy(pos, true);
         }
 
-        temp.Reverse();
-        foreach ((int x, int y, int z) pos in temp)
-        {
-            UpdateEntropy(pos, true);
-        }
+        //temp.Reverse();
+        //foreach ((int x, int y, int z) pos in temp)
+        //{
+        //    UpdateEntropy(pos, true);
+        //}
     }
 
     private bool CheckAndHandleCollapse()
@@ -118,7 +118,7 @@ public class Region : MonoBehaviour
         {
             var temp = mNotCollapsesed[i];
             //Debug.Log($"{temp.x},{temp.y},{temp.z}  {mTile[mNotCollapsesed[i]].GetEntropyCount()}");
-            mTile[temp].SetEntropy(entropy.Keys.ToList());
+            mTile[temp].SetEntropy(entropy.Keys.ToHashSet());
         }
         //if (mNotCollapsesed.Count == 25) return;
 
@@ -127,7 +127,7 @@ public class Region : MonoBehaviour
             var lastPos = mStack.Pop();
             mNotCollapsesed.Add(lastPos);
 
-            mTile[lastPos].SetEntropy(entropy.Keys.ToList());
+            mTile[lastPos].SetEntropy(entropy.Keys.ToHashSet());
 
             UpdateEntropy(lastPos, true);
         }
@@ -234,19 +234,23 @@ public class Region : MonoBehaviour
         // Initialize all tiles within the specified bounds with maximum entropy.
         for (int x = min.x; x < max.x; x++)
         {
+            //Debug.Log(x);
             for (int y = min.y; y < max.y; y++)
             {
+                //Debug.Log(y);
                 for (int z = min.z; z < max.z; z++)
                 {
+                    //Debug.Log(z);
                     if (!GamobjectMap.ContainsKey((x, y, z)))
                     {
+                        //Debug.Log($"{x}, {y}, {z}");
                         //Debug.Log("ficlklclckckngdusujjnksl;ujnikhsejnklrfhujnlikesgvujnhkmred");
                         Vector3 _targetPos = new Vector3((float)x * 3 + transPosisiton.x, (float)y * 3 + transPosisiton.y, (float)z * 3 + transPosisiton.z);
                         GameObject TempTile = Instantiate(tilePrefab, _targetPos, Quaternion.identity, transform);
                         //TempTile.AddComponent<Tile>();
                         //Tile temp = TempTile.GetComponent<Tile>();
                         Tile temp = new Tile();
-                        temp.Initialize((x, y, z), max, entropy.Keys.ToList());
+                        temp.Initialize((x, y, z), max, entropy.Keys.ToHashSet());
 
                         mTile.Add((x, y, z), temp);
                         mNotCollapsesed.Add((x, y, z));
@@ -266,10 +270,16 @@ public class Region : MonoBehaviour
             (int x, int y, int z) _tP = (pos.x + Dirs[_dir].x, pos.y + Dirs[_dir].y, pos.z + Dirs[_dir].z);
             List<int> _tE;
             // Adjust boundary check to correctly wrap or handle edge cases.
-            bool isOutside = _tP.x < 0 || _tP.x >= max.x || _tP.y < 0 || _tP.y >= max.y || _tP.z < 0 || _tP.z >= max.z;
-
-            if (isOutside) _tE = manager.GetTileEntropy(_tP);
-            else _tE = mTile[_tP].GetEntropy();
+            bool isOutside = _tP.x < min.x || _tP.x >= max.x || _tP.y < min.y || _tP.y >= max.y || _tP.z < min.z || _tP.z >= max.z;
+            
+            //if(_tP == (0,0,0))
+            //foreach (var tile in mTile) 
+            //{
+            //    Debug.Log($"{tile.Key.x}, {tile.Key.y}, {tile.Key.z}");
+            //}
+            //if (_tP == (0,0,0)) return;
+            if(isOutside)_tE = manager.GetTileEntropy(_tP).ToList();
+            else _tE = mTile[_tP].GetEntropy().ToList();
             //Debug.Log($"{pos.x},{pos.y},{pos.z} {_tE.Count}");
 
             //_targetEntropy = isOutside ? manager.GetTileEntropy(_tP) : mTile[_tP].GetEntropy();
@@ -308,7 +318,7 @@ public class Region : MonoBehaviour
 
         int _randNum = Random.Range(0, entropyCount);
         int randomEntropyElement = mTile[pos].GetEntropy().ElementAt(_randNum);
-        mTile[pos].entropy = new List<int>();
+        mTile[pos].entropy = new HashSet<int>();
         mTile[pos].entropy.Add(randomEntropyElement);
         mNotCollapsesed.Remove(pos);
         mStack.Push(pos);
@@ -381,7 +391,7 @@ public class Region : MonoBehaviour
         return _ent;
     }
 
-    public List<int> GetTile((int x, int y, int z) _targetTile)
+    public HashSet<int> GetTile((int x, int y, int z) _targetTile)
     {
         return mTile[_targetTile].GetEntropy();
     }
@@ -390,7 +400,7 @@ public class Region : MonoBehaviour
     {
         foreach (var pos in mNotCollapsesed) 
         {
-            mTile[pos].SetEntropy(entropy.Keys.ToList());
+            mTile[pos].SetEntropy(entropy.Keys.ToHashSet());
         }
         mCollapseCount--;
         //Debug.Log("fuck you cunt");
