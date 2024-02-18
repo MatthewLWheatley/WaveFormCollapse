@@ -38,6 +38,8 @@ public class Manager : MonoBehaviour
 
     public int mCollapseCount = 0;
 
+    public bool realTimeRender = false;
+
     private void Start()
     {
         mGameObject = new Dictionary<(int x, int y, int z), GameObject>();
@@ -75,7 +77,7 @@ public class Manager : MonoBehaviour
             var r = mRegion[targetRegion];
             r.running = true;
             r.RunUpdate();
-            r.RunRenderer();
+            //if(realTimeRender)r.RunRenderer();
             if (r.resetCount > 0) 
             {
                 if (mStack.Count > 0)
@@ -124,7 +126,7 @@ public class Manager : MonoBehaviour
         else if (!rendered)
         {
             var r = mRegion[mRegion.ElementAt(renderedCount).Key];
-            r.RunRenderer();
+            //r.RunRenderer();
             if (r.rendered)
             {
                 renderedCount++;
@@ -137,57 +139,68 @@ public class Manager : MonoBehaviour
     private void InitRules()
     {
         byte[] _r = { 0x00, 0x01, 0x02};
-
+        List<byte[]> ent = new List<byte[]>();
         //entropy.Add(-1, new byte[] { _r[0], _r[0], _r[0], _r[0], _r[0], _r[0] });
 
-        entropy.Add(0, new byte[] { _r[0], _r[0], _r[1], _r[1], _r[0], _r[1] });
-        entropy.Add(1, new byte[] { _r[1], _r[0], _r[0], _r[1], _r[0], _r[1] });
-        entropy.Add(2, new byte[] { _r[1], _r[0], _r[1], _r[0], _r[0], _r[1] });
-        entropy.Add(3, new byte[] { _r[1], _r[0], _r[1], _r[1], _r[0], _r[0] });
-        entropy.Add(4, new byte[] { _r[1], _r[0], _r[1], _r[0], _r[0], _r[0] });
-        entropy.Add(5, new byte[] { _r[1], _r[0], _r[0], _r[1], _r[0], _r[0] });
-        entropy.Add(6, new byte[] { _r[1], _r[0], _r[0], _r[0], _r[0], _r[1] });
-        entropy.Add(7, new byte[] { _r[0], _r[0], _r[1], _r[1], _r[0], _r[0] });
-        entropy.Add(8, new byte[] { _r[0], _r[0], _r[1], _r[0], _r[0], _r[1] });
-        entropy.Add(9, new byte[] { _r[0], _r[0], _r[0], _r[1], _r[0], _r[1] });
+        ent.Add(new byte[] { _r[0], _r[0], _r[1], _r[1], _r[0], _r[1] });
+        ent.Add(new byte[] { _r[1], _r[0], _r[0], _r[1], _r[0], _r[1] });
+        ent.Add(new byte[] { _r[1], _r[0], _r[1], _r[0], _r[0], _r[1] });
+        ent.Add(new byte[] { _r[1], _r[0], _r[1], _r[1], _r[0], _r[0] });
+        ent.Add(new byte[] { _r[1], _r[0], _r[1], _r[0], _r[0], _r[0] });
+        ent.Add(new byte[] { _r[1], _r[0], _r[0], _r[1], _r[0], _r[0] });
+        ent.Add(new byte[] { _r[1], _r[0], _r[0], _r[0], _r[0], _r[1] });
+        ent.Add(new byte[] { _r[0], _r[0], _r[1], _r[1], _r[0], _r[0] });
+        ent.Add(new byte[] { _r[0], _r[0], _r[1], _r[0], _r[0], _r[1] });
+        ent.Add(new byte[] { _r[0], _r[0], _r[0], _r[1], _r[0], _r[1] });
 
-        entropy.Add(10, new byte[] { _r[0], _r[0], _r[2], _r[2], _r[0], _r[2] });
-        entropy.Add(11, new byte[] { _r[2], _r[0], _r[0], _r[2], _r[0], _r[2] });
-        entropy.Add(12, new byte[] { _r[2], _r[0], _r[2], _r[0], _r[0], _r[2] });
-        entropy.Add(13, new byte[] { _r[2], _r[0], _r[2], _r[2], _r[0], _r[0] });
-        entropy.Add(14, new byte[] { _r[2], _r[0], _r[2], _r[0], _r[0], _r[0] });
-        entropy.Add(15, new byte[] { _r[2], _r[0], _r[0], _r[2], _r[0], _r[0] });
-        entropy.Add(16, new byte[] { _r[2], _r[0], _r[0], _r[0], _r[0], _r[2] });
-        entropy.Add(17, new byte[] { _r[0], _r[0], _r[2], _r[2], _r[0], _r[0] });
-        entropy.Add(18, new byte[] { _r[0], _r[0], _r[2], _r[0], _r[0], _r[2] });
-        entropy.Add(19, new byte[] { _r[0], _r[0], _r[0], _r[2], _r[0], _r[2] });
+        //entropy.Add(10, new byte[] { _r[0], _r[0], _r[2], _r[2], _r[0], _r[2] });
+        //entropy.Add(11, new byte[] { _r[2], _r[0], _r[0], _r[2], _r[0], _r[2] });
+        //entropy.Add(12, new byte[] { _r[2], _r[0], _r[2], _r[0], _r[0], _r[2] });
+        //entropy.Add(13, new byte[] { _r[2], _r[0], _r[2], _r[2], _r[0], _r[0] });
+        //entropy.Add(14, new byte[] { _r[2], _r[0], _r[2], _r[0], _r[0], _r[0] });
+        //entropy.Add(15, new byte[] { _r[2], _r[0], _r[0], _r[2], _r[0], _r[0] });
+        //entropy.Add(16, new byte[] { _r[2], _r[0], _r[0], _r[0], _r[0], _r[2] });
+        //entropy.Add(17, new byte[] { _r[0], _r[0], _r[2], _r[2], _r[0], _r[0] });
+        //entropy.Add(18, new byte[] { _r[0], _r[0], _r[2], _r[0], _r[0], _r[2] });
+        //entropy.Add(19, new byte[] { _r[0], _r[0], _r[0], _r[2], _r[0], _r[2] });
 
-        //entropy.Add(8, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[0], _r[1] });
-        //entropy.Add(9, new byte[] { _r[1], _r[1], _r[0], _r[1], _r[0], _r[1] });
-        //entropy.Add(10, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[0], _r[1] });
-        //entropy.Add(11, new byte[] { _r[1], _r[1], _r[1], _r[1], _r[0], _r[0] });
-        //entropy.Add(12, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[0], _r[0] });
-        //entropy.Add(13, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[0], _r[0] });
-        //entropy.Add(14, new byte[] { _r[0], _r[1], _r[0], _r[1], _r[0], _r[1] });
-        //entropy.Add(15, new byte[] { _r[1], _r[1], _r[0], _r[0], _r[0], _r[1] });
+        ent.Add(new byte[] { _r[0], _r[1], _r[1], _r[1], _r[0], _r[1] });
+        ent.Add(new byte[] { _r[1], _r[1], _r[0], _r[1], _r[0], _r[1] });
+        ent.Add(new byte[] { _r[1], _r[1], _r[1], _r[0], _r[0], _r[1] });
+        ent.Add(new byte[] { _r[1], _r[1], _r[1], _r[1], _r[0], _r[0] });
+        ent.Add(new byte[] { _r[1], _r[1], _r[1], _r[0], _r[0], _r[0] });
+        ent.Add(new byte[] { _r[1], _r[1], _r[0], _r[1], _r[0], _r[0] });
+        ent.Add(new byte[] { _r[1], _r[1], _r[0], _r[0], _r[0], _r[1] });
+        ent.Add(new byte[] { _r[0], _r[1], _r[1], _r[1], _r[0], _r[0] });
+        ent.Add(new byte[] { _r[0], _r[1], _r[1], _r[0], _r[0], _r[1] });
+        ent.Add(new byte[] { _r[0], _r[1], _r[0], _r[1], _r[0], _r[1] });
 
-        //entropy.Add(16, new byte[] { _r[0], _r[0], _r[1], _r[1], _r[1], _r[1] });
-        //entropy.Add(17, new byte[] { _r[1], _r[0], _r[0], _r[1], _r[1], _r[1] });
-        //entropy.Add(18, new byte[] { _r[1], _r[0], _r[1], _r[0], _r[1], _r[1] });
-        //entropy.Add(19, new byte[] { _r[1], _r[0], _r[1], _r[1], _r[1], _r[0] });
-        //entropy.Add(20, new byte[] { _r[1], _r[0], _r[1], _r[0], _r[1], _r[0] });
-        //entropy.Add(21, new byte[] { _r[0], _r[0], _r[1], _r[1], _r[1], _r[0] });
-        //entropy.Add(22, new byte[] { _r[0], _r[0], _r[0], _r[1], _r[1], _r[1] });
-        //entropy.Add(23, new byte[] { _r[1], _r[0], _r[0], _r[0], _r[1], _r[1] });
+        ent.Add(new byte[] { _r[0], _r[0], _r[1], _r[1], _r[1], _r[1] });
+        ent.Add(new byte[] { _r[1], _r[0], _r[0], _r[1], _r[1], _r[1] });
+        ent.Add(new byte[] { _r[1], _r[0], _r[1], _r[0], _r[1], _r[1] });
+        ent.Add(new byte[] { _r[1], _r[0], _r[1], _r[1], _r[1], _r[0] });
+        ent.Add(new byte[] { _r[1], _r[0], _r[1], _r[0], _r[1], _r[0] });
+        ent.Add(new byte[] { _r[1], _r[0], _r[0], _r[1], _r[1], _r[0] });
+        ent.Add(new byte[] { _r[1], _r[0], _r[0], _r[0], _r[1], _r[1] });
+        ent.Add(new byte[] { _r[0], _r[0], _r[1], _r[1], _r[1], _r[0] });
+        ent.Add(new byte[] { _r[0], _r[0], _r[1], _r[0], _r[1], _r[1] });
+        ent.Add(new byte[] { _r[0], _r[0], _r[0], _r[1], _r[1], _r[1] });
 
-        //entropy.Add(24, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[1], _r[1] });
-        //entropy.Add(25, new byte[] { _r[1], _r[1], _r[0], _r[1], _r[1], _r[1] });
-        //entropy.Add(26, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[1], _r[1] });
-        //entropy.Add(27, new byte[] { _r[1], _r[1], _r[1], _r[1], _r[1], _r[0] });
-        //entropy.Add(28, new byte[] { _r[1], _r[1], _r[1], _r[0], _r[1], _r[0] });
-        //entropy.Add(29, new byte[] { _r[0], _r[1], _r[1], _r[1], _r[1], _r[0] });
-        //entropy.Add(30, new byte[] { _r[0], _r[1], _r[0], _r[1], _r[1], _r[1] });
-        //entropy.Add(31, new byte[] { _r[1], _r[1], _r[0], _r[0], _r[1], _r[1] });
+        ent.Add(new byte[] { _r[0], _r[1], _r[1], _r[1], _r[1], _r[1] });
+        ent.Add(new byte[] { _r[1], _r[1], _r[0], _r[1], _r[1], _r[1] });
+        ent.Add(new byte[] { _r[1], _r[1], _r[1], _r[0], _r[1], _r[1] });
+        ent.Add(new byte[] { _r[1], _r[1], _r[1], _r[1], _r[1], _r[0] });
+        ent.Add(new byte[] { _r[1], _r[1], _r[1], _r[0], _r[1], _r[0] });
+        ent.Add(new byte[] { _r[1], _r[1], _r[0], _r[1], _r[1], _r[0] });
+        ent.Add(new byte[] { _r[1], _r[1], _r[0], _r[0], _r[1], _r[1] });
+        ent.Add(new byte[] { _r[0], _r[1], _r[1], _r[1], _r[1], _r[0] });
+        ent.Add(new byte[] { _r[0], _r[1], _r[1], _r[0], _r[1], _r[1] });
+        ent.Add(new byte[] { _r[0], _r[1], _r[0], _r[1], _r[1], _r[1] });
+
+        for (int i = 0; i < ent.Count; i++) 
+        {
+            entropy.Add(i, ent[i]);
+        }
     }
 
     private void InitRegions() 

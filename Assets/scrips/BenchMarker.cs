@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
@@ -30,7 +31,7 @@ public class BenchMarker : MonoBehaviour
 
     List<Manager> managerScripts = new List<Manager>();
 
-    
+    public List<float> runTimes = new List<float>();
 
     void Start()
     {
@@ -77,19 +78,49 @@ public class BenchMarker : MonoBehaviour
         {
             
             CollapseTime += (Time.time - startTime);
+
+            runTimes.Add((Time.time - startTime));
             startTime = Time.time;
 
             RunText.text = string.Format(RunCount.ToString());
             RunningTotal.text = string.Format(CollapseTime.ToString());
-            CollapsedTime.text = string.Format($"{CollapseTime / RunCount}");
+
+            CollapsedTime.text = string.Format(CalculateAverageExcludingOutliers().ToString());
             DeleteManagers();
             SpawnManagers();
         }
     }
 
-    public void redo() 
-    { 
-        
+    float CalculateAverageExcludingOutliers()
+    {
+        if (runTimes.Count == 0) return 0f;
+        // Directly return the average if the list is too small for outlier removal to make sense
+        if (runTimes.Count <= 10) return CollapseTime / (float)RunCount;
+
+        // Calculate number of elements to remove from each end
+        int countToRemove = (int)(runTimes.Count * 0.1f); // 5% from each end, total 10%
+
+        // Ensure we have a sorted copy of the run times
+        List<float> sortedTimes = new List<float>(runTimes);
+        sortedTimes.Sort();
+
+        // Adjust for edge cases where the list size might be too small after removal
+        if (2 * countToRemove > sortedTimes.Count) return CollapseTime / (float)RunCount;
+
+        // Remove outliers
+
+        sortedTimes.RemoveRange(sortedTimes.Count - countToRemove, countToRemove);
+        sortedTimes.RemoveRange(0, countToRemove); 
+                                                   
+
+        // Calculate the average of the remaining times
+        float total = 0;
+        foreach (float time in sortedTimes)
+        {
+            total += time;
+        }
+        Debug.Log($"{countToRemove}, {total}, {sortedTimes.Count}");
+        return total / sortedTimes.Count; // Return the average of the adjusted list
     }
 
     void DeleteManagers()

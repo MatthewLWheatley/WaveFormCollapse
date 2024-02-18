@@ -243,8 +243,9 @@ public class Region : MonoBehaviour
                         //Debug.Log("ficlklclckckngdusujjnksl;ujnikhsejnklrfhujnlikesgvujnhkmred");
                         Vector3 _targetPos = new Vector3((float)x * 3 + transPosisiton.x, (float)y * 3 + transPosisiton.y, (float)z * 3 + transPosisiton.z);
                         GameObject TempTile = Instantiate(tilePrefab, _targetPos, Quaternion.identity, transform);
-                        TempTile.AddComponent<Tile>();
-                        Tile temp = TempTile.GetComponent<Tile>();
+                        //TempTile.AddComponent<Tile>();
+                        //Tile temp = TempTile.GetComponent<Tile>();
+                        Tile temp = new Tile();
                         temp.Initialize((x, y, z), max, entropy.Keys.ToList());
 
                         mTile.Add((x, y, z), temp);
@@ -266,8 +267,9 @@ public class Region : MonoBehaviour
             List<int> _tE;
             // Adjust boundary check to correctly wrap or handle edge cases.
             bool isOutside = _tP.x < 0 || _tP.x >= max.x || _tP.y < 0 || _tP.y >= max.y || _tP.z < 0 || _tP.z >= max.z;
-            
-            _tE = manager.GetTileEntropy(_tP);
+
+            if (isOutside) _tE = manager.GetTileEntropy(_tP);
+            else _tE = mTile[_tP].GetEntropy();
             //Debug.Log($"{pos.x},{pos.y},{pos.z} {_tE.Count}");
 
             //_targetEntropy = isOutside ? manager.GetTileEntropy(_tP) : mTile[_tP].GetEntropy();

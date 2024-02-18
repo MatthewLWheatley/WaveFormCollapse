@@ -7,7 +7,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 [System.Serializable]
-public class Tile : MonoBehaviour
+public class Tile
 {
     //list is 0.089 5*5 5*5
     //hashset is 0.083 5*5 5*5

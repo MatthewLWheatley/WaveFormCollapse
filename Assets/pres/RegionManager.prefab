@@ -51,7 +51,7 @@ MonoBehaviour:
   failCount: 0
   resetCount: 0
   maxFailCount: 5
-  tilePrefab: {fileID: 7223019185097040091, guid: c1a13cee700145a4091bb760e65a613f,
+  tilePrefab: {fileID: 620040156300198187, guid: c1a13cee700145a4091bb760e65a613f,
     type: 3}
   StartTime: 0
   FinishCollapseTime: 0
