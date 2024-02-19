@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -23,16 +24,22 @@ public class BenchMarker : MonoBehaviour
 
     public int MaxRunCount = 100;
 
+
+
+    public TextMeshProUGUI t_TR100;
+    public TextMeshProUGUI t_TR80;
+    public TextMeshProUGUI t_TotalTime;
+    public TextMeshProUGUI t_RunCount;
+    public TextMeshProUGUI t_RegionsCollapsed;
+    public TextMeshProUGUI t_RegionsRendered;
+
+    public bool running = false;
+    public bool rendering = false;
+    public bool realTimeRendering = false;
+
     public int RunCount;
     public float CollapseTime = 0.0f;
-    public TextMeshProUGUI CollapsedTime;
-    public TextMeshProUGUI RunText;
-    public TextMeshProUGUI RunningTotal;
-    public TextMeshProUGUI colapseTotal;
-    public TextMeshProUGUI renderTotal;
-
     List<Manager> managerScripts = new List<Manager>();
-
     public List<float> runTimes = new List<float>();
 
     void Start()
@@ -43,12 +50,20 @@ public class BenchMarker : MonoBehaviour
         {
             Random.InitState(seed);
         }
+
+        t_RegionsCollapsed.text = "0";
+        t_RegionsRendered.text = "0";
+        t_RunCount.text = "0";
+        t_TR80.text = "0";
+        t_TotalTime.text = "0";
+        t_TR100.text = "0";
     }
 
     float startTime = 0.0f;
 
     private void Update()
     {
+        if (!running) return;
         if (RunCount >= MaxRunCount) return;
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -61,8 +76,8 @@ public class BenchMarker : MonoBehaviour
         List<Manager> list = new List<Manager>();
         foreach (Manager intst in managerScripts)
         {
-            colapseTotal.text = string.Format(intst.renderedCount.ToString());
-            renderTotal.text = string.Format(intst.collapseCount.ToString());
+            t_RegionsCollapsed.text = string.Format(intst.renderedCount.ToString());
+            t_RegionsRendered.text = string.Format(intst.collapseCount.ToString());
             
             if (intst.collapsed && intst.rendered)
             {
@@ -84,13 +99,22 @@ public class BenchMarker : MonoBehaviour
 
             runTimes.Add((Time.time - startTime));
 
-            RunText.text = string.Format(RunCount.ToString());
-            RunningTotal.text = string.Format(CollapseTime.ToString());
+            t_RunCount.text = string.Format(RunCount.ToString());
+            t_TotalTime.text = string.Format(CollapseTime.ToString());
 
-            CollapsedTime.text = string.Format(CalculateAverageExcludingOutliers().ToString());
+            t_TR80.text = string.Format(CalculateAverageExcludingOutliers().ToString());
+            t_TR100.text = string.Format((CollapseTime/(float)RunCount).ToString());
             DeleteManagers();
             SpawnManagers();
             startTime = Time.time;
+        }
+    }
+
+    public void PauseManagers()
+    {
+        foreach (Manager intst in managerScripts)
+        {
+            intst.Running = !intst.Running;
         }
     }
 
@@ -132,7 +156,8 @@ public class BenchMarker : MonoBehaviour
         {
             DestroyChildAndMesh(child);
         }
-        System.GC.Collect();
+        managerScripts = new List<Manager>();
+            System.GC.Collect();
     }
 
     void DestroyChildAndMesh(Transform parent)
@@ -174,6 +199,70 @@ public class BenchMarker : MonoBehaviour
                     managerScript.seed = seed;
                 }
             }
+        }
+        startTime = Time.time;
+        foreach (Manager intst in managerScripts)
+        {
+            intst.renderOnFinish = rendering;
+        }
+        foreach (Manager intst in managerScripts)
+        {
+            intst.realTimeRender = realTimeRendering;
+        }
+        //PauseManagers();
+    }
+
+    public void Run() 
+    { 
+        DeleteManagers();
+        SpawnManagers();
+        running = true;
+    }
+
+    public void Pause()
+    {
+       running = !running;
+        PauseManagers();
+    }
+
+    public void Cancel()
+    {
+        running = false;
+        t_RegionsCollapsed.text = "0";
+        t_RegionsRendered.text = "0";
+        t_RunCount.text = "0";
+        t_TR80.text = "0";
+        t_TotalTime.text = "0";
+        t_TR100.text = "0";
+        DeleteManagers();
+        RunCount = 0;
+        CollapseTime = 0;
+        runTimes = new List<float>();
+    }
+
+    public void RenderRealTime() 
+    {
+        realTimeRendering = !realTimeRendering;
+        foreach (Manager intst in managerScripts)
+        {
+            intst.renderOnFinish = rendering;
+        }
+        foreach (Manager intst in managerScripts)
+        {
+            intst.realTimeRender = realTimeRendering;
+        }
+    }
+
+    public void RenderAtFinish()
+    {
+        rendering = !rendering;
+        foreach (Manager intst in managerScripts)
+        {
+            intst.renderOnFinish = rendering;
+        }
+        foreach (Manager intst in managerScripts)
+        {
+            intst.realTimeRender = realTimeRendering;
         }
     }
 }

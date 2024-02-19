@@ -9,9 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6997249427686470278}
-  - component: {fileID: 1515428826683428729}
+  - component: {fileID: -2484629704153602585}
   m_Layer: 0
-  m_Name: managerPrefab
+  m_Name: StitchedManagerPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -32,7 +32,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1515428826683428729
+--- !u!114 &-2484629704153602585
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -41,7 +41,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4449771667803146177}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 74f194fffb683ea4b8621d1876da05e9, type: 3}
+  m_Script: {fileID: 11500000, guid: 8b74a0805a4ded24f9ad30cc5ac95e3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   tilePrefab: {fileID: 620040156300198187, guid: c1a13cee700145a4091bb760e65a613f,
@@ -49,8 +49,7 @@ MonoBehaviour:
   seed: 0
   RegionPrefab: {fileID: 2526488758609007937, guid: 35c77e6af3eb33647aedb5313ff0538a,
     type: 3}
-  RunningTotal: {fileID: 1548197621844457607, guid: e40e07aa880ab9e40ac90309e736ffbf,
-    type: 3}
+  RunningTotal: {fileID: 0}
   collapsed: 0
   rendered: 0
   FinishCollapseTime: 0

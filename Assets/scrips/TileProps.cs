@@ -13,10 +13,14 @@ public class TileProps : MonoBehaviour
     public GameObject Parent { get; private set; }
     private byte[] exits = new byte[6];
     [SerializeField] private GameObject centre;
+    [SerializeField] private MeshRenderer centreRenderer;
     [SerializeField] private GameObject[] edges;
+    [SerializeField] private MeshRenderer[] edgesRenderer;
     [SerializeField] private GameObject edge;
     [SerializeField] private Material[] mats;
     public bool renderered = false;
+
+    public bool collapsed = false;
 
     private Mesh[] meshes;
 
@@ -25,6 +29,38 @@ public class TileProps : MonoBehaviour
     private void Start()
     {
         edges = new GameObject[6];
+        edgesRenderer = new MeshRenderer[6];
+        for (int i = 0; i < 6; i++)
+        {
+            Vector3 Target = new Vector3(0.0f, 0.0f, 0.0f);
+            switch (i)
+            {
+                case 0:
+                    Target.x += 1;
+                    break;
+                case 1:
+                    Target.y += 1;
+                    break;
+                case 2:
+                    Target.z += 1;
+                    break;
+                case 3:
+                    Target.x -= 1;
+                    break;
+                case 4:
+                    Target.y -= 1;
+                    break;
+                case 5:
+                    Target.z -= 1;
+                    break;
+            }
+            var temp = Instantiate(edge, transform.position + Target, Quaternion.identity, this.transform);
+            edges[i] = temp.gameObject;
+            edges[i].SetActive(false);
+            edgesRenderer[i] = edges[i].GetComponent<MeshRenderer>();
+        }
+
+        centreRenderer = centre.GetComponent<MeshRenderer>();
     }
 
     bool done = false;
@@ -33,49 +69,23 @@ public class TileProps : MonoBehaviour
     {
         if(renderered) { return; }
         poss.x = pos.x; poss.y = pos.y; poss.z = pos.z;
-        edges = new GameObject[6];
+        //edges = new GameObject[6];
         exits = _exits;
         for (int i = 0; i < exits.Length; i++)
         {
             if (exits[i] > 0)
             {
-                Vector3 Target = new Vector3(0.0f, 0.0f, 0.0f);
-                switch (i)
-                {
-                    case 0:
-                        Target.x += 1;
-                        break;
-                    case 1:
-                        Target.y += 1;
-                        break;
-                    case 2:
-                        Target.z += 1;
-                        break;
-                    case 3:
-                        Target.x -= 1;
-                        break;
-                    case 4:
-                        Target.y -= 1;
-                        break;
-                    case 5:
-                        Target.z -= 1;
-                        break;
-                }
-                if (!(edges[i] != null)) 
-                { 
-                    edges[i] = Instantiate(edge, transform.position + Target, Quaternion.identity, this.transform);
-                    // Debug.Log(i);
+                edges[i].SetActive(true);
+                centre.SetActive(true);
+                done = true;
 
-                    centre.SetActive(true);
-                    done = true;
+                edgesRenderer[i].material = mats[exits[i] - 1];
+                centreRenderer.material = mats[exits[i] - 1];
 
-                    edges[i].GetComponent<MeshRenderer>().material = mats[exits[i] - 1];
-                    centre.GetComponent<MeshRenderer>().material = mats[exits[i] - 1];
-
-                    renderered = true;
-                }
+                renderered = true;
+                //}
             }
-            else 
+            else
             {
                 //if (edges[i] != null && edges[i].gameObject != null)
                 //{

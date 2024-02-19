@@ -8,7 +8,7 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using static System.Net.WebRequestMethods;
 
-public class Region : MonoBehaviour
+public class Region
 {
     // Variables for managing procedural generation and rendering.
     public int seed; // Seed for the random number generator to ensure reproducibility.
@@ -18,7 +18,6 @@ public class Region : MonoBehaviour
     public (int x, int y, int z) min; // Minimum bounds for the region.
     public (int x, int y, int z) pos; // Current position of the region.
     public Dictionary<int, byte[]> entropy = new Dictionary<int, byte[]>(); // Stores entropy values for procedural generation.
-    public Dictionary<(int x, int y, int z), GameObject> GamobjectMap = new Dictionary<(int x, int y, int z), GameObject>();
     public bool collapsed = false; // Flag to indicate if the wave function collapse has completed.
     public bool rendered = false; // Flag to indicate if the region has been rendered.
     private List<(int x, int y, int z)> mNotCollapsesed; // Tracks tiles that have not yet collapsed.
@@ -49,30 +48,19 @@ public class Region : MonoBehaviour
     public bool updateingEntropy = false;
     public int tileCounter = 0;
 
+    System.Random rnd = new System.Random();
 
     public void RunUpdate()
     {
-        FinishCollapseTime += Time.deltaTime;
-        if (FinishCollapseTime <= 0.0000001) return;
+        //FinishCollapseTime += Time.deltaTime;
+        //if (FinishCollapseTime <= 0.0000001) return;
 
         FinishCollapseTime = 0;
         if (CheckAndHandleCollapse()) return; // If all tiles have collapsed or a failure occurred, exit early.
-        //if (updateingEntropy) return;
-        //string temp = "";
-        //foreach (var tile in mNotCollapsesed)
-        //{
-        //    temp += $" {mTile[tile].GetEntropyCount()}";
-        //}
-        //Debug.Log(temp);
+
         UpdateAllEntropy();
-        //temp = "";
-        //foreach (var tile in mNotCollapsesed)
-        //{
-        //    temp += $" {mTile[tile].GetEntropyCount()}";
-        //}
-        //Debug.Log(temp);
+
         AttemptCollapseRandomTile();
-        //RunRenderer();
     }
 
     public void UpdateAllEntropy()
@@ -118,7 +106,7 @@ public class Region : MonoBehaviour
         {
             var temp = mNotCollapsesed[i];
             //Debug.Log($"{temp.x},{temp.y},{temp.z}  {mTile[mNotCollapsesed[i]].GetEntropyCount()}");
-            mTile[temp].SetEntropy(entropy.Keys.ToHashSet());
+            mTile[temp].SetEntropy(entropy.Keys.ToList());
         }
         //if (mNotCollapsesed.Count == 25) return;
 
@@ -127,7 +115,7 @@ public class Region : MonoBehaviour
             var lastPos = mStack.Pop();
             mNotCollapsesed.Add(lastPos);
 
-            mTile[lastPos].SetEntropy(entropy.Keys.ToHashSet());
+            mTile[lastPos].SetEntropy(entropy.Keys.ToList());
 
             UpdateEntropy(lastPos, true);
         }
@@ -154,55 +142,19 @@ public class Region : MonoBehaviour
         var lowEntropyList = GetLowestEntropyList().ToList(); // Assumes this could change from earlier if failures were handled.
         if (lowEntropyList.Count == 0) return;
 
-        var randomIndex = Random.Range(0, lowEntropyList.Count);
+        var randomIndex = rnd.Next(0, lowEntropyList.Count);
         var selectedPos = lowEntropyList[randomIndex];
-        CollapseEntropy(selectedPos);
+        if (!CollapseEntropy(selectedPos)) 
+        { 
+            HandleFailState();
+        }
     }
 
     public void RunRenderer()
     {
-
         if (!rendered) // Check if the region has not been rendered yet.
         {
-            MeshFilter meshFilter;
-            MeshRenderer meshRenderer;
-
-            if (transform.TryGetComponent<MeshFilter>(out meshFilter))
-            {
-                DestroyImmediate(meshFilter.mesh); // Destroy the mesh
-                DestroyImmediate(meshFilter); // Destroy the mesh
-            }
-            if (transform.TryGetComponent<MeshRenderer>(out meshRenderer))
-            {
-                DestroyImmediate(meshRenderer); // Destroy the mesh
-            }
-            // Iterate backwards through the child list and destroy all child GameObjects for clean-up.
-            //for (int i = transform.childCount - 1; i >= 0; i--)
-            //{
-            //    Destroy(transform.GetChild(i).gameObject);
-            //}
-
-            foreach (var tile in GamobjectMap)
-            {
-                var TempTile = tile.Value;
-                TileProps temp = TempTile.GetComponent<TileProps>();
-                var e = mTile[tile.Key].GetExits();
-                byte[] ent;
-                if (e == -1)
-                {
-                    ent = new byte[6] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-                }
-                else
-                {
-                    ent = entropy[e];
-                }
-                temp.SetExits(ent, tile.Key);
-                //CombineMeshes();
-            }
-
-            //CombineMeshes(); // Combine meshes for optimization after rendering all tiles.
-
-            //rendered = true; // Uncomment this to prevent re-rendering in subsequent updates.
+            manager.SpawnTiles(mTile);
         }
     }
 
@@ -216,7 +168,7 @@ public class Region : MonoBehaviour
         mTile = new Dictionary<(int x, int y, int z), Tile>();
         mNotCollapsesed = new List<(int x, int y, int z)>();
         mStack = new Stack<(int x, int y, int z)>();
-        GamobjectMap = new Dictionary<(int x, int y, int z), GameObject>();
+        
         entropy = _ent;
         foreach (var en in _ent)
         {
@@ -225,7 +177,7 @@ public class Region : MonoBehaviour
         }
         InitTiles(); // Initialize tiles based on the specified bounds and entropy.
 
-        StartTime = Time.time; // Record start time for performance tracking.
+        //StartTime = Time.time; // Record start time for performance tracking.
     }
 
     private void InitTiles()
@@ -241,20 +193,20 @@ public class Region : MonoBehaviour
                 for (int z = min.z; z < max.z; z++)
                 {
                     //Debug.Log(z);
-                    if (!GamobjectMap.ContainsKey((x, y, z)))
+                    if (!mTile.ContainsKey((x, y, z)))
                     {
                         //Debug.Log($"{x}, {y}, {z}");
                         //Debug.Log("ficlklclckckngdusujjnksl;ujnikhsejnklrfhujnlikesgvujnhkmred");
-                        Vector3 _targetPos = new Vector3((float)x * 3 + transPosisiton.x, (float)y * 3 + transPosisiton.y, (float)z * 3 + transPosisiton.z);
-                        GameObject TempTile = Instantiate(tilePrefab, _targetPos, Quaternion.identity, transform);
-                        //TempTile.AddComponent<Tile>();
+                        //Vector3 _targetPos = new Vector3((float)x * 3 + transPosisiton.x, (float)y * 3 + transPosisiton.y, (float)z * 3 + transPosisiton.z);
+                        //GameObject TempTile = Instantiate(tilePrefab, _targetPos, Quaternion.identity, transform);
+                        ////TempTile.AddComponent<Tile>();
                         //Tile temp = TempTile.GetComponent<Tile>();
                         Tile temp = new Tile();
-                        temp.Initialize((x, y, z), max, entropy.Keys.ToHashSet());
+                        temp.Initialize((x, y, z), max, entropy.Keys.ToList());
 
                         mTile.Add((x, y, z), temp);
                         mNotCollapsesed.Add((x, y, z));
-                        GamobjectMap.Add((x, y, z), TempTile);
+                        //GamobjectMap.Add((x, y, z), TempTile);
                     }
 
                 }
@@ -283,9 +235,9 @@ public class Region : MonoBehaviour
             //Debug.Log($"{pos.x},{pos.y},{pos.z} {_tE.Count}");
 
             //_targetEntropy = isOutside ? manager.GetTileEntropy(_tP) : mTile[_tP].GetEntropy();
-            HashSet<int> toRemove = new HashSet<int>();
+            List<int> toRemove = new List<int>();
             int _correspondingExit = (_dir + 3) % 6;
-            HashSet<byte> possibleExits = new HashSet<byte>();
+            List<byte> possibleExits = new List<byte>();
 
             // Find all the possible exits.
             foreach (var _exit in _tE)
@@ -295,7 +247,7 @@ public class Region : MonoBehaviour
             }
 
             // Remove impossible states.
-            foreach (var ent in mTile[pos].entropy)
+            foreach (var ent in mTile[pos].entropy.ToList())
             {
                 if (!possibleExits.Contains(entropy[ent][_dir]))
                 {
@@ -306,22 +258,35 @@ public class Region : MonoBehaviour
             // Use HashSet's ExceptWith for efficiency.
             foreach (var remove in toRemove) 
             {
-                mTile[pos].entropy.Remove(remove);
+                if(mTile[pos].entropy.Contains(remove)) mTile[pos].entropy.Remove(remove);
             }
         }
     }
 
-    private void CollapseEntropy((int x, int y, int z) pos)
-    {
-        int entropyCount = mTile[pos].GetEntropyCount();
-        if (entropyCount == 0) return;
+    private readonly object lockObject = new object();
 
-        int _randNum = Random.Range(0, entropyCount);
-        int randomEntropyElement = mTile[pos].GetEntropy().ElementAt(_randNum);
-        mTile[pos].entropy = new HashSet<int>();
-        mTile[pos].entropy.Add(randomEntropyElement);
-        mNotCollapsesed.Remove(pos);
-        mStack.Push(pos);
+    private bool CollapseEntropy((int x, int y, int z) pos)
+    {
+        lock (lockObject)
+        {
+            UpdateAllEntropy();
+            int entropyCount = mTile[pos].GetEntropyCount();
+            if (entropyCount == 0)
+            {
+                Debug.Log($"{pos.x},{pos.y},{pos.z}, {mNotCollapsesed.Count} fuck");
+                ///ResetRegionState();
+                return false;
+            }
+
+            int _randNum = rnd.Next(0, entropyCount);
+            int randomEntropyElement = mTile[pos].GetEntropy().ElementAt(_randNum);
+            mTile[pos].entropy = new List<int>();
+            mTile[pos].entropy.Add(randomEntropyElement);
+            manager.mGameObject[pos].collapsed = true;
+            mNotCollapsesed.Remove(pos);
+            mStack.Push(pos);
+            return true;
+        }
     }
 
     private HashSet<(int, int, int)> GetLowestEntropyList()
@@ -391,19 +356,22 @@ public class Region : MonoBehaviour
         return _ent;
     }
 
-    public HashSet<int> GetTile((int x, int y, int z) _targetTile)
+    public List<int> GetTile((int x, int y, int z) _targetTile)
     {
-        return mTile[_targetTile].GetEntropy();
+        List<int> result = new List<int>();
+        lock (lockObject)
+        {
+            return mTile[_targetTile].entropy;
+        }
     }
 
     public void ResetRegionState()
     {
-        foreach (var pos in mNotCollapsesed) 
+        Parallel.ForEach(mNotCollapsesed, pos =>
         {
-            mTile[pos].SetEntropy(entropy.Keys.ToHashSet());
-        }
+            mTile[pos].SetEntropy(entropy.Keys.ToList());
+        });
         mCollapseCount--;
-        //Debug.Log("fuck you cunt");
     }
 
     public void NukeCloseRegion() 
@@ -413,10 +381,10 @@ public class Region : MonoBehaviour
 
     private void ResetVisuals()
     {
-        foreach (Transform child in transform)
-        {
-            Destroy(child.gameObject);
-        }
+        //foreach (Transform child in transform)
+        //{
+        //    Destroy(child.gameObject);
+        //}
     }
 
     public void CombineMeshes()

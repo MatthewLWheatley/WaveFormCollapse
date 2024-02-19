@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4193792055387011241}
-  - component: {fileID: 2187779485959540437}
+  - component: {fileID: -8037016974533121534}
   m_Layer: 0
   m_Name: RegionManager
   m_TagString: Untagged
@@ -32,7 +32,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2187779485959540437
+--- !u!114 &-8037016974533121534
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -41,21 +41,21 @@ MonoBehaviour:
   m_GameObject: {fileID: 2526488758609007937}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 84168f25c0ac5ce45a1e8c80a48e8c8b, type: 3}
+  m_Script: {fileID: 11500000, guid: 74f194fffb683ea4b8621d1876da05e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  seed: 0
-  manager: {fileID: 0}
-  collapsed: 0
-  rendered: 0
-  failCount: 0
-  resetCount: 0
-  maxFailCount: 5
   tilePrefab: {fileID: 620040156300198187, guid: c1a13cee700145a4091bb760e65a613f,
     type: 3}
-  StartTime: 0
+  seed: 0
+  RegionPrefab: {fileID: 2526488758609007937}
+  RunningTotal: {fileID: 0}
+  collapsed: 0
+  rendered: 0
   FinishCollapseTime: 0
-  running: 0
   mCollapseCount: 0
-  updateingEntropy: 0
-  tileCounter: 0
+  realTimeRender: 0
+  renderOnFinish: 0
+  Running: 1
+  collapseCount: 0
+  renderedCount: 0
+  time: 0
