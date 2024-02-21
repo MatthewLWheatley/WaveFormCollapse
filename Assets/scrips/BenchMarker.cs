@@ -12,13 +12,21 @@ public class BenchMarker : MonoBehaviour
     public int seed;
     public bool randomSeed = false;
 
-    public GameObject managerPrefab;
+    /// <summary>
+    /// 0 = normal/region
+    /// 1 = stiched
+    /// 3 = Repeated WFC
+    /// </summary>
+    public int managerVersion = 0;
+    public GameObject[] managerPrefabs;
+
     public int maxX;
     public int maxY;
     public int maxZ;
     public int RegionX;
     public int RegionY;
     public int RegionZ;
+    public int StitchSize;
     public int width;
     public int depth;
 
@@ -61,18 +69,30 @@ public class BenchMarker : MonoBehaviour
 
     float startTime = 0.0f;
 
+    public void ChangeWFCVerison(string type) 
+    {
+        switch (type) 
+        {
+            case "WFC":
+                managerVersion = 0;
+                break;
+            case "N-WFC":
+                managerVersion = 1;
+                break;
+            case "S-WFC":
+                managerVersion = 2;
+                break;
+            case "R-WFC":
+                managerVersion = 4;
+                break;
+        }
+    }
+
     private void Update()
     {
+
         if (!running) return;
         if (RunCount >= MaxRunCount) return;
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            DeleteManagers();
-            if (randomSeed) seed++;
-            Random.InitState(seed);
-
-            SpawnManagers();
-        }
         List<Manager> list = new List<Manager>();
         foreach (Manager intst in managerScripts)
         {
@@ -146,7 +166,7 @@ public class BenchMarker : MonoBehaviour
         {
             total += time;
         }
-        Debug.Log($"{countToRemove}, {total}, {sortedTimes.Count}");
+        //Debug.Log($"{countToRemove}, {total}, {sortedTimes.Count}");
         return total / sortedTimes.Count; // Return the average of the adjusted list
     }
 
@@ -187,7 +207,7 @@ public class BenchMarker : MonoBehaviour
                 Vector3 position = new Vector3(x * maxX * 3, 0, z * maxZ * 3);
 
                 // Instantiate the manager prefab
-                GameObject managerInstance = Instantiate(managerPrefab, position, Quaternion.identity, this.transform);
+                GameObject managerInstance = Instantiate(managerPrefabs[managerVersion], position, Quaternion.identity, this.transform);
 
                 // Assuming the Manager script is attached to the prefab and has public maxX, maxY, maxZ
                 Manager managerScript = managerInstance.GetComponent<Manager>();

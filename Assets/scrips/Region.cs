@@ -273,8 +273,8 @@ public class Region
             int entropyCount = mTile[pos].GetEntropyCount();
             if (entropyCount == 0)
             {
-                Debug.Log($"{pos.x},{pos.y},{pos.z}, {mNotCollapsesed.Count} fuck");
-                ///ResetRegionState();
+                //Debug.Log($"{pos.x},{pos.y},{pos.z}, {mNotCollapsesed.Count} fuck");
+                ResetRegionState();
                 return false;
             }
 

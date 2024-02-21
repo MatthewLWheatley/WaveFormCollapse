@@ -30,7 +30,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &7668789440186061114
 MonoBehaviour:
@@ -44,8 +44,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac50ca9cf1c533349a1bafa1d680b80b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  managerPrefab: {fileID: 1445259381991249452, guid: febfd4a9cf67efa44bbfa79d211f22d5,
-    type: 3}
+  seed: 0
+  randomSeed: 0
+  managerVersion: 0
+  managerPrefabs:
+  - {fileID: 4449771667803146177, guid: febfd4a9cf67efa44bbfa79d211f22d5, type: 3}
+  - {fileID: 4449771667803146177, guid: 80250c36aa1f8ae468d43db73794ec98, type: 3}
   maxX: 5
   maxY: 1
   maxZ: 5
@@ -54,8 +58,16 @@ MonoBehaviour:
   RegionZ: 0
   width: 1
   depth: 1
+  MaxRunCount: 100
+  t_TR100: {fileID: 0}
+  t_TR80: {fileID: 0}
+  t_TotalTime: {fileID: 0}
+  t_RunCount: {fileID: 0}
+  t_RegionsCollapsed: {fileID: 0}
+  t_RegionsRendered: {fileID: 0}
+  running: 0
+  rendering: 0
+  realTimeRendering: 0
   RunCount: 0
   CollapseTime: 0.000001
-  CollapsedTime: {fileID: 0}
-  RunText: {fileID: 0}
-  RunningTotal: {fileID: 0}
+  runTimes: []
