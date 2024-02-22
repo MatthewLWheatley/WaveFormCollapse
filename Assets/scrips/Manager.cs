@@ -74,11 +74,6 @@ public class Manager : MonoBehaviour
     private void Update()
     {
         if(!Running) return;
-        CustomUpdate();
-    }
-
-    public virtual void CustomUpdate() 
-    {
         //Debug.Log("running");
         mCollapseCount = mNotCollapsesed.Count;
 
@@ -96,10 +91,10 @@ public class Manager : MonoBehaviour
             {
                 if (mStack.Count > 0)
                 {
-                    foreach (var tile in mNotCollapsesed)
+                    foreach (var coord in mNotCollapsesed)
                     {
-                        ResetRegion(tile, 0);
-                        mRegion[tile].ResetRegionState();
+                        ResetRegion(coord, 0);
+                        mRegion[coord].ResetRegionState();
                     }
                     //Debug.Log("pop");
                     var temp5 = mStack.Pop();
@@ -107,9 +102,9 @@ public class Manager : MonoBehaviour
                     targetRegion = temp5;
                     ResetRegion(targetRegion, 0);
                     if (realTimeRender) r.RunRenderer();
-                    foreach (var tile in mNotCollapsesed)
+                    foreach (var coord in mNotCollapsesed)
                     {
-                        mRegion[tile].UpdateAllEntropy();
+                        mRegion[coord].UpdateAllEntropy();
                     }
                 }
                 else
@@ -127,7 +122,7 @@ public class Manager : MonoBehaviour
             {
                 mStack.Push(targetRegion);
                 r.running = false;
-                if(renderOnFinish)r.RunRenderer();
+                if (renderOnFinish) r.RunRenderer();
                 collapseCount++;
                 mNotCollapsesed.Remove(targetRegion);
                 UpdateRegionEntropyList(true);
@@ -407,19 +402,19 @@ public class Manager : MonoBehaviour
         }
         maxRegion = (posX, posY, posZ);
 
-        //for (int x = 0; x < max.x; x++)
-        //{
-        //    for (int y = 0; y < max.y; y++)
-        //    {
-        //        for (int z = 0; z < max.z; z++) 
-        //        {
-        //            Vector3 _targetPos = new Vector3((float)x * 3, (float)y * 3, (float)z * 3);
-        //            GameObject TempTile = Instantiate(tilePrefab, _targetPos, Quaternion.identity, transform);
-                    
-        //            mGameObject.Add((x, y, z), TempTile.GetComponent<TileProps>());
-        //        }
-        //    }
-        //}
+        for (int x = 0; x < max.x; x++)
+        {
+            for (int y = 0; y < max.y; y++)
+            {
+                for (int z = 0; z < max.z; z++)
+                {
+                    Vector3 _targetPos = new Vector3((float)x * 3, (float)y * 3, (float)z * 3);
+                    GameObject TempTile = Instantiate(tilePrefab, _targetPos, Quaternion.identity, transform);
+
+                    mGameObject.Add((x, y, z), TempTile.GetComponent<TileProps>());
+                }
+            }
+        }
 
         foreach (var region in regions)
         {

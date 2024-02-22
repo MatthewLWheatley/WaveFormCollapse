@@ -52,14 +52,7 @@ public class NestedRegion
 
     public void RunUpdate()
     {
-        //FinishCollapseTime += Time.deltaTime;
-        //if (FinishCollapseTime <= 0.0000001) return;
-
-        FinishCollapseTime = 0;
-        if (CheckAndHandleCollapse()) return; // If all tiles have collapsed or a failure occurred, exit early.
-
-        UpdateAllEntropy();
-
+        if (CheckAndHandleCollapse()) return;
         AttemptCollapseRandomTile();
     }
 
@@ -71,12 +64,6 @@ public class NestedRegion
         {
             UpdateEntropy(pos, true);
         }
-
-        //temp.Reverse();
-        //foreach ((int x, int y, int z) pos in temp)
-        //{
-        //    UpdateEntropy(pos, true);
-        //}
     }
 
     private bool CheckAndHandleCollapse()
@@ -216,37 +203,28 @@ public class NestedRegion
 
     private void UpdateEntropy((int x, int y, int z) pos, bool full)
     {
+
+        List<int> toRemove = new List<int>();
         // Loop through all directions and check entropy
         for (int _dir = 0; _dir < 6; _dir++)
         {
             (int x, int y, int z) _tP = (pos.x + Dirs[_dir].x, pos.y + Dirs[_dir].y, pos.z + Dirs[_dir].z);
+            if (pos.x == _tP.x && pos.y == _tP.y && pos.z == _tP.z) continue;
             List<int> _tE;
-            // Adjust boundary check to correctly wrap or handle edge cases.
             bool isOutside = _tP.x < min.x || _tP.x >= max.x || _tP.y < min.y || _tP.y >= max.y || _tP.z < min.z || _tP.z >= max.z;
             
-            //if(_tP == (0,0,0))
-            //foreach (var tile in mTile) 
-            //{
-            //    Debug.Log($"{tile.Key.x}, {tile.Key.y}, {tile.Key.z}");
-            //}
-            //if (_tP == (0,0,0)) return;
             if(isOutside)_tE = manager.GetTileEntropy(_tP).ToList();
             else _tE = mTile[_tP].GetEntropy().ToList();
-            //Debug.Log($"{pos.x},{pos.y},{pos.z} {_tE.Count}");
 
-            //_targetEntropy = isOutside ? manager.GetTileEntropy(_tP) : mTile[_tP].GetEntropy();
-            List<int> toRemove = new List<int>();
             int _correspondingExit = (_dir + 3) % 6;
             List<byte> possibleExits = new List<byte>();
 
-            // Find all the possible exits.
             foreach (var _exit in _tE)
             {
                 byte exitValue = entropy[_exit][_correspondingExit];
                 possibleExits.Add(exitValue);
             }
 
-            // Remove impossible states.
             foreach (var ent in mTile[pos].entropy.ToList())
             {
                 if (!possibleExits.Contains(entropy[ent][_dir]))
@@ -254,12 +232,10 @@ public class NestedRegion
                     toRemove.Add(ent);
                 }
             }
-
-            // Use HashSet's ExceptWith for efficiency.
-            foreach (var remove in toRemove) 
-            {
-                if(mTile[pos].entropy.Contains(remove)) mTile[pos].entropy.Remove(remove);
-            }
+        }
+        foreach (var remove in toRemove)
+        {
+            if (mTile[pos].entropy.Contains(remove)) mTile[pos].entropy.Remove(remove);
         }
     }
 
@@ -273,7 +249,6 @@ public class NestedRegion
             int entropyCount = mTile[pos].GetEntropyCount();
             if (entropyCount == 0)
             {
-                //Debug.Log($"{pos.x},{pos.y},{pos.z}, {mNotCollapsesed.Count} fuck");
                 ResetRegionState();
                 return false;
             }
@@ -367,10 +342,10 @@ public class NestedRegion
 
     public void ResetRegionState()
     {
-        Parallel.ForEach(mNotCollapsesed, pos =>
+        foreach (var pos in mNotCollapsesed)
         {
             mTile[pos].SetEntropy(entropy.Keys.ToHashSet());
-        });
+        }
         mCollapseCount--;
     }
 

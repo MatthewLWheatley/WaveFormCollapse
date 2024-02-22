@@ -21,12 +21,15 @@ public class SelectorScript : MonoBehaviour
         bench = benchMarker.GetComponent<BenchMarker>();
     }
 
-
     public void Running() 
     {
         if (bench.running)
         {
-            this.GetComponent<Button>().interactable = false;
+            Button buttonComponent;
+            if (this.TryGetComponent<Button>(out buttonComponent))
+            {
+                buttonComponent.interactable = false;
+            }
             foreach (var tempMenu in menus)
             {
                 tempMenu.GetComponent<TMP_InputField>().interactable = false;
@@ -34,7 +37,11 @@ public class SelectorScript : MonoBehaviour
         }
         else
         {
-            this.GetComponent<Button>().interactable = true;
+            Button buttonComponent;
+            if (this.TryGetComponent<Button>(out buttonComponent))
+            {
+                buttonComponent.interactable = true;
+            }
             foreach (var tempMenu in menus)
             {
                 tempMenu.GetComponent<TMP_InputField>().interactable = true;
@@ -167,4 +174,27 @@ public class SelectorScript : MonoBehaviour
         menu.SetActive(true);
     }
 
+    public void ChangeRunCount()
+    {
+        var temp = menus[0].GetComponent<TMP_InputField>().text;
+        int newTemp;
+        bool success = int.TryParse(temp, out newTemp);
+        if (success)
+        {
+            bench.MaxRunCount = int.Parse(temp);
+        }
+    }
+
+    public void ChangeComplexity()
+    {
+        var temp = menus[1].GetComponent<TMP_InputField>().text;
+        int newTemp;
+        bool success = int.TryParse(temp, out newTemp);
+        if (success)
+        {
+            if(newTemp < 2) newTemp = 2;
+            if(newTemp > 5) newTemp = 5;
+            bench.complexity = int.Parse(temp);
+        }
+    }
 }
