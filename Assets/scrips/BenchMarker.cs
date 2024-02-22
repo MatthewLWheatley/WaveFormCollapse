@@ -177,7 +177,7 @@ public class BenchMarker : MonoBehaviour
             DestroyChildAndMesh(child);
         }
         managerScripts = new List<Manager>();
-            System.GC.Collect();
+            //System.GC.Collect();
     }
 
     void DestroyChildAndMesh(Transform parent)

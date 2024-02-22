@@ -129,10 +129,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   centre: {fileID: 575176384154984286}
+  centreRenderer: {fileID: 0}
   edges: []
+  edgesRenderer: []
   edge: {fileID: 7310942344303385605, guid: e844381171a427e48a5df7aaa54be29e, type: 3}
   mats:
   - {fileID: 2100000, guid: 66cc3185df69d5e4fa4325fa1d494036, type: 2}
   - {fileID: 2100000, guid: 369e2ba8ec94f284dba7b3f11391e8b1, type: 2}
+  - {fileID: 2100000, guid: 483d7c0bd3875c54385a83118302fad8, type: 2}
+  - {fileID: 2100000, guid: 769c676846fd9c9498663cb2ac70f648, type: 2}
+  - {fileID: 2100000, guid: 96702895f403ae14b8090b6951714486, type: 2}
+  - {fileID: 2100000, guid: cb443d9b45419c74c8e98eb3713f2397, type: 2}
   renderered: 0
+  collapsed: 0
   poss: {x: 0, y: 0, z: 0}

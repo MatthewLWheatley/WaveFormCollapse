@@ -124,15 +124,12 @@ public class Manager : MonoBehaviour
             }
             if (r.collapsed)
             {
-                //r.RunRenderer();
-                //r.CombineMeshes();
                 mStack.Push(targetRegion);
                 r.running = false;
-                //if(renderOnFinish)r.RunRenderer();
+                if(renderOnFinish)r.RunRenderer();
                 collapseCount++;
                 mNotCollapsesed.Remove(targetRegion);
                 UpdateRegionEntropyList(true);
-
             }
             RunningTotal.text = string.Format(collapseCount.ToString());
         }
@@ -151,7 +148,7 @@ public class Manager : MonoBehaviour
 
     protected void InitRules()
     {
-        byte[] _r = { 0x00, 0x01, 0x02};
+        byte[] _r = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 };
         List<byte[]> ent = new List<byte[]>();
         //entropy.Add(-1, new byte[] { _r[0], _r[0], _r[0], _r[0], _r[0], _r[0] });
 
@@ -166,49 +163,38 @@ public class Manager : MonoBehaviour
         ent.Add(new byte[] { _r[0], _r[0], _r[1], _r[0], _r[0], _r[1] });
         ent.Add(new byte[] { _r[0], _r[0], _r[0], _r[1], _r[0], _r[1] });
 
-        //entropy.Add(10, new byte[] { _r[0], _r[0], _r[2], _r[2], _r[0], _r[2] });
-        //entropy.Add(11, new byte[] { _r[2], _r[0], _r[0], _r[2], _r[0], _r[2] });
-        //entropy.Add(12, new byte[] { _r[2], _r[0], _r[2], _r[0], _r[0], _r[2] });
-        //entropy.Add(13, new byte[] { _r[2], _r[0], _r[2], _r[2], _r[0], _r[0] });
-        //entropy.Add(14, new byte[] { _r[2], _r[0], _r[2], _r[0], _r[0], _r[0] });
-        //entropy.Add(15, new byte[] { _r[2], _r[0], _r[0], _r[2], _r[0], _r[0] });
-        //entropy.Add(16, new byte[] { _r[2], _r[0], _r[0], _r[0], _r[0], _r[2] });
-        //entropy.Add(17, new byte[] { _r[0], _r[0], _r[2], _r[2], _r[0], _r[0] });
-        //entropy.Add(18, new byte[] { _r[0], _r[0], _r[2], _r[0], _r[0], _r[2] });
-        //entropy.Add(19, new byte[] { _r[0], _r[0], _r[0], _r[2], _r[0], _r[2] });
+        //ent.Add(new byte[] { _r[0], _r[0], _r[2], _r[2], _r[0], _r[2] });
+        //ent.Add(new byte[] { _r[2], _r[0], _r[0], _r[2], _r[0], _r[2] });
+        //ent.Add(new byte[] { _r[2], _r[0], _r[2], _r[0], _r[0], _r[2] });
+        //ent.Add(new byte[] { _r[2], _r[0], _r[2], _r[2], _r[0], _r[0] });
+        //ent.Add(new byte[] { _r[2], _r[0], _r[2], _r[0], _r[0], _r[0] });
+        //ent.Add(new byte[] { _r[2], _r[0], _r[0], _r[2], _r[0], _r[0] });
+        //ent.Add(new byte[] { _r[2], _r[0], _r[0], _r[0], _r[0], _r[2] });
+        //ent.Add(new byte[] { _r[0], _r[0], _r[2], _r[2], _r[0], _r[0] });
+        //ent.Add(new byte[] { _r[0], _r[0], _r[2], _r[0], _r[0], _r[2] });
+        //ent.Add(new byte[] { _r[0], _r[0], _r[0], _r[2], _r[0], _r[2] });
 
-        //ent.Add(new byte[] { _r[0], _r[1], _r[1], _r[1], _r[0], _r[1] });
-        //ent.Add(new byte[] { _r[1], _r[1], _r[0], _r[1], _r[0], _r[1] });
-        //ent.Add(new byte[] { _r[1], _r[1], _r[1], _r[0], _r[0], _r[1] });
-        //ent.Add(new byte[] { _r[1], _r[1], _r[1], _r[1], _r[0], _r[0] });
-        //ent.Add(new byte[] { _r[1], _r[1], _r[1], _r[0], _r[0], _r[0] });
-        //ent.Add(new byte[] { _r[1], _r[1], _r[0], _r[1], _r[0], _r[0] });
-        //ent.Add(new byte[] { _r[1], _r[1], _r[0], _r[0], _r[0], _r[1] });
-        //ent.Add(new byte[] { _r[0], _r[1], _r[1], _r[1], _r[0], _r[0] });
-        //ent.Add(new byte[] { _r[0], _r[1], _r[1], _r[0], _r[0], _r[1] });
-        //ent.Add(new byte[] { _r[0], _r[1], _r[0], _r[1], _r[0], _r[1] });
+        //ent.Add(new byte[] { _r[0], _r[0], _r[3], _r[3], _r[0], _r[3] });
+        //ent.Add(new byte[] { _r[3], _r[0], _r[0], _r[3], _r[0], _r[3] });
+        //ent.Add(new byte[] { _r[3], _r[0], _r[3], _r[0], _r[0], _r[3] });
+        //ent.Add(new byte[] { _r[3], _r[0], _r[3], _r[3], _r[0], _r[0] });
+        //ent.Add(new byte[] { _r[3], _r[0], _r[3], _r[0], _r[0], _r[0] });
+        //ent.Add(new byte[] { _r[3], _r[0], _r[0], _r[3], _r[0], _r[0] });
+        //ent.Add(new byte[] { _r[3], _r[0], _r[0], _r[0], _r[0], _r[3] });
+        //ent.Add(new byte[] { _r[0], _r[0], _r[3], _r[3], _r[0], _r[0] });
+        //ent.Add(new byte[] { _r[0], _r[0], _r[3], _r[0], _r[0], _r[3] });
+        //ent.Add(new byte[] { _r[0], _r[0], _r[0], _r[3], _r[0], _r[3] });
 
-        //ent.Add(new byte[] { _r[0], _r[0], _r[1], _r[1], _r[1], _r[1] });
-        //ent.Add(new byte[] { _r[1], _r[0], _r[0], _r[1], _r[1], _r[1] });
-        //ent.Add(new byte[] { _r[1], _r[0], _r[1], _r[0], _r[1], _r[1] });
-        //ent.Add(new byte[] { _r[1], _r[0], _r[1], _r[1], _r[1], _r[0] });
-        //ent.Add(new byte[] { _r[1], _r[0], _r[1], _r[0], _r[1], _r[0] });
-        //ent.Add(new byte[] { _r[1], _r[0], _r[0], _r[1], _r[1], _r[0] });
-        //ent.Add(new byte[] { _r[1], _r[0], _r[0], _r[0], _r[1], _r[1] });
-        //ent.Add(new byte[] { _r[0], _r[0], _r[1], _r[1], _r[1], _r[0] });
-        //ent.Add(new byte[] { _r[0], _r[0], _r[1], _r[0], _r[1], _r[1] });
-        //ent.Add(new byte[] { _r[0], _r[0], _r[0], _r[1], _r[1], _r[1] });
-
-        //ent.Add(new byte[] { _r[0], _r[1], _r[1], _r[1], _r[1], _r[1] });
-        //ent.Add(new byte[] { _r[1], _r[1], _r[0], _r[1], _r[1], _r[1] });
-        //ent.Add(new byte[] { _r[1], _r[1], _r[1], _r[0], _r[1], _r[1] });
-        //ent.Add(new byte[] { _r[1], _r[1], _r[1], _r[1], _r[1], _r[0] });
-        //ent.Add(new byte[] { _r[1], _r[1], _r[1], _r[0], _r[1], _r[0] });
-        //ent.Add(new byte[] { _r[1], _r[1], _r[0], _r[1], _r[1], _r[0] });
-        //ent.Add(new byte[] { _r[1], _r[1], _r[0], _r[0], _r[1], _r[1] });
-        //ent.Add(new byte[] { _r[0], _r[1], _r[1], _r[1], _r[1], _r[0] });
-        //ent.Add(new byte[] { _r[0], _r[1], _r[1], _r[0], _r[1], _r[1] });
-        //ent.Add(new byte[] { _r[0], _r[1], _r[0], _r[1], _r[1], _r[1] });
+        //ent.Add(new byte[] { _r[0], _r[0], _r[4], _r[4], _r[0], _r[4] });
+        //ent.Add(new byte[] { _r[4], _r[0], _r[0], _r[4], _r[0], _r[4] });
+        //ent.Add(new byte[] { _r[4], _r[0], _r[4], _r[0], _r[0], _r[4] });
+        //ent.Add(new byte[] { _r[4], _r[0], _r[4], _r[4], _r[0], _r[0] });
+        //ent.Add(new byte[] { _r[4], _r[0], _r[4], _r[0], _r[0], _r[0] });
+        //ent.Add(new byte[] { _r[4], _r[0], _r[0], _r[4], _r[0], _r[0] });
+        //ent.Add(new byte[] { _r[4], _r[0], _r[0], _r[0], _r[0], _r[4] });
+        //ent.Add(new byte[] { _r[0], _r[0], _r[4], _r[4], _r[0], _r[0] });
+        //ent.Add(new byte[] { _r[0], _r[0], _r[4], _r[0], _r[0], _r[4] });
+        //ent.Add(new byte[] { _r[0], _r[0], _r[0], _r[4], _r[0], _r[4] });
 
         for (int i = 0; i < ent.Count; i++) 
         {
@@ -300,7 +286,7 @@ public class Manager : MonoBehaviour
         GamobjectMap = new Dictionary<(int x, int y, int z), GameObject>();
     }
 
-    public List<int> GetTileEntropy((int x, int y, int z) _tP)
+    public HashSet<int> GetTileEntropy((int x, int y, int z) _tP)
     {
         // Normalize the tile position within the bounds of the world.
         _tP.x = (_tP.x + max.x) % max.x;

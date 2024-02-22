@@ -22,17 +22,17 @@ public class SelectorScript : MonoBehaviour
     }
 
 
-    private void Update()
+    public void Running() 
     {
         if (bench.running)
         {
             this.GetComponent<Button>().interactable = false;
-            foreach (var tempMenu in menus) 
-            { 
+            foreach (var tempMenu in menus)
+            {
                 tempMenu.GetComponent<TMP_InputField>().interactable = false;
             }
         }
-        else 
+        else
         {
             this.GetComponent<Button>().interactable = true;
             foreach (var tempMenu in menus)
@@ -40,7 +40,6 @@ public class SelectorScript : MonoBehaviour
                 tempMenu.GetComponent<TMP_InputField>().interactable = true;
             }
         }
-
     }
 
     public void GridChangeSize(string text)

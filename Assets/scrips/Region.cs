@@ -106,7 +106,7 @@ public class Region
         {
             var temp = mNotCollapsesed[i];
             //Debug.Log($"{temp.x},{temp.y},{temp.z}  {mTile[mNotCollapsesed[i]].GetEntropyCount()}");
-            mTile[temp].SetEntropy(entropy.Keys.ToList());
+            mTile[temp].SetEntropy(entropy.Keys.ToHashSet());
         }
         //if (mNotCollapsesed.Count == 25) return;
 
@@ -115,7 +115,7 @@ public class Region
             var lastPos = mStack.Pop();
             mNotCollapsesed.Add(lastPos);
 
-            mTile[lastPos].SetEntropy(entropy.Keys.ToList());
+            mTile[lastPos].SetEntropy(entropy.Keys.ToHashSet());
 
             UpdateEntropy(lastPos, true);
         }
@@ -202,7 +202,7 @@ public class Region
                         ////TempTile.AddComponent<Tile>();
                         //Tile temp = TempTile.GetComponent<Tile>();
                         Tile temp = new Tile();
-                        temp.Initialize((x, y, z), max, entropy.Keys.ToList());
+                        temp.Initialize((x, y, z), max, entropy.Keys.ToHashSet());
 
                         mTile.Add((x, y, z), temp);
                         mNotCollapsesed.Add((x, y, z));
@@ -280,7 +280,7 @@ public class Region
 
             int _randNum = rnd.Next(0, entropyCount);
             int randomEntropyElement = mTile[pos].GetEntropy().ElementAt(_randNum);
-            mTile[pos].entropy = new List<int>();
+            mTile[pos].entropy = new HashSet<int>();
             mTile[pos].entropy.Add(randomEntropyElement);
             manager.mGameObject[pos].collapsed = true;
             mNotCollapsesed.Remove(pos);
@@ -356,9 +356,9 @@ public class Region
         return _ent;
     }
 
-    public List<int> GetTile((int x, int y, int z) _targetTile)
+    public HashSet<int> GetTile((int x, int y, int z) _targetTile)
     {
-        List<int> result = new List<int>();
+        //HashSet<int> result = new HashSet<int>();
         lock (lockObject)
         {
             return mTile[_targetTile].entropy;
@@ -369,7 +369,7 @@ public class Region
     {
         Parallel.ForEach(mNotCollapsesed, pos =>
         {
-            mTile[pos].SetEntropy(entropy.Keys.ToList());
+            mTile[pos].SetEntropy(entropy.Keys.ToHashSet());
         });
         mCollapseCount--;
     }
