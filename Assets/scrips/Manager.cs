@@ -20,7 +20,7 @@ public class Manager : MonoBehaviour
     public (int x, int y, int z) regionSize;
 
 
-    protected Dictionary<(int x, int y, int z), Region> mRegion;
+    protected Dictionary<(int x, int y, int z), NestedRegion> mRegion;
     public Dictionary<(int x, int y, int z), TileProps> mGameObject;
     public List<(int x, int y, int z)> mNotCollapsesed;
     [SerializeField] protected GameObject RegionPrefab;
@@ -54,7 +54,7 @@ public class Manager : MonoBehaviour
         mGameObject = new Dictionary<(int x, int y, int z), TileProps>();
         mNotCollapsesed = new List<(int x, int y, int z)>();
         mStack = new Stack<(int x, int y, int z)>();
-        mRegion = new Dictionary<(int x, int y, int z), Region> ();
+        mRegion = new Dictionary<(int x, int y, int z), NestedRegion> ();
 
 
         StartTime = Time.time;
@@ -407,19 +407,19 @@ public class Manager : MonoBehaviour
         }
         maxRegion = (posX, posY, posZ);
 
-        for (int x = 0; x < max.x; x++)
-        {
-            for (int y = 0; y < max.y; y++)
-            {
-                for (int z = 0; z < max.z; z++) 
-                {
-                    Vector3 _targetPos = new Vector3((float)x * 3, (float)y * 3, (float)z * 3);
-                    GameObject TempTile = Instantiate(tilePrefab, _targetPos, Quaternion.identity, transform);
+        //for (int x = 0; x < max.x; x++)
+        //{
+        //    for (int y = 0; y < max.y; y++)
+        //    {
+        //        for (int z = 0; z < max.z; z++) 
+        //        {
+        //            Vector3 _targetPos = new Vector3((float)x * 3, (float)y * 3, (float)z * 3);
+        //            GameObject TempTile = Instantiate(tilePrefab, _targetPos, Quaternion.identity, transform);
                     
-                    mGameObject.Add((x, y, z), TempTile.GetComponent<TileProps>());
-                }
-            }
-        }
+        //            mGameObject.Add((x, y, z), TempTile.GetComponent<TileProps>());
+        //        }
+        //    }
+        //}
 
         foreach (var region in regions)
         {
@@ -431,7 +431,7 @@ public class Manager : MonoBehaviour
             //GameObject RegionInstance = Instantiate(RegionPrefab, position, Quaternion.identity, this.transform);
             //RegionInstance.GetComponent<Region>().seed = seed;
             // Assuming the Manager script is attached to the prefab and has public maxX, maxY, maxZ
-            Region RegionScript = new Region();
+            NestedRegion RegionScript = new NestedRegion();
             mRegion.Add(region.Key, RegionScript);
             var min = (region.Value.minX, region.Value.minY, region.Value.minZ);
             var max = (region.Value.maxX, region.Value.maxY, region.Value.maxZ);
@@ -474,7 +474,7 @@ public class Manager : MonoBehaviour
 
         Vector3 position = new Vector3(0, 0, 0);
         //GameObject RegionInstance = Instantiate(RegionPrefab, position, Quaternion.identity, this.transform);
-        Region RegionScript = new Region();
+        NestedRegion RegionScript = new NestedRegion();
         mRegion.Add(targetRegion, RegionScript);
         RegionScript.Initialize(region.pos, region.max, region.min, entropy, this);
         collapseCount = (maxRegion.x * maxRegion.y * maxRegion.z) - mNotCollapsesed.Count;
@@ -499,7 +499,7 @@ public class Manager : MonoBehaviour
 
         mNotCollapsesed = new List<(int x, int y, int z)>();
         mStack = new Stack<(int x, int y, int z)>();
-        mRegion = new Dictionary<(int x, int y, int z), Region>();
+        mRegion = new Dictionary<(int x, int y, int z), NestedRegion>();
         entropy = new Dictionary<int, byte[]>();
 
         collapseCount = 0;

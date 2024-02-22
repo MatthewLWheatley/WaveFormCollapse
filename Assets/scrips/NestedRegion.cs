@@ -8,7 +8,7 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using static System.Net.WebRequestMethods;
 
-public class Region
+public class NestedRegion
 {
     // Variables for managing procedural generation and rendering.
     public int seed; // Seed for the random number generator to ensure reproducibility.
@@ -282,7 +282,7 @@ public class Region
             int randomEntropyElement = mTile[pos].GetEntropy().ElementAt(_randNum);
             mTile[pos].entropy = new HashSet<int>();
             mTile[pos].entropy.Add(randomEntropyElement);
-            manager.mGameObject[pos].collapsed = true;
+            //manager.mGameObject[pos].collapsed = true;
             mNotCollapsesed.Remove(pos);
             mStack.Push(pos);
             return true;
