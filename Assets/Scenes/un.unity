@@ -9904,12 +9904,12 @@ PrefabInstance:
     - target: {fileID: 7668789440186061114, guid: 4a94a313ed07e624e85610827de8a69d,
         type: 3}
       propertyPath: maxX
-      value: 5
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7668789440186061114, guid: 4a94a313ed07e624e85610827de8a69d,
         type: 3}
       propertyPath: maxY
-      value: 5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7668789440186061114, guid: 4a94a313ed07e624e85610827de8a69d,
         type: 3}
@@ -9939,17 +9939,17 @@ PrefabInstance:
     - target: {fileID: 7668789440186061114, guid: 4a94a313ed07e624e85610827de8a69d,
         type: 3}
       propertyPath: RegionX
-      value: 5
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7668789440186061114, guid: 4a94a313ed07e624e85610827de8a69d,
         type: 3}
       propertyPath: RegionY
-      value: 5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7668789440186061114, guid: 4a94a313ed07e624e85610827de8a69d,
         type: 3}
       propertyPath: RegionZ
-      value: 5
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7668789440186061114, guid: 4a94a313ed07e624e85610827de8a69d,
         type: 3}
@@ -9963,6 +9963,11 @@ PrefabInstance:
       objectReference: {fileID: 92111360}
     - target: {fileID: 7668789440186061114, guid: 4a94a313ed07e624e85610827de8a69d,
         type: 3}
+      propertyPath: complexity
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 7668789440186061114, guid: 4a94a313ed07e624e85610827de8a69d,
+        type: 3}
       propertyPath: randomSeed
       value: 0
       objectReference: {fileID: 0}
@@ -9974,7 +9979,7 @@ PrefabInstance:
     - target: {fileID: 7668789440186061114, guid: 4a94a313ed07e624e85610827de8a69d,
         type: 3}
       propertyPath: MaxRunCount
-      value: 1000
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 7668789440186061114, guid: 4a94a313ed07e624e85610827de8a69d,
         type: 3}
