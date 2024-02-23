@@ -160,76 +160,6 @@ public class Manager : MonoBehaviour
             r.rendered = true;
             RunningTotal.text = string.Format(renderedCount.ToString());
         }
-        //if(!Running) return;
-        ////Debug.Log("running");
-        //mCollapseCount = mNotCollapsesed.Count;
-
-        //time = Time.time;
-
-        //if (renderedCount >= mRegion.Count) rendered = true;
-
-        ////Debug.Log($"fuck {targetRegion.x}, {targetRegion.y}, {targetRegion.z} ");
-        //if (!collapsed)
-        //{
-        //    var r = mRegion[targetRegion];
-        //    r.running = true;
-        //    r.RunUpdate();
-        //    if (realTimeRender)
-        //    {
-        //        r.RunRenderer();
-        //        Debug.Log($"fuck {targetRegion.x}, {targetRegion.y}, {targetRegion.z} ");
-        //    }
-        //    if (r.resetCount > 100)
-        //    {
-        //        r.resetCount = 0; 
-        //        Debug.Log($"fuck {targetRegion.x}, {targetRegion.y}, {targetRegion.z} ");
-        //        //ResetRegions(targetRegion);
-        //        UpdateRegionEntropyList(true);
-        //    }
-        //    if (r.collapsed)
-        //    {
-        //        mList.Add(targetRegion);
-        //        r.running = false;
-        //        if (renderOnFinish) r.RunRenderer();
-        //        mNotCollapsesed.Remove(targetRegion);
-        //        UpdateRegionEntropyList(true);
-        //    }
-        //    RunningTotal.text = string.Format(collapseCount.ToString());
-        //}
-        //else if (!rendered)
-        //{
-
-        //    foreach (var go in mGameObject)
-        //    {
-        //        Destroy(go.Value.transform.gameObject);
-        //    }
-        //    mGameObject.Clear();
-        //    for (int x = 0; x < max.x; x++)
-        //    {
-        //        for (int y = 0; y < max.y; y++)
-        //        {
-        //            for (int z = 0; z < max.z; z++)
-        //            {
-        //                Vector3 _targetPos = new Vector3((float)x * 3, (float)y * 3, (float)z * 3);
-        //                GameObject TempTile = Instantiate(tilePrefab, _targetPos, Quaternion.identity, transform);
-        //                //TileProps tileProps = new TileProps();
-        //                mGameObject.Add((x, y, z), TempTile.GetComponent<TileProps>());
-        //            }
-        //        }
-        //    }
-
-        //    foreach (var r in mRegion.Values)
-        //    {
-        //        if (renderOnFinish) r.RunRenderer();
-        //        if (r.rendered)
-        //        {
-        //            renderedCount++;
-        //        }
-        //        r.rendered = true;
-        //    }
-        //    rendered = true;
-        //    RunningTotal.text = string.Format(renderedCount.ToString());
-        //}
     }
 
     public void ResetRegions((int x, int y, int z) failedRegion)
@@ -259,8 +189,7 @@ public class Manager : MonoBehaviour
         foreach (var region in regionsToReset)
         {
             if (mRegion.ContainsKey(region))
-            {
-                //Debug.Log($"{region.x},{region.x},{region.x}");
+            { 
                 mRegion[region].ResetRegionState();
                 mNotCollapsesed.Add(region); 
             }
@@ -584,16 +513,10 @@ public class Manager : MonoBehaviour
     public void ResetRegion((int x, int y, int z) _startRegion, int counter)
     {
         ((int x, int y, int z) pos, (int x, int y, int z) min, (int x, int y, int z) max) region = (mRegion[targetRegion].pos, mRegion[targetRegion].min, mRegion[targetRegion].max);
-        //MeshFilter meshFilter;
-        //if ((mRegion[targetRegion].transform.TryGetComponent<MeshFilter>(out meshFilter)))
-        //{
-        //    Destroy(meshFilter.mesh); // Destroy the mesh
-        //}
-        //Destroy(mRegion[targetRegion].gameObject);
+
         mRegion.Remove(targetRegion);
 
         Vector3 position = new Vector3(0, 0, 0);
-        //GameObject RegionInstance = Instantiate(RegionPrefab, position, Quaternion.identity, this.transform);
         NestedRegion RegionScript = new NestedRegion();
         mRegion.Add(targetRegion, RegionScript);
         RegionScript.Initialize(region.pos, region.max, region.min, entropy, this);
@@ -667,82 +590,5 @@ public class Manager : MonoBehaviour
             }
         }
         if (count > max.x * max.y * max.z) collapsed = true;
-    }
-
-    void CombineMeshes()
-    {
-        //// Ensure this GameObject has a MeshFilter component
-        //MeshFilter meshFilter = GetComponent<MeshFilter>();
-        //if (meshFilter == null)
-        //{
-        //    meshFilter = gameObject.AddComponent<MeshFilter>();
-        //}
-
-        //// Ensure this GameObject has a MeshRenderer component
-        //MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
-        //if (meshRenderer == null)
-        //{
-        //    meshRenderer = gameObject.AddComponent<MeshRenderer>();
-        //}
-
-        //// Get all MeshFilter components from child objects
-        //MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>(false);
-
-        //// Group meshes by material
-        //Dictionary<Material, List<MeshFilter>> materialGroups = new Dictionary<Material, List<MeshFilter>>();
-
-        //foreach (MeshFilter mf in meshFilters)
-        //{
-        //    if (mf.sharedMesh == null || mf == meshFilter) continue; // Skip if the sharedMesh is null or it's the parent MeshFilter
-
-        //    MeshRenderer mr = mf.GetComponent<MeshRenderer>();
-        //    if (mr == null || mr.sharedMaterial == null) continue; // Skip if there's no MeshRenderer or sharedMaterial
-
-        //    if (!materialGroups.ContainsKey(mr.sharedMaterial))
-        //    {
-        //        materialGroups[mr.sharedMaterial] = new List<MeshFilter>();
-        //    }
-        //    materialGroups[mr.sharedMaterial].Add(mf);
-        //}
-
-        //// Combine meshes for each material group
-        //CombineInstance[] combine = new CombineInstance[materialGroups.Count];
-        //Material[] materials = new Material[materialGroups.Count];
-        //int materialIndex = 0;
-        //List<GameObject> objectsToDestroy = new List<GameObject>();
-        //foreach (KeyValuePair<Material, List<MeshFilter>> kvp in materialGroups)
-        //{
-        //    CombineInstance[] materialCombines = new CombineInstance[kvp.Value.Count];
-        //    for (int i = 0; i < kvp.Value.Count; i++)
-        //    {
-        //        materialCombines[i].mesh = kvp.Value[i].sharedMesh;
-        //        materialCombines[i].transform = kvp.Value[i].transform.localToWorldMatrix;
-        //        objectsToDestroy.Add(kvp.Value[i].gameObject); // Mark the child object for deletion
-        //    }
-
-        //    // Combine meshes for the current material
-        //    Mesh combinedMesh = new Mesh();
-        //    combinedMesh.CombineMeshes(materialCombines, true, true);
-
-        //    combine[materialIndex].mesh = combinedMesh;
-        //    combine[materialIndex].transform = Matrix4x4.identity;
-        //    materials[materialIndex] = kvp.Key;
-        //    materialIndex++;
-        //}
-
-        //// Create a new mesh and combine all the grouped meshes into it
-        //Mesh finalMesh = new Mesh();
-        //finalMesh.CombineMeshes(combine, false, false);
-        //meshFilter.mesh = finalMesh;
-        //meshRenderer.materials = materials; // Set the materials array
-
-        //// Optionally, reset the position if needed
-        //meshRenderer.transform.position = Vector3.zero;
-
-        //// Destroy the child GameObjects
-        //foreach (GameObject go in objectsToDestroy)
-        //{
-        //    Destroy(go);
-        //}
     }
 }

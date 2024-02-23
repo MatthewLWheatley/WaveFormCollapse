@@ -52,218 +52,7 @@ public class BenchMarker : MonoBehaviour
     public List<float> runTimes = new List<float>();
 
     public Dictionary<int, byte[]> entropy = new Dictionary<int, byte[]>();
-
-    //void InitRules()
-    //{
-    //    byte[] _r = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 };
-    //    List<byte[]> ent = new List<byte[]>();
-    //    //entropy.Add(-1, new byte[] { _r[0], _r[0], _r[0], _r[0], _r[0], _r[0] });
-
-    //    bool threeD = false;
-    //    if (maxX > 1 && maxY > 1 && maxZ > 1)
-    //    {
-    //        threeD = true;
-    //    }
-    //    if (complexity >= 2)
-    //    {
-    //        ent.Add(new byte[] { _r[0], _r[0], _r[1], _r[1], _r[0], _r[1] });
-    //        ent.Add(new byte[] { _r[1], _r[0], _r[0], _r[1], _r[0], _r[1] });
-    //        ent.Add(new byte[] { _r[1], _r[0], _r[1], _r[0], _r[0], _r[1] });
-    //        ent.Add(new byte[] { _r[1], _r[0], _r[1], _r[1], _r[0], _r[0] });
-    //        ent.Add(new byte[] { _r[1], _r[0], _r[1], _r[0], _r[0], _r[0] });
-    //        ent.Add(new byte[] { _r[1], _r[0], _r[0], _r[1], _r[0], _r[0] });
-    //        ent.Add(new byte[] { _r[1], _r[0], _r[0], _r[0], _r[0], _r[1] });
-    //        ent.Add(new byte[] { _r[0], _r[0], _r[1], _r[1], _r[0], _r[0] });
-    //        ent.Add(new byte[] { _r[0], _r[0], _r[1], _r[0], _r[0], _r[1] });
-    //        ent.Add(new byte[] { _r[0], _r[0], _r[0], _r[1], _r[0], _r[1] });
-    //        if (threeD)
-    //        {
-    //            ent.Add(new byte[] { _r[0], _r[1], _r[1], _r[1], _r[0], _r[1] });
-    //            ent.Add(new byte[] { _r[1], _r[1], _r[0], _r[1], _r[0], _r[1] });
-    //            ent.Add(new byte[] { _r[1], _r[1], _r[1], _r[0], _r[0], _r[1] });
-    //            ent.Add(new byte[] { _r[1], _r[1], _r[1], _r[1], _r[0], _r[0] });
-    //            ent.Add(new byte[] { _r[1], _r[1], _r[1], _r[0], _r[0], _r[0] });
-    //            ent.Add(new byte[] { _r[1], _r[1], _r[0], _r[1], _r[0], _r[0] });
-    //            ent.Add(new byte[] { _r[1], _r[1], _r[0], _r[0], _r[0], _r[1] });
-    //            ent.Add(new byte[] { _r[0], _r[1], _r[1], _r[1], _r[0], _r[0] });
-    //            ent.Add(new byte[] { _r[0], _r[1], _r[1], _r[0], _r[0], _r[1] });
-    //            ent.Add(new byte[] { _r[0], _r[1], _r[0], _r[1], _r[0], _r[1] });
-
-    //            ent.Add(new byte[] { _r[0], _r[0], _r[1], _r[1], _r[1], _r[1] });
-    //            ent.Add(new byte[] { _r[1], _r[0], _r[0], _r[1], _r[1], _r[1] });
-    //            ent.Add(new byte[] { _r[1], _r[0], _r[1], _r[0], _r[1], _r[1] });
-    //            ent.Add(new byte[] { _r[1], _r[0], _r[1], _r[1], _r[1], _r[0] });
-    //            ent.Add(new byte[] { _r[1], _r[0], _r[1], _r[0], _r[1], _r[0] });
-    //            ent.Add(new byte[] { _r[1], _r[0], _r[0], _r[1], _r[1], _r[0] });
-    //            ent.Add(new byte[] { _r[1], _r[0], _r[0], _r[0], _r[1], _r[1] });
-    //            ent.Add(new byte[] { _r[0], _r[0], _r[1], _r[1], _r[1], _r[0] });
-    //            ent.Add(new byte[] { _r[0], _r[0], _r[1], _r[0], _r[1], _r[1] });
-    //            ent.Add(new byte[] { _r[0], _r[0], _r[0], _r[1], _r[1], _r[1] });
-
-    //            ent.Add(new byte[] { _r[0], _r[1], _r[1], _r[1], _r[1], _r[1] });
-    //            ent.Add(new byte[] { _r[1], _r[1], _r[0], _r[1], _r[1], _r[1] });
-    //            ent.Add(new byte[] { _r[1], _r[1], _r[1], _r[0], _r[1], _r[1] });
-    //            ent.Add(new byte[] { _r[1], _r[1], _r[1], _r[1], _r[1], _r[0] });
-    //            ent.Add(new byte[] { _r[1], _r[1], _r[1], _r[0], _r[1], _r[0] });
-    //            ent.Add(new byte[] { _r[1], _r[1], _r[0], _r[1], _r[1], _r[0] });
-    //            ent.Add(new byte[] { _r[1], _r[1], _r[0], _r[0], _r[1], _r[1] });
-    //            ent.Add(new byte[] { _r[0], _r[1], _r[1], _r[1], _r[1], _r[0] });
-    //            ent.Add(new byte[] { _r[0], _r[1], _r[1], _r[0], _r[1], _r[1] });
-    //            ent.Add(new byte[] { _r[0], _r[1], _r[0], _r[1], _r[1], _r[1] });
-    //        }
-    //    }
-    //    if (complexity >= 3)
-    //    {
-    //        ent.Add(new byte[] { _r[0], _r[0], _r[2], _r[2], _r[0], _r[2] });
-    //        ent.Add(new byte[] { _r[2], _r[0], _r[0], _r[2], _r[0], _r[2] });
-    //        ent.Add(new byte[] { _r[2], _r[0], _r[2], _r[0], _r[0], _r[2] });
-    //        ent.Add(new byte[] { _r[2], _r[0], _r[2], _r[2], _r[0], _r[0] });
-    //        ent.Add(new byte[] { _r[2], _r[0], _r[2], _r[0], _r[0], _r[0] });
-    //        ent.Add(new byte[] { _r[2], _r[0], _r[0], _r[2], _r[0], _r[0] });
-    //        ent.Add(new byte[] { _r[2], _r[0], _r[0], _r[0], _r[0], _r[2] });
-    //        ent.Add(new byte[] { _r[0], _r[0], _r[2], _r[2], _r[0], _r[0] });
-    //        ent.Add(new byte[] { _r[0], _r[0], _r[2], _r[0], _r[0], _r[2] });
-    //        ent.Add(new byte[] { _r[0], _r[0], _r[0], _r[2], _r[0], _r[2] });
-    //        if (threeD)
-    //        {
-    //            ent.Add(new byte[] { _r[0], _r[2], _r[2], _r[2], _r[0], _r[2] });
-    //            ent.Add(new byte[] { _r[2], _r[2], _r[0], _r[2], _r[0], _r[2] });
-    //            ent.Add(new byte[] { _r[2], _r[2], _r[2], _r[0], _r[0], _r[2] });
-    //            ent.Add(new byte[] { _r[2], _r[2], _r[2], _r[2], _r[0], _r[0] });
-    //            ent.Add(new byte[] { _r[2], _r[2], _r[2], _r[0], _r[0], _r[0] });
-    //            ent.Add(new byte[] { _r[2], _r[2], _r[0], _r[2], _r[0], _r[0] });
-    //            ent.Add(new byte[] { _r[2], _r[2], _r[0], _r[0], _r[0], _r[2] });
-    //            ent.Add(new byte[] { _r[0], _r[2], _r[2], _r[2], _r[0], _r[0] });
-    //            ent.Add(new byte[] { _r[0], _r[2], _r[2], _r[0], _r[0], _r[2] });
-    //            ent.Add(new byte[] { _r[0], _r[2], _r[0], _r[2], _r[0], _r[2] });
-
-    //            ent.Add(new byte[] { _r[0], _r[0], _r[2], _r[2], _r[2], _r[2] });
-    //            ent.Add(new byte[] { _r[2], _r[0], _r[0], _r[2], _r[2], _r[2] });
-    //            ent.Add(new byte[] { _r[2], _r[0], _r[2], _r[0], _r[2], _r[2] });
-    //            ent.Add(new byte[] { _r[2], _r[0], _r[2], _r[2], _r[2], _r[0] });
-    //            ent.Add(new byte[] { _r[2], _r[0], _r[2], _r[0], _r[2], _r[0] });
-    //            ent.Add(new byte[] { _r[2], _r[0], _r[0], _r[2], _r[2], _r[0] });
-    //            ent.Add(new byte[] { _r[2], _r[0], _r[0], _r[0], _r[2], _r[2] });
-    //            ent.Add(new byte[] { _r[0], _r[0], _r[2], _r[2], _r[2], _r[0] });
-    //            ent.Add(new byte[] { _r[0], _r[0], _r[2], _r[0], _r[2], _r[2] });
-    //            ent.Add(new byte[] { _r[0], _r[0], _r[0], _r[2], _r[2], _r[2] });
-
-    //            ent.Add(new byte[] { _r[2], _r[2], _r[0], _r[2], _r[2], _r[2] });
-    //            ent.Add(new byte[] { _r[2], _r[2], _r[2], _r[0], _r[2], _r[2] });
-    //            ent.Add(new byte[] { _r[2], _r[2], _r[2], _r[2], _r[2], _r[0] });
-    //            ent.Add(new byte[] { _r[2], _r[2], _r[2], _r[0], _r[2], _r[0] });
-    //            ent.Add(new byte[] { _r[2], _r[2], _r[0], _r[2], _r[2], _r[0] });
-    //            ent.Add(new byte[] { _r[2], _r[2], _r[0], _r[0], _r[2], _r[2] });
-    //            ent.Add(new byte[] { _r[0], _r[2], _r[2], _r[2], _r[2], _r[0] });
-    //            ent.Add(new byte[] { _r[0], _r[2], _r[2], _r[0], _r[2], _r[2] });
-    //            ent.Add(new byte[] { _r[0], _r[2], _r[2], _r[2], _r[2], _r[2] });
-    //            ent.Add(new byte[] { _r[0], _r[2], _r[0], _r[2], _r[2], _r[2] });
-    //        }
-    //    }
-    //    if (complexity >= 4)
-    //    {
-    //        ent.Add(new byte[] { _r[0], _r[0], _r[3], _r[3], _r[0], _r[3] });
-    //        ent.Add(new byte[] { _r[3], _r[0], _r[0], _r[3], _r[0], _r[3] });
-    //        ent.Add(new byte[] { _r[3], _r[0], _r[3], _r[0], _r[0], _r[3] });
-    //        ent.Add(new byte[] { _r[3], _r[0], _r[3], _r[3], _r[0], _r[0] });
-    //        ent.Add(new byte[] { _r[3], _r[0], _r[3], _r[0], _r[0], _r[0] });
-    //        ent.Add(new byte[] { _r[3], _r[0], _r[0], _r[3], _r[0], _r[0] });
-    //        ent.Add(new byte[] { _r[3], _r[0], _r[0], _r[0], _r[0], _r[3] });
-    //        ent.Add(new byte[] { _r[0], _r[0], _r[3], _r[3], _r[0], _r[0] });
-    //        ent.Add(new byte[] { _r[0], _r[0], _r[3], _r[0], _r[0], _r[3] });
-    //        ent.Add(new byte[] { _r[0], _r[0], _r[0], _r[3], _r[0], _r[3] });
-
-    //        if (threeD)
-    //        {
-    //            ent.Add(new byte[] { _r[0], _r[3], _r[3], _r[3], _r[0], _r[3] });
-    //            ent.Add(new byte[] { _r[3], _r[3], _r[0], _r[3], _r[0], _r[3] });
-    //            ent.Add(new byte[] { _r[3], _r[3], _r[3], _r[0], _r[0], _r[3] });
-    //            ent.Add(new byte[] { _r[3], _r[3], _r[3], _r[3], _r[0], _r[0] });
-    //            ent.Add(new byte[] { _r[3], _r[3], _r[3], _r[0], _r[0], _r[0] });
-    //            ent.Add(new byte[] { _r[3], _r[3], _r[0], _r[3], _r[0], _r[0] });
-    //            ent.Add(new byte[] { _r[3], _r[3], _r[0], _r[0], _r[0], _r[3] });
-    //            ent.Add(new byte[] { _r[0], _r[3], _r[3], _r[3], _r[0], _r[0] });
-    //            ent.Add(new byte[] { _r[0], _r[3], _r[3], _r[0], _r[0], _r[3] });
-    //            ent.Add(new byte[] { _r[0], _r[3], _r[0], _r[3], _r[0], _r[3] });
-
-    //            ent.Add(new byte[] { _r[0], _r[0], _r[3], _r[3], _r[3], _r[3] });
-    //            ent.Add(new byte[] { _r[3], _r[0], _r[0], _r[3], _r[3], _r[3] });
-    //            ent.Add(new byte[] { _r[3], _r[0], _r[3], _r[0], _r[3], _r[3] });
-    //            ent.Add(new byte[] { _r[3], _r[0], _r[3], _r[3], _r[3], _r[0] });
-    //            ent.Add(new byte[] { _r[3], _r[0], _r[3], _r[0], _r[3], _r[0] });
-    //            ent.Add(new byte[] { _r[3], _r[0], _r[0], _r[3], _r[3], _r[0] });
-    //            ent.Add(new byte[] { _r[3], _r[0], _r[0], _r[0], _r[3], _r[3] });
-    //            ent.Add(new byte[] { _r[0], _r[0], _r[3], _r[3], _r[3], _r[0] });
-    //            ent.Add(new byte[] { _r[0], _r[0], _r[3], _r[0], _r[3], _r[3] });
-    //            ent.Add(new byte[] { _r[0], _r[0], _r[0], _r[3], _r[3], _r[3] });
-
-    //            ent.Add(new byte[] { _r[0], _r[3], _r[3], _r[3], _r[3], _r[3] });
-    //            ent.Add(new byte[] { _r[3], _r[3], _r[0], _r[3], _r[3], _r[3] });
-    //            ent.Add(new byte[] { _r[3], _r[3], _r[3], _r[0], _r[3], _r[3] });
-    //            ent.Add(new byte[] { _r[3], _r[3], _r[3], _r[3], _r[3], _r[0] });
-    //            ent.Add(new byte[] { _r[3], _r[3], _r[3], _r[0], _r[3], _r[0] });
-    //            ent.Add(new byte[] { _r[3], _r[3], _r[0], _r[3], _r[3], _r[0] });
-    //            ent.Add(new byte[] { _r[3], _r[3], _r[0], _r[0], _r[3], _r[3] });
-    //            ent.Add(new byte[] { _r[0], _r[3], _r[3], _r[3], _r[3], _r[0] });
-    //            ent.Add(new byte[] { _r[0], _r[3], _r[3], _r[0], _r[3], _r[3] });
-    //            ent.Add(new byte[] { _r[0], _r[3], _r[0], _r[3], _r[3], _r[3] });
-    //        }
-    //    }
-    //    if (complexity >= 5)
-    //    {
-    //        ent.Add(new byte[] { _r[0], _r[0], _r[4], _r[4], _r[0], _r[4] });
-    //        ent.Add(new byte[] { _r[4], _r[0], _r[0], _r[4], _r[0], _r[4] });
-    //        ent.Add(new byte[] { _r[4], _r[0], _r[4], _r[0], _r[0], _r[4] });
-    //        ent.Add(new byte[] { _r[4], _r[0], _r[4], _r[4], _r[0], _r[0] });
-    //        ent.Add(new byte[] { _r[4], _r[0], _r[4], _r[0], _r[0], _r[0] });
-    //        ent.Add(new byte[] { _r[4], _r[0], _r[0], _r[4], _r[0], _r[0] });
-    //        ent.Add(new byte[] { _r[4], _r[0], _r[0], _r[0], _r[0], _r[4] });
-    //        ent.Add(new byte[] { _r[0], _r[0], _r[4], _r[4], _r[0], _r[0] });
-    //        ent.Add(new byte[] { _r[0], _r[0], _r[4], _r[0], _r[0], _r[4] });
-    //        ent.Add(new byte[] { _r[0], _r[0], _r[0], _r[4], _r[0], _r[4] });
-
-    //        if (threeD)
-    //        {
-    //            ent.Add(new byte[] { _r[0], _r[4], _r[4], _r[4], _r[0], _r[4] });
-    //            ent.Add(new byte[] { _r[4], _r[4], _r[0], _r[4], _r[0], _r[4] });
-    //            ent.Add(new byte[] { _r[4], _r[4], _r[4], _r[0], _r[0], _r[4] });
-    //            ent.Add(new byte[] { _r[4], _r[4], _r[4], _r[4], _r[0], _r[0] });
-    //            ent.Add(new byte[] { _r[4], _r[4], _r[4], _r[0], _r[0], _r[0] });
-    //            ent.Add(new byte[] { _r[4], _r[4], _r[0], _r[4], _r[0], _r[0] });
-    //            ent.Add(new byte[] { _r[4], _r[4], _r[0], _r[0], _r[0], _r[4] });
-    //            ent.Add(new byte[] { _r[0], _r[4], _r[4], _r[4], _r[0], _r[0] });
-    //            ent.Add(new byte[] { _r[0], _r[4], _r[4], _r[0], _r[0], _r[4] });
-    //            ent.Add(new byte[] { _r[0], _r[4], _r[0], _r[4], _r[0], _r[4] });
-
-    //            ent.Add(new byte[] { _r[0], _r[0], _r[4], _r[4], _r[4], _r[4] });
-    //            ent.Add(new byte[] { _r[4], _r[0], _r[0], _r[4], _r[4], _r[4] });
-    //            ent.Add(new byte[] { _r[4], _r[0], _r[4], _r[0], _r[4], _r[4] });
-    //            ent.Add(new byte[] { _r[4], _r[0], _r[4], _r[4], _r[4], _r[0] });
-    //            ent.Add(new byte[] { _r[4], _r[0], _r[4], _r[0], _r[4], _r[0] });
-    //            ent.Add(new byte[] { _r[4], _r[0], _r[0], _r[4], _r[4], _r[0] });
-    //            ent.Add(new byte[] { _r[4], _r[0], _r[0], _r[0], _r[4], _r[4] });
-    //            ent.Add(new byte[] { _r[0], _r[0], _r[4], _r[4], _r[4], _r[0] });
-    //            ent.Add(new byte[] { _r[0], _r[0], _r[4], _r[0], _r[4], _r[4] });
-    //            ent.Add(new byte[] { _r[0], _r[0], _r[0], _r[4], _r[4], _r[4] });
-
-    //            ent.Add(new byte[] { _r[0], _r[4], _r[4], _r[4], _r[4], _r[4] });
-    //            ent.Add(new byte[] { _r[4], _r[4], _r[0], _r[4], _r[4], _r[4] });
-    //            ent.Add(new byte[] { _r[4], _r[4], _r[4], _r[0], _r[4], _r[4] });
-    //            ent.Add(new byte[] { _r[4], _r[4], _r[4], _r[4], _r[4], _r[0] });
-    //            ent.Add(new byte[] { _r[4], _r[4], _r[4], _r[0], _r[4], _r[0] });
-    //            ent.Add(new byte[] { _r[4], _r[4], _r[0], _r[4], _r[4], _r[0] });
-    //            ent.Add(new byte[] { _r[4], _r[4], _r[0], _r[0], _r[4], _r[4] });
-    //            ent.Add(new byte[] { _r[0], _r[4], _r[4], _r[4], _r[4], _r[0] });
-    //            ent.Add(new byte[] { _r[0], _r[4], _r[4], _r[0], _r[4], _r[4] });
-    //            ent.Add(new byte[] { _r[0], _r[4], _r[0], _r[4], _r[4], _r[4] });
-    //        }
-    //    }
-    //    for (int i = 0; i < ent.Count; i++)
-    //    {
-    //        entropy.Add(i, ent[i]);
-    //    }
-    //}
-
+    
     void Start()
     {
         Application.targetFrameRate = 100000;
@@ -316,9 +105,7 @@ public class BenchMarker : MonoBehaviour
 
                 if (intst.collapsed && intst.rendered)
                 {
-
                     RunCount++;
-
                     list.Add(intst);
                     //Debug.Log(RunCount);
                 }
@@ -343,13 +130,14 @@ public class BenchMarker : MonoBehaviour
 
                     list.Add(intst);
                     //Debug.Log(RunCount);
-                }            }
+                }
+            }
             foreach (Manager intst in list)
             {
                 managerScripts.Remove(intst);
             }
         }
-        if (managerScripts.Count == 0)
+        if (managerScripts.Count == 0 && managerVersion == 0)
         {
             
             CollapseTime += (Time.time - startTime);
@@ -361,6 +149,21 @@ public class BenchMarker : MonoBehaviour
 
             t_TR80.text = string.Format(CalculateAverageExcludingOutliers().ToString());
             t_TR100.text = string.Format((CollapseTime/(float)RunCount).ToString());
+            DeleteManagers();
+            SpawnManagers();
+            startTime = Time.time;
+        }
+        if (stitchedManagers.Count == 0 && managerVersion == 1)
+        {
+            CollapseTime += (Time.time - startTime);
+
+            runTimes.Add((Time.time - startTime));
+
+            t_RunCount.text = string.Format(RunCount.ToString());
+            t_TotalTime.text = string.Format(CollapseTime.ToString());
+
+            t_TR80.text = string.Format(CalculateAverageExcludingOutliers().ToString());
+            t_TR100.text = string.Format((CollapseTime / (float)RunCount).ToString());
             DeleteManagers();
             SpawnManagers();
             startTime = Time.time;
@@ -449,20 +252,39 @@ public class BenchMarker : MonoBehaviour
             {
                 // Calculate the position for each manager
                 Vector3 position = new Vector3(x * maxX * 3, 0, z * maxZ * 3);
-
-                // Instantiate the manager prefab
-                GameObject managerInstance = Instantiate(managerPrefabs[managerVersion], position, Quaternion.identity, this.transform);
-
-                // Assuming the Manager script is attached to the prefab and has public maxX, maxY, maxZ
-                Manager managerScript = managerInstance.GetComponent<Manager>();
-                managerScripts.Add(managerScript);
-                if (managerScript != null)
+                if (managerVersion == 0)
                 {
-                    managerScript.max = (maxX, maxY, maxZ);
-                    managerScript.regionSize = (RegionX, RegionY, RegionZ);
-                    managerScript.seed = seed;
-                    managerScript.complexity = complexity;
-                    //managerScript.entropy = entropy;
+                    // Instantiate the manager prefab
+                    GameObject managerInstance = Instantiate(managerPrefabs[managerVersion], position, Quaternion.identity, this.transform);
+
+                    // Assuming the Manager script is attached to the prefab and has public maxX, maxY, maxZ
+                    Manager managerScript = managerInstance.GetComponent<Manager>();
+                    managerScripts.Add(managerScript);
+                    if (managerScript != null)
+                    {
+                        managerScript.max = (maxX, maxY, maxZ);
+                        managerScript.regionSize = (RegionX, RegionY, RegionZ);
+                        managerScript.seed = seed;
+                        managerScript.complexity = complexity;
+                        //managerScript.entropy = entropy;
+                    }
+                }
+                if (managerVersion == 1)
+                {
+                    // Instantiate the manager prefab
+                    GameObject managerInstance = Instantiate(managerPrefabs[2], position, Quaternion.identity, this.transform);
+
+                    // Assuming the Manager script is attached to the prefab and has public maxX, maxY, maxZ
+                    StitchedManager managerScript = managerInstance.GetComponent<StitchedManager>();
+                    stitchedManagers.Add(managerScript);
+                    if (managerScript != null)
+                    {
+                        managerScript.max = (maxX, maxY, maxZ);
+                        managerScript.regionSize = (RegionX, RegionY, RegionZ);
+                        managerScript.seed = seed;
+                        managerScript.complexity = complexity;
+                        //managerScript.entropy = entropy;
+                    }
                 }
             }
         }

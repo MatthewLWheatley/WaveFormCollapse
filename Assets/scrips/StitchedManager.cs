@@ -3,12 +3,11 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using TMPro;
-using Unity.Jobs;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UIElements;
 
 public class StitchedManager : MonoBehaviour
@@ -22,7 +21,7 @@ public class StitchedManager : MonoBehaviour
     public (int x, int y, int z) regionSize;
 
 
-    protected Dictionary<(int x, int y, int z), StitchedRegion> mRegion;
+    public Dictionary<(int x, int y, int z), StitchedRegion> mRegion;
     public Dictionary<(int x, int y, int z), TileProps> mGameObject;
     public List<(int x, int y, int z)> mNotCollapsesed;
     [SerializeField] protected GameObject RegionPrefab;
@@ -35,9 +34,9 @@ public class StitchedManager : MonoBehaviour
 
     public int complexity = 0;
 
-    protected (int x, int y, int z)[] Dirs = new (int x, int y, int z)[] { (1, 0, 0), (0, 1, 0), (0, 0, 1), (-1, 0, 0), (0, -1, 0), (0, 0, -1) };
+    public (int x, int y, int z)[] Dirs = new (int x, int y, int z)[] { (1, 0, 0), (0, 1, 0), (0, 0, 1), (-1, 0, 0), (0, -1, 0), (0, 0, -1) };
 
-    public Stack<(int x, int y, int z)> mStack;
+    public List<(int x, int y, int z)> mList;
 
     protected (int x, int y, int z) maxRegion;
 
@@ -55,9 +54,10 @@ public class StitchedManager : MonoBehaviour
     {
         mGameObject = new Dictionary<(int x, int y, int z), TileProps>();
         mNotCollapsesed = new List<(int x, int y, int z)>();
-        mStack = new Stack<(int x, int y, int z)>();
+        mList = new List<(int x, int y, int z)>();
         mRegion = new Dictionary<(int x, int y, int z), StitchedRegion>();
 
+        mStack = new Stack<(int x, int y, int z)>();
 
         StartTime = Time.time;
         time = Time.time;
@@ -72,159 +72,160 @@ public class StitchedManager : MonoBehaviour
     protected (int x, int y, int z) targetRegion = (0, 0, 0);
 
     public float time;
-    List<int> ParallelisedNumbers = new List<int>();
+
+    public int failCount = 0;
+
+    Stack<(int x, int y, int z)> mStack;
+    bool setup = false;
+
 
     private void Update()
     {
-        if (!Running) return;
-        CustomUpdate();
-    }
-
-    private void CustomUpdate()
-    {
         //Debug.Log("running");
         mCollapseCount = mNotCollapsesed.Count;
-
+        
         time = Time.time;
 
-        //if (renderedCount >= mRegion.Count) rendered = true;
+        if (!setup)
+        {
+            createGrid();
+
+        }
+
+        if (renderedCount >= mRegion.Count) rendered = true;
 
         if (!collapsed)
         {
-            //Stitch();
-            ParallelGrid();
+            var r = mRegion[targetRegion];
+            r.running = true;
+            r.RunUpdate();
+            if (realTimeRender) r.RunRenderer();
+            if (r.resetCount > 10)
+            {
+                r.resetCount = 0;
+                failCount++;
+                for (int i = 0; i < failCount; i++)
+                {
+                    if (mStack.Count > 0)
+                    {
+                        foreach (var tile in mNotCollapsesed)
+                        {
+                            ResetRegion(tile, 0);
+                            mRegion[tile].ResetRegionState();
+                        }
+                        //Debug.Log("pop");
+                        var temp5 = mStack.Pop();
+                        mNotCollapsesed.Add(temp5);
+                        targetRegion = temp5;
+                        ResetRegion(targetRegion, 0);
+                        if (realTimeRender) r.RunRenderer();
+                        foreach (var tile in mNotCollapsesed)
+                        {
+                            mRegion[tile].UpdateAllEntropy();
+                        }
+                    }
+                    else
+                    {
+                        Debug.Log("stack empty");
+                        Debug.Log($"{mNotCollapsesed.Count}");
+                        foreach (var tile in mNotCollapsesed)
+                        {
+                            Debug.Log($"{tile.x},{tile.y},{tile.z}");
+                            ResetRegion(tile, 0);
+                        }
+                        failCount = 0;
+                        return;
+                    }
+                }
+            }
+            if (r.collapsed)
+            {
+                //r.RunRenderer();
+                //r.CombineMeshes();
+                mStack.Push(targetRegion);
+                r.running = false;
+                //if(renderOnFinish)r.RunRenderer();
+                collapseCount++;
+                mNotCollapsesed.Remove(targetRegion);
+                foreach (var tile in mNotCollapsesed)
+                {
+                    //ResetRegion(tile, 0);
+                    mRegion[tile].ResetRegionState();
+                }
+                UpdateRegionEntropyList(true);
+
+            }
+            //RunningTotal.text = string.Format(collapseCount.ToString());
         }
         else if (!rendered)
         {
-            //var r = mRegion[mRegion.ElementAt(renderedCount).Key];
-            //if (renderOnFinish) r.RunRenderer();
-            //if (r.rendered)
-            //{
-            //    renderedCount++;
-            //}
-            //r.rendered = true;
-            ////RunningTotal.text = string.Format(renderedCount.ToString());
+            var r = mRegion[mRegion.ElementAt(renderedCount).Key];
+            if (renderOnFinish) r.RunRenderer();
+            if (r.rendered)
+            {
+                renderedCount++;
+            }
+            r.rendered = true;
+            //RunningTotal.text = string.Format(renderedCount.ToString());
         }
     }
 
-    private void Stitch((int x, int y, int z) targetR) 
+    private void createGrid() 
     {
-        var r = mRegion[targetR];
-        r.running = true;
-        r.RunUpdate();
-        
-        if (r.collapsed)
+        Parallel.ForEach(mRegion.Keys, (tile) =>
         {
-            //r.RunRenderer();
-            //r.CombineMeshes();
-            mStack.Push(targetRegion);
-            r.running = false;
-            //if(renderOnFinish)r.RunRenderer();
-            collapseCount++;
-            mNotCollapsesed.Remove(targetRegion);
-            //UpdateRegionEntropyList(true);
-
-        }
-        //RunningTotal.text = string.Format(collapseCount.ToString());
-    }
-
-    public bool cunt = false;
-    public bool shit = false;
-    public bool wank = false;
-    private void ParallelGrid() 
-    {
-        
-        bool fuck = true;
-
-        if (fuck && !cunt)
-        {
-            Parallel.For(0, maxRegion.x, x =>
+            if ((tile.x + tile.y + tile.z) % 2 == 0)
             {
-                for (int y = 0; y < maxRegion.y; y++)
+                mRegion[tile].RunUpdate();
+                if (mRegion[tile].collapsed)
                 {
-                    for (int z = 0; z < maxRegion.z; z++)
-                    {
-                        if ((x + z + y) % 2 == 0)
-                        {
-
-                            int tempint = (int)x;
-                            Stitch((tempint, y, z));
-                            if (!mRegion[(tempint, y, z)].collapsed)
-                            {
-                                fuck = false;
-                            }
-                        }
-                    }
-                }
-            });
-            UpdateRegionEntropyList(true);
-            
-            for (int x = 0; x < maxRegion.x; x++)
-            {
-                for (int y = 0; y < maxRegion.y; y++)
-                {
-                    for (int z = 0; z < maxRegion.z; z++)
-                    {
-                        if ((x + z + y) % 2 == 0)
-                        {
-                            if (realTimeRender) mRegion[(x, y, z)].RunRenderer();
-                        }
-                    }
+                    mStack.Push(tile);
+                    collapseCount++;
+                    mNotCollapsesed.Remove(targetRegion);
                 }
             }
-
-            if (!fuck) return;
+        });
+        if (mStack.Count > (max.x * max.y * max.z) / 2) 
+        { 
+            setup = true;
         }
-        cunt = true;
-        shit = true;
-
-        UpdateRegionEntropyList(true);
-
-        UpdateRegionEntropyList(true);
-
-        if (shit && !wank)
-        {
-
-            //Parallel.For(0, maxRegion.x, x =>
-            //{
-            for(int x = 0; x < maxRegion.x; x++) { 
-                for (int y = 0; y < maxRegion.y; y++)
-                {
-                    for (int z = 0; z < maxRegion.z; z++)
-                    {
-                        if ((x + z + y) % 2 != 0)
-                        {
-                            int tempint = (int)x;
-                            Stitch((tempint, y, z));
-                            //if (!mRegion[(tempint, y, z)].collapsed)
-                            //{
-                            //    shit = false;
-                            //}
-                            shit = false;
-                        }
-                    }
-                }
-            }//);
-
-            UpdateRegionEntropyList(true);
-
-            for (int x = 0; x < maxRegion.x; x++)
-            {
-                for (int y = 0; y < maxRegion.y; y++)
-                {
-                    for (int z = 0; z < maxRegion.z; z++)
-                    {
-                        if (realTimeRender) mRegion[(x, y, z)].RunRenderer();
-                    }
-                }
-            }
-            if (!shit) return;
-        }
-        wank = true;
-        //collapsed = true;
     }
 
-    public void InitRules()
+    public void ResetRegions((int x, int y, int z) failedRegion)
+    {
+        var surroundingOffsets = new (int x, int y, int z)[] {
+        (1, 0, 0), (-1, 0, 0), // X-axis neighbors
+        (0, 1, 0), (0, -1, 0), // Y-axis neighbors
+        (0, 0, 1), (0, 0, -1)  // Z-axis neighbors
+            };
+
+        List<(int x, int y, int z)> regionsToReset = new List<(int x, int y, int z)>();
+
+        // Add the failed region itself to the reset list
+        regionsToReset.Add(failedRegion);
+
+        // Identify and add surrounding regions to the reset list
+        foreach (var offset in surroundingOffsets)
+        {
+            var neighbor = (failedRegion.x + offset.x, failedRegion.y + offset.y, failedRegion.z + offset.z);
+            if (mRegion.ContainsKey(neighbor))
+            {
+                regionsToReset.Add(neighbor);
+            }
+        }
+
+        // Reset identified regions
+        foreach (var region in regionsToReset)
+        {
+            if (mRegion.ContainsKey(region))
+            {
+                mRegion[region].ResetRegionState();
+                mNotCollapsesed.Add(region);
+            }
+        }
+    }
+
+    protected void InitRules()
     {
         byte[] _r = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 };
         List<byte[]> ent = new List<byte[]>();
@@ -435,8 +436,28 @@ public class StitchedManager : MonoBehaviour
         }
     }
 
+    public void SpawnTiles(Dictionary<(int x, int y, int z), Tile> mTile)
+    {
+        foreach (var tile in mTile)
+        {
+            var TempTile = tile.Value;
+            TileProps temp = mGameObject[tile.Key];
+            var e = mTile[tile.Key].GetExits();
+            byte[] ent;
+            if (e == -1)
+            {
+                ent = new byte[6] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+            }
+            else
+            {
+                ent = entropy[e];
+            }
+            temp.SetExits(ent, tile.Key);
+            //CombineMeshes();
+        }
+    }
 
-    public virtual void InitRegions()
+    protected virtual void InitRegions()
     {
         var regions = new Dictionary<(int x, int y, int z), (int minX, int minY, int minZ, int maxX, int maxY, int maxZ)>();
 
@@ -472,7 +493,7 @@ public class StitchedManager : MonoBehaviour
                 {
                     Vector3 _targetPos = new Vector3((float)x * 3, (float)y * 3, (float)z * 3);
                     GameObject TempTile = Instantiate(tilePrefab, _targetPos, Quaternion.identity, transform);
-
+                    //TileProps tileProps = new TileProps();
                     mGameObject.Add((x, y, z), TempTile.GetComponent<TileProps>());
                 }
             }
@@ -499,47 +520,6 @@ public class StitchedManager : MonoBehaviour
         GamobjectMap = new Dictionary<(int x, int y, int z), GameObject>();
     }
 
-    public void UpdateRegionEntropyList(bool change)
-    {
-        if (mNotCollapsesed.Count > 0)
-        {
-            // Update all entropy values first.
-            for (int i = 0; i < mNotCollapsesed.Count; i++)
-            {
-                mRegion[mNotCollapsesed[i]].ResetRegionState();
-                mRegion[mNotCollapsesed[i]].UpdateAllEntropy();
-                //mRegion[tile].UpdateAllEntropy();
-            }
-
-            ConcurrentDictionary<(int x, int y, int z), int> mRegionEntropy = new ConcurrentDictionary<(int x, int y, int z), int>();
-
-            for (int i = 0; i < mNotCollapsesed.Count; i++)
-            {
-                mRegionEntropy.TryAdd(mNotCollapsesed[i], mRegion[mNotCollapsesed[i]].GetEntropy());
-            }
-
-            //var tempDictionary = mNotCollapsesed.ToDictionary(key => key, key => mRegion[key].GetEntropy());
-
-
-            // Find the minimum entropy value.
-            int minEntropy = mRegionEntropy.Values.Min();
-
-            // Select all regions that have this minimum entropy value.
-            var lowEntropyRegions = mRegionEntropy.Where(pair => pair.Value == minEntropy).Select(pair => pair.Key).ToList();
-
-            // Safely update targetRegion with the first region of the lowest entropy, if any.
-            if (lowEntropyRegions.Any())
-            {
-                if (change) targetRegion = lowEntropyRegions[0];
-            }
-        }
-        else
-        {
-            collapsed = true;
-        }
-    }
-
-
     public HashSet<int> GetTileEntropy((int x, int y, int z) _tP)
     {
         // Normalize the tile position within the bounds of the world.
@@ -559,31 +539,85 @@ public class StitchedManager : MonoBehaviour
         return mRegion[_tR].GetTile(_tP);
     }
 
-
-    public void SpawnTiles(Dictionary<(int x, int y, int z), Tile> mTile)
+    public void ResetRegion((int x, int y, int z) _startRegion, int counter)
     {
-        foreach (var tile in mTile)
+        ((int x, int y, int z) pos, (int x, int y, int z) min, (int x, int y, int z) max) region = (mRegion[targetRegion].pos, mRegion[targetRegion].min, mRegion[targetRegion].max);
+
+        mRegion.Remove(targetRegion);
+
+        Vector3 position = new Vector3(0, 0, 0);
+        StitchedRegion RegionScript = new StitchedRegion();
+        mRegion.Add(targetRegion, RegionScript);
+        RegionScript.Initialize(region.pos, region.max, region.min, entropy, this);
+        collapseCount = (maxRegion.x * maxRegion.y * maxRegion.z) - mNotCollapsesed.Count;
+    }
+
+    public void ResetAllRegion()
+    {
+        mNotCollapsesed = new List<(int x, int y, int z)>();
+        mList = new List<(int x, int y, int z)>();
+        mRegion = new Dictionary<(int x, int y, int z), StitchedRegion>();
+        entropy = new Dictionary<int, byte[]>();
+
+        collapseCount = 0;
+
+        Start();
+    }
+
+    public void UpdateRegionEntropyList(bool change)
+    {
+        if (mNotCollapsesed.Count > 0)
         {
-            var TempTile = tile.Value;
-            TileProps temp = mGameObject[tile.Key];
-            var e = mTile[tile.Key].GetExits();
-            byte[] ent;
-            if (e == -1)
+            // Update all entropy values first.
+            for (int i = 0; i < mNotCollapsesed.Count; i++)
             {
-                ent = new byte[6] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+                mRegion[mNotCollapsesed[i]].ResetRegionState();
+                //mRegion[tile].UpdateAllEntropy();
             }
-            else
+
+            for (int i = 0; i < mNotCollapsesed.Count; i++)
             {
-                ent = entropy[e];
+                mRegion[mNotCollapsesed[i]].UpdateAllEntropy();
             }
-            temp.SetExits(ent, tile.Key);
-            //CombineMeshes();
+            ConcurrentDictionary<(int x, int y, int z), int> mRegionEntropy = new ConcurrentDictionary<(int x, int y, int z), int>();
+
+            for (int i = 0; i < mNotCollapsesed.Count; i++)
+            {
+                mRegionEntropy.TryAdd(mNotCollapsesed[i], mRegion[mNotCollapsesed[i]].GetEntropy());
+            }
+
+            //var tempDictionary = mNotCollapsesed.ToDictionary(key => key, key => mRegion[key].GetEntropy());
+
+
+            // Find the minimum entropy value.
+            int minEntropy = mRegionEntropy.Values.Min();
+
+            // Select all regions that have this minimum entropy value.
+            var lowEntropyRegions = mRegionEntropy.Where(pair => pair.Value == minEntropy).Select(pair => pair.Key).ToList();
+
+            // Safely update targetRegion with the first region of the lowest entropy, if any.
+            if (lowEntropyRegions.Any())
+            {
+                System.Random rnd = new System.Random();
+                if (change) targetRegion = lowEntropyRegions[rnd.Next(0, lowEntropyRegions.Count())];
+            }
+        }
+        else
+        {
+            collapsed = true;
         }
     }
+
+    public void CheckDone()
+    {
+        var count = 0;
+        foreach (var region in mRegion)
+        {
+            if (region.Value.collapsed)
+            {
+                count++;
+            }
+        }
+        if (count > max.x * max.y * max.z) collapsed = true;
+    }
 }
-
-//public struct stitchJob : IJobParallelFor 
-//{ 
-
-
-//}
