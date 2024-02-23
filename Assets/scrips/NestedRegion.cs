@@ -13,14 +13,14 @@ public class NestedRegion
     // Variables for managing procedural generation and rendering.
     public int seed; // Seed for the random number generator to ensure reproducibility.
     public Manager manager; // Reference to a manager class that probably handles global game state or level management.
-    private Dictionary<(int x, int y, int z), Tile> mTile; // Stores tiles with their coordinates as keys.
+    public Dictionary<(int x, int y, int z), Tile> mTile; // Stores tiles with their coordinates as keys.
     public (int x, int y, int z) max; // Maximum bounds for the region.
     public (int x, int y, int z) min; // Minimum bounds for the region.
     public (int x, int y, int z) pos; // Current position of the region.
     public Dictionary<int, byte[]> entropy = new Dictionary<int, byte[]>(); // Stores entropy values for procedural generation.
     public bool collapsed = false; // Flag to indicate if the wave function collapse has completed.
     public bool rendered = false; // Flag to indicate if the region has been rendered.
-    private List<(int x, int y, int z)> mNotCollapsesed; // Tracks tiles that have not yet collapsed.
+    public List<(int x, int y, int z)> mNotCollapsesed; // Tracks tiles that have not yet collapsed.
     public int failCount = 0; // Counter for the number of failures during generation, used for error handling or retries.
     public int resetCount = 0;
     public int maxFailCount = 10;
