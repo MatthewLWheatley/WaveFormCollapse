@@ -78,6 +78,17 @@ public class NestedRegion
         return collapsed; // Return true if handling fail state resulted in a collapse.
     }
 
+    private bool CheckCollpase() 
+    {
+        foreach (var tile in mTile) 
+        {
+            if (!tile.Value.GetCollapsed()) collapsed = false;
+            
+        }
+        if(collapsed == false) return false;
+        else return true;
+    }
+
     private bool CheckForFailState()
     {
 
@@ -86,17 +97,12 @@ public class NestedRegion
 
     private void HandleFailState()
     {
-        //Debug.Log($"mNotCollapsesed: {mNotCollapsesed.Count}");
-
-
         for (int i = 0; i < mNotCollapsesed.Count; i++)
         {
             var temp = mNotCollapsesed[i];
-            //Debug.Log($"{temp.x},{temp.y},{temp.z}  {mTile[mNotCollapsesed[i]].GetEntropyCount()}");
-            
             mTile[temp].SetEntropy(entropy.Keys.ToHashSet());
         }
-        //if (mNotCollapsesed.Count == 25) return;
+
         failCount++;
         for (int i = 0; i < failCount; i++) 
         { 
@@ -350,11 +356,8 @@ public class NestedRegion
         {
             mTile[pos].SetEntropy(entropy.Keys.ToHashSet());
         }
-    }
-
-    public void NukeCloseRegion() 
-    { 
-        
+        collapsed = false;
+        rendered = false;
     }
 
     private void ResetVisuals()

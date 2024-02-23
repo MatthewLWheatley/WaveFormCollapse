@@ -109,26 +109,14 @@ public class TileProps : MonoBehaviour
         }
     }
 
-    private void OnDestroy()
-    {
-        ResetExits();
-    }
-
     public void ResetExits()
     {
-        MeshFilter meshFilter;
-        // Destroy all child GameObjects
-        foreach (Transform child in transform)
+        foreach (var ed in edges)
         {
-            Destroy(child.gameObject);
+            Destroy(ed.transform.gameObject);
         }
 
-        // Destroy associated meshes
-        meshFilter = GetComponent<MeshFilter>();
-        if (meshFilter != null && meshFilter.sharedMesh != null)
-        {
-            Destroy(meshFilter.sharedMesh);
-        }
+        Start();
     }
 
     void CombineMeshes()

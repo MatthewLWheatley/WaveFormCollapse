@@ -312,14 +312,14 @@ public class BenchMarker : MonoBehaviour
             t_RegionsCollapsed.text = string.Format(intst.renderedCount.ToString());
             t_RegionsRendered.text = string.Format(intst.collapseCount.ToString());
             
-            if (intst.collapsed && intst.rendered)
-            {
+            //if (intst.collapsed && intst.rendered)
+            //{
 
-                RunCount++;
+            //    RunCount++;
                 
-                list.Add(intst);
-                //Debug.Log(RunCount);
-            }
+            //    list.Add(intst);
+            //    //Debug.Log(RunCount);
+            //}
         }
         foreach (Manager intst in list)
         {
@@ -327,7 +327,6 @@ public class BenchMarker : MonoBehaviour
         }
         if (managerScripts.Count == 0)
         {
-            
             CollapseTime += (Time.time - startTime);
 
             runTimes.Add((Time.time - startTime));
