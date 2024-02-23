@@ -249,29 +249,25 @@ public class NestedRegion
         }
     }
 
-    private readonly object lockObject = new object();
-
     private bool CollapseEntropy((int x, int y, int z) pos)
     {
-        lock (lockObject)
+        UpdateAllEntropy();
+        int entropyCount = mTile[pos].GetEntropyCount();
+        if (entropyCount == 0)
         {
-            UpdateAllEntropy();
-            int entropyCount = mTile[pos].GetEntropyCount();
-            if (entropyCount == 0)
-            {
-                ResetRegionState();
-                return false;
-            }
-
-            int _randNum = rnd.Next(0, entropyCount);
-            int randomEntropyElement = mTile[pos].GetEntropy().ElementAt(_randNum);
-            mTile[pos].entropy = new HashSet<int>();
-            mTile[pos].entropy.Add(randomEntropyElement);
-            //manager.mGameObject[pos].collapsed = true;
-            mNotCollapsesed.Remove(pos);
-            mStack.Push(pos);
-            return true;
+            ResetRegionState();
+            return false;
         }
+
+        int _randNum = rnd.Next(0, entropyCount);
+        int randomEntropyElement = mTile[pos].GetEntropy().ElementAt(_randNum);
+        mTile[pos].entropy = new HashSet<int>();
+        mTile[pos].entropy.Add(randomEntropyElement);
+        //manager.mGameObject[pos].collapsed = true;
+        mNotCollapsesed.Remove(pos);
+        mStack.Push(pos);
+        return true;
+
     }
 
     private HashSet<(int, int, int)> GetLowestEntropyList()
@@ -344,10 +340,7 @@ public class NestedRegion
     public HashSet<int> GetTile((int x, int y, int z) _targetTile)
     {
         //HashSet<int> result = new HashSet<int>();
-        lock (lockObject)
-        {
-            return mTile[_targetTile].entropy;
-        }
+        return mTile[_targetTile].entropy;
     }
 
     public void ResetRegionState()
