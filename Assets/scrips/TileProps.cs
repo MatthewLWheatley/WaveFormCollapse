@@ -11,7 +11,7 @@ using UnityEngine.UIElements;
 public class TileProps : MonoBehaviour
 {
     public GameObject Parent { get; private set; }
-    private byte[] exits = new byte[6];
+    private byte[] exits;
     [SerializeField] private GameObject centre;
     [SerializeField] private MeshRenderer centreRenderer;
     [SerializeField] private GameObject[] edges;
@@ -28,6 +28,7 @@ public class TileProps : MonoBehaviour
 
     private void Start()
     {
+        exits = new byte[6];
         edges = new GameObject[6];
         edgesRenderer = new MeshRenderer[6];
         for (int i = 0; i < 6; i++)
@@ -54,6 +55,7 @@ public class TileProps : MonoBehaviour
                     Target.z -= 1;
                     break;
             }
+
             var temp = Instantiate(edge, transform.position + Target, Quaternion.identity, this.transform);
             edges[i] = temp.gameObject;
             edges[i].SetActive(false);
@@ -67,12 +69,14 @@ public class TileProps : MonoBehaviour
 
     public void SetExits(byte[] _exits,(int x, int y, int z) pos)
     {
-        if(renderered) { return; }
         poss.x = pos.x; poss.y = pos.y; poss.z = pos.z;
-        //edges = new GameObject[6];
         exits = _exits;
         for (int i = 0; i < exits.Length; i++)
         {
+            if (edges == null) 
+            {
+                Debug.Log("fucks");
+            }
             if (exits[i] > 0)
             {
                 edges[i].SetActive(true);
@@ -83,10 +87,10 @@ public class TileProps : MonoBehaviour
                 centreRenderer.material = mats[exits[i] - 1];
 
                 renderered = true;
-                //}
             }
             else
             {
+                edges[i].SetActive(false);
                 //if (edges[i] != null && edges[i].gameObject != null)
                 //{
                 //    edges[i].gameObject.SetActive(false);
@@ -95,14 +99,13 @@ public class TileProps : MonoBehaviour
         }
         if (done)
         {
-            CombineMeshes();
-            for (int i = 0; i < exits.Length; i++)
-            {
-                if (edges[i] != null)
-                    edges[i].SetActive(false);
-                
-            }
-            centre.SetActive(false);
+            //CombineMeshes();
+            //for (int i = 0; i < exits.Length; i++)
+            //{
+            //    if (edges[i] != null)
+            //        edges[i].SetActive(false);
+            //}
+            //centre.SetActive(false);
         }
     }
 

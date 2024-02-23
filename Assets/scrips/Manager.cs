@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UIElements;
 
 public class Manager : MonoBehaviour
@@ -71,6 +72,8 @@ public class Manager : MonoBehaviour
 
     public float time;
 
+    public int failCount = 0;
+
     private void Update()
     {
         if(!Running) return;
@@ -87,36 +90,36 @@ public class Manager : MonoBehaviour
             r.running = true;
             r.RunUpdate();
             if (realTimeRender) r.RunRenderer();
-            if (r.resetCount > 0)
+            if (r.resetCount > 10)
             {
-                if (mStack.Count > 0)
+                r.resetCount = 0;
+                for (int i = 0; i < mNotCollapsesed.Count; i++)
                 {
-                    foreach (var coord in mNotCollapsesed)
+                    var temp = mNotCollapsesed[i];
+                    //Debug.Log($"{temp.x},{temp.y},{temp.z}  {mTile[mNotCollapsesed[i]].GetEntropyCount()}");
+                    mRegion[temp].ResetRegionState();
+                }
+                //if (mNotCollapsesed.Count == 25) return;
+                failCount++;
+                for (int i = 0; i < failCount; i++)
+                {
+                    if (mStack.Count > 0)
                     {
-                        ResetRegion(coord, 0);
-                        mRegion[coord].ResetRegionState();
-                    }
-                    //Debug.Log("pop");
-                    var temp5 = mStack.Pop();
-                    mNotCollapsesed.Add(temp5);
-                    targetRegion = temp5;
-                    ResetRegion(targetRegion, 0);
-                    if (realTimeRender) r.RunRenderer();
-                    foreach (var coord in mNotCollapsesed)
-                    {
-                        mRegion[coord].UpdateAllEntropy();
+                        var lastPos = mStack.Pop();
+                        mNotCollapsesed.Add(lastPos);
+
+                        mRegion[lastPos].ResetRegionState();
                     }
                 }
-                else
+                UpdateRegionEntropyList(true);
+
+                if (failCount > mStack.Count)
                 {
-                    Debug.Log("stack empty");
-                    Debug.Log($"{mNotCollapsesed.Count}");
-                    foreach (var tile in mNotCollapsesed)
-                    {
-                        Debug.Log($"{tile.x},{tile.y},{tile.z}");
-                        ResetRegion(tile, 0);
-                    }
+                    failCount = 0;
+                    //ResetAllRegion();
+                    UpdateRegionEntropyList(false);
                 }
+
             }
             if (r.collapsed)
             {
@@ -410,7 +413,7 @@ public class Manager : MonoBehaviour
                 {
                     Vector3 _targetPos = new Vector3((float)x * 3, (float)y * 3, (float)z * 3);
                     GameObject TempTile = Instantiate(tilePrefab, _targetPos, Quaternion.identity, transform);
-
+                    //TileProps tileProps = new TileProps();
                     mGameObject.Add((x, y, z), TempTile.GetComponent<TileProps>());
                 }
             }
@@ -459,20 +462,13 @@ public class Manager : MonoBehaviour
     public void ResetRegion((int x, int y, int z) _startRegion, int counter)
     {
         ((int x, int y, int z) pos, (int x, int y, int z) min, (int x, int y, int z) max) region = (mRegion[targetRegion].pos, mRegion[targetRegion].min, mRegion[targetRegion].max);
-        //MeshFilter meshFilter;
-        //if ((mRegion[targetRegion].transform.TryGetComponent<MeshFilter>(out meshFilter)))
-        //{
-        //    Destroy(meshFilter.mesh); // Destroy the mesh
-        //}
-        //Destroy(mRegion[targetRegion].gameObject);
+
         mRegion.Remove(targetRegion);
 
         Vector3 position = new Vector3(0, 0, 0);
-        //GameObject RegionInstance = Instantiate(RegionPrefab, position, Quaternion.identity, this.transform);
         NestedRegion RegionScript = new NestedRegion();
         mRegion.Add(targetRegion, RegionScript);
         RegionScript.Initialize(region.pos, region.max, region.min, entropy, this);
-        collapseCount = (maxRegion.x * maxRegion.y * maxRegion.z) - mNotCollapsesed.Count;
     }
 
     public void ResetAllRegion()

@@ -87,36 +87,40 @@ public class NestedRegion
     private void HandleFailState()
     {
         //Debug.Log($"mNotCollapsesed: {mNotCollapsesed.Count}");
-        
+
 
         for (int i = 0; i < mNotCollapsesed.Count; i++)
         {
             var temp = mNotCollapsesed[i];
             //Debug.Log($"{temp.x},{temp.y},{temp.z}  {mTile[mNotCollapsesed[i]].GetEntropyCount()}");
+            
             mTile[temp].SetEntropy(entropy.Keys.ToHashSet());
         }
         //if (mNotCollapsesed.Count == 25) return;
-
-        if (mStack.Count > 0)
-        {
-            var lastPos = mStack.Pop();
-            mNotCollapsesed.Add(lastPos);
-
-            mTile[lastPos].SetEntropy(entropy.Keys.ToHashSet());
-
-            UpdateEntropy(lastPos, true);
-        }
-
         failCount++;
-        if (failCount > maxFailCount)
-        {
-            //Debug.Log($"{pos.x},{pos.y},{pos.z}fuck");
-            ResetRegionState();
-            
-            UpdateAllEntropy();
-            resetCount++;
-            failCount = 0;
+        for (int i = 0; i < failCount; i++) 
+        { 
+            if (mStack.Count > 0)
+            {
+                var lastPos = mStack.Pop();
+                mNotCollapsesed.Add(lastPos);
+
+                mTile[lastPos].SetEntropy(entropy.Keys.ToHashSet());
+
+                UpdateEntropy(lastPos, true);
+
+                ResetRegionState();
+            } 
         }
+
+        if (failCount > mStack.Count) 
+        { 
+            failCount = 0;
+            resetCount++;
+            ResetRegionState();
+            UpdateAllEntropy();
+        }
+
         
         if (!CheckForFailState())
         {
@@ -346,7 +350,6 @@ public class NestedRegion
         {
             mTile[pos].SetEntropy(entropy.Keys.ToHashSet());
         }
-        mCollapseCount--;
     }
 
     public void NukeCloseRegion() 
