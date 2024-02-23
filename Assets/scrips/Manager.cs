@@ -140,7 +140,7 @@ public class Manager : MonoBehaviour
                 mNotCollapsesed.Remove(targetRegion);
                 foreach (var tile in mNotCollapsesed)
                 {
-                    ResetRegion(tile, 0);
+                    //ResetRegion(tile, 0);
                     mRegion[tile].ResetRegionState();
                 }
                 foreach (var tile in mNotCollapsesed)

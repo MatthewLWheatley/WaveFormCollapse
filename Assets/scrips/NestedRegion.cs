@@ -174,7 +174,6 @@ public class NestedRegion
 
     private void InitTiles()
     {
-        //Debug.Log($"max:{max.x},{max.y},{max.z} min:{min.x},{min.y},{min.z}fuck you");
         // Initialize all tiles within the specified bounds with maximum entropy.
         for (int x = min.x; x < max.x; x++)
         {

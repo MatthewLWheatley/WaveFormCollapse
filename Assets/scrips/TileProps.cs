@@ -76,7 +76,7 @@ public class TileProps : MonoBehaviour
         {
             if (edges == null) 
             {
-                Debug.Log("fucks");
+                
             }
             if (exits[i] > 0)
             {

@@ -172,7 +172,8 @@ public class StitchedManager : MonoBehaviour
 
     private void createGrid() 
     {
-        Parallel.ForEach(mRegion.Keys, (tile) =>
+        //Parallel.ForEach(mRegion.Keys, (tile) =>
+        foreach(var tile in mRegion.Keys)
         {
             if ((tile.x + tile.y + tile.z) % 2 == 0)
             {
@@ -184,7 +185,7 @@ public class StitchedManager : MonoBehaviour
                     mNotCollapsesed.Remove(targetRegion);
                 }
             }
-        });
+        }//);
         if (mStack.Count > (max.x * max.y * max.z) / 2) 
         { 
             setup = true;
