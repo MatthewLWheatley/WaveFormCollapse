@@ -21,7 +21,7 @@ public class Manager : MonoBehaviour
     public (int x, int y, int z) regionSize;
 
 
-    protected Dictionary<(int x, int y, int z), NestedRegion> mRegion;
+    public Dictionary<(int x, int y, int z), NestedRegion> mRegion;
     public Dictionary<(int x, int y, int z), TileProps> mGameObject;
     public List<(int x, int y, int z)> mNotCollapsesed;
     [SerializeField] protected GameObject RegionPrefab;
@@ -34,9 +34,9 @@ public class Manager : MonoBehaviour
 
     public int complexity = 0;
 
-    protected (int x, int y, int z)[] Dirs = new (int x, int y, int z)[] { (1, 0, 0), (0, 1, 0), (0, 0, 1), (-1, 0, 0), (0, -1, 0), (0, 0, -1)};
+    public (int x, int y, int z)[] Dirs = new (int x, int y, int z)[] { (1, 0, 0), (0, 1, 0), (0, 0, 1), (-1, 0, 0), (0, -1, 0), (0, 0, -1)};
 
-    public Stack<(int x, int y, int z)> mStack;
+    public List<(int x, int y, int z)> mList;
 
     protected (int x, int y, int z) maxRegion;
 
@@ -54,7 +54,7 @@ public class Manager : MonoBehaviour
     {
         mGameObject = new Dictionary<(int x, int y, int z), TileProps>();
         mNotCollapsesed = new List<(int x, int y, int z)>();
-        mStack = new Stack<(int x, int y, int z)>();
+        mList = new List<(int x, int y, int z)>();
         mRegion = new Dictionary<(int x, int y, int z), NestedRegion> ();
 
 
@@ -92,41 +92,16 @@ public class Manager : MonoBehaviour
             if (realTimeRender) r.RunRenderer();
             if (r.resetCount > 10)
             {
-                r.resetCount = 0;
-                for (int i = 0; i < mNotCollapsesed.Count; i++)
-                {
-                    var temp = mNotCollapsesed[i];
-                    //Debug.Log($"{temp.x},{temp.y},{temp.z}  {mTile[mNotCollapsesed[i]].GetEntropyCount()}");
-                    mRegion[temp].ResetRegionState();
-                }
-                //if (mNotCollapsesed.Count == 25) return;
-                failCount++;
-                for (int i = 0; i < failCount; i++)
-                {
-                    if (mStack.Count > 0)
-                    {
-                        var lastPos = mStack.Pop();
-                        mNotCollapsesed.Add(lastPos);
-
-                        mRegion[lastPos].ResetRegionState();
-                    }
-                }
-                UpdateRegionEntropyList(true);
-
-                if (failCount > mStack.Count)
-                {
-                    failCount = 0;
-                    //ResetAllRegion();
-                    UpdateRegionEntropyList(false);
-                }
-
+                r.resetCount = 0; 
+                Debug.Log($"fuck {targetRegion.x}, {targetRegion.y}, {targetRegion.z}, ");
+                ResetRegions(targetRegion);
+                UpdateRegionEntropyList(false);
             }
             if (r.collapsed)
             {
-                mStack.Push(targetRegion);
+                mList.Add(targetRegion);
                 r.running = false;
                 if (renderOnFinish) r.RunRenderer();
-                collapseCount++;
                 mNotCollapsesed.Remove(targetRegion);
                 UpdateRegionEntropyList(true);
             }
@@ -134,14 +109,72 @@ public class Manager : MonoBehaviour
         }
         else if (!rendered)
         {
-            var r = mRegion[mRegion.ElementAt(renderedCount).Key];
-            if (renderOnFinish) r.RunRenderer();
-            if (r.rendered)
+
+            foreach (var go in mGameObject)
             {
-                renderedCount++;
+                Destroy(go.Value.transform.gameObject);
             }
-            r.rendered = true;
+            mGameObject.Clear();
+            for (int x = 0; x < max.x; x++)
+            {
+                for (int y = 0; y < max.y; y++)
+                {
+                    for (int z = 0; z < max.z; z++)
+                    {
+                        Vector3 _targetPos = new Vector3((float)x * 3, (float)y * 3, (float)z * 3);
+                        GameObject TempTile = Instantiate(tilePrefab, _targetPos, Quaternion.identity, transform);
+                        //TileProps tileProps = new TileProps();
+                        mGameObject.Add((x, y, z), TempTile.GetComponent<TileProps>());
+                    }
+                }
+            }
+            
+            foreach (var r in mRegion.Values)
+            {
+                if (renderOnFinish) r.RunRenderer();
+                if (r.rendered)
+                {
+                    renderedCount++;
+                }
+                r.rendered = true;
+            }
+            rendered = true;
             RunningTotal.text = string.Format(renderedCount.ToString());
+        }
+    }
+
+    public void ResetRegions((int x, int y, int z) failedRegion)
+    {
+        var surroundingOffsets = new (int x, int y, int z)[] {
+        (1, 0, 0), (-1, 0, 0), // X-axis neighbors
+        (0, 1, 0), (0, -1, 0), // Y-axis neighbors
+        (0, 0, 1), (0, 0, -1)  // Z-axis neighbors
+            };
+
+        List<(int x, int y, int z)> regionsToReset = new List<(int x, int y, int z)>();
+
+        // Add the failed region itself to the reset list
+        regionsToReset.Add(failedRegion);
+
+        // Identify and add surrounding regions to the reset list
+        foreach (var offset in surroundingOffsets)
+        {
+            var neighbor = (failedRegion.x + offset.x, failedRegion.y + offset.y, failedRegion.z + offset.z);
+            if (mRegion.ContainsKey(neighbor))
+            {
+                regionsToReset.Add(neighbor);
+            }
+        }
+
+        // Reset identified regions
+        foreach (var region in regionsToReset)
+        {
+            if (mRegion.ContainsKey(region))
+            {
+                //Debug.Log($"{region.x},{region.x},{region.x}");
+                mRegion[region].ResetRegionState();
+                mNotCollapsesed.Add(region); 
+            }
         }
     }
 
@@ -473,23 +506,8 @@ public class Manager : MonoBehaviour
 
     public void ResetAllRegion()
     {
-        //foreach (var GO in mGameObject) 
-        //{
-        //    Destroy(GO.Value);
-        //}
-        //mGameObject = new Dictionary<(int x, int y, int z), GameObject>();
-        //MeshFilter meshFilter;
-        //foreach (var R in mRegion)
-        //{
-        //    if ((mRegion[targetRegion].transform.TryGetComponent<MeshFilter>(out meshFilter)))
-        //    {
-        //        Destroy(meshFilter.mesh); // Destroy the mesh
-        //    }
-        //    Destroy(R.Value);
-        //}
-
         mNotCollapsesed = new List<(int x, int y, int z)>();
-        mStack = new Stack<(int x, int y, int z)>();
+        mList = new List<(int x, int y, int z)>();
         mRegion = new Dictionary<(int x, int y, int z), NestedRegion>();
         entropy = new Dictionary<int, byte[]>();
 
@@ -506,10 +524,13 @@ public class Manager : MonoBehaviour
             for(int i = 0; i < mNotCollapsesed.Count; i++)
             {
                 mRegion[mNotCollapsesed[i]].ResetRegionState();
-                mRegion[mNotCollapsesed[i]].UpdateAllEntropy();
                 //mRegion[tile].UpdateAllEntropy();
             }
 
+            for (int i = 0; i < mNotCollapsesed.Count; i++)
+            {
+                mRegion[mNotCollapsesed[i]].UpdateAllEntropy();
+            }
             ConcurrentDictionary<(int x, int y, int z), int> mRegionEntropy = new ConcurrentDictionary<(int x, int y, int z), int>();
 
             for (int i = 0; i < mNotCollapsesed.Count; i++) 
@@ -529,7 +550,8 @@ public class Manager : MonoBehaviour
             // Safely update targetRegion with the first region of the lowest entropy, if any.
             if (lowEntropyRegions.Any())
             {
-                if (change) targetRegion = lowEntropyRegions[0];
+                System.Random rnd = new System.Random();
+                if (change) targetRegion = lowEntropyRegions[rnd.Next(0,lowEntropyRegions.Count())];
             }
         }
         else 

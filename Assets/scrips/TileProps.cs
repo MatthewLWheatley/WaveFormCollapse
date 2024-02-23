@@ -69,6 +69,7 @@ public class TileProps : MonoBehaviour
 
     public void SetExits(byte[] _exits,(int x, int y, int z) pos)
     {
+        ResetExits();
         poss.x = pos.x; poss.y = pos.y; poss.z = pos.z;
         exits = _exits;
         for (int i = 0; i < exits.Length; i++)
@@ -91,10 +92,6 @@ public class TileProps : MonoBehaviour
             else
             {
                 edges[i].SetActive(false);
-                //if (edges[i] != null && edges[i].gameObject != null)
-                //{
-                //    edges[i].gameObject.SetActive(false);
-                //}
             }
         }
         if (done)
@@ -109,26 +106,14 @@ public class TileProps : MonoBehaviour
         }
     }
 
-    private void OnDestroy()
-    {
-        ResetExits();
-    }
-
     public void ResetExits()
     {
-        MeshFilter meshFilter;
-        // Destroy all child GameObjects
-        foreach (Transform child in transform)
+        foreach (var child in edges)
         {
-            Destroy(child.gameObject);
+            Destroy(child.transform.gameObject);
         }
 
-        // Destroy associated meshes
-        meshFilter = GetComponent<MeshFilter>();
-        if (meshFilter != null && meshFilter.sharedMesh != null)
-        {
-            Destroy(meshFilter.sharedMesh);
-        }
+        Start();
     }
 
     void CombineMeshes()

@@ -48,6 +48,7 @@ public class BenchMarker : MonoBehaviour
     public int RunCount;
     public float CollapseTime = 0.0f;
     List<Manager> managerScripts = new List<Manager>();
+    List<StitchedManager> stitchedManagers = new List<StitchedManager>();
     public List<float> runTimes = new List<float>();
 
     public Dictionary<int, byte[]> entropy = new Dictionary<int, byte[]>();
@@ -306,24 +307,50 @@ public class BenchMarker : MonoBehaviour
 
         if (!running) return;
         if (RunCount >= MaxRunCount) return;
-        List<Manager> list = new List<Manager>();
-        foreach (Manager intst in managerScripts)
-        {
-            t_RegionsCollapsed.text = string.Format(intst.renderedCount.ToString());
-            t_RegionsRendered.text = string.Format(intst.collapseCount.ToString());
-            
-            if (intst.collapsed && intst.rendered)
-            {
 
-                RunCount++;
-                
-                list.Add(intst);
-                //Debug.Log(RunCount);
+
+        if (managerVersion == 1)
+        {
+            List<StitchedManager> list = new List<StitchedManager>();
+            foreach (StitchedManager intst in stitchedManagers)
+            {
+                t_RegionsCollapsed.text = string.Format(intst.renderedCount.ToString());
+                t_RegionsRendered.text = string.Format(intst.collapseCount.ToString());
+
+                if (intst.collapsed && intst.rendered)
+                {
+
+                    RunCount++;
+
+                    list.Add(intst);
+                    //Debug.Log(RunCount);
+                }
+            }
+            foreach (StitchedManager intst in list)
+            {
+                stitchedManagers.Remove(intst);
             }
         }
-        foreach (Manager intst in list)
+        if (managerVersion == 0)
         {
-            managerScripts.Remove(intst);
+            List<Manager> list = new List<Manager>();
+            foreach (Manager intst in managerScripts)
+            {
+                t_RegionsCollapsed.text = string.Format(intst.renderedCount.ToString());
+                t_RegionsRendered.text = string.Format(intst.collapseCount.ToString());
+
+                if (intst.collapsed && intst.rendered)
+                {
+
+                    RunCount++;
+
+                    list.Add(intst);
+                    //Debug.Log(RunCount);
+                }            }
+            foreach (Manager intst in list)
+            {
+                managerScripts.Remove(intst);
+            }
         }
         if (managerScripts.Count == 0)
         {
@@ -345,7 +372,13 @@ public class BenchMarker : MonoBehaviour
 
     public void PauseManagers()
     {
+        if(managerVersion == 0)
         foreach (Manager intst in managerScripts)
+        {
+            intst.Running = !intst.Running;
+        }
+        if(managerVersion == 1)
+        foreach (StitchedManager intst in stitchedManagers)
         {
             intst.Running = !intst.Running;
         }
@@ -390,6 +423,7 @@ public class BenchMarker : MonoBehaviour
             DestroyChildAndMesh(child);
         }
         managerScripts = new List<Manager>();
+        stitchedManagers = new List<StitchedManager>();
             //System.GC.Collect();
     }
 
@@ -436,13 +470,28 @@ public class BenchMarker : MonoBehaviour
             }
         }
         startTime = Time.time;
-        foreach (Manager intst in managerScripts)
+
+        if (managerVersion == 0)
         {
-            intst.renderOnFinish = rendering;
+            foreach (Manager intst in managerScripts)
+            {
+                intst.renderOnFinish = rendering;
+            }
+            foreach (Manager intst in managerScripts)
+            {
+                intst.realTimeRender = realTimeRendering;
+            }
         }
-        foreach (Manager intst in managerScripts)
+        if (managerVersion == 1)
         {
-            intst.realTimeRender = realTimeRendering;
+            foreach (StitchedManager intst in stitchedManagers)
+            {
+                intst.renderOnFinish = rendering;
+            }
+            foreach (StitchedManager intst in stitchedManagers)
+            {
+                intst.realTimeRender = realTimeRendering;
+            }
         }
         //PauseManagers();
     }
@@ -478,26 +527,56 @@ public class BenchMarker : MonoBehaviour
     public void RenderRealTime() 
     {
         realTimeRendering = !realTimeRendering;
-        foreach (Manager intst in managerScripts)
+
+        if (managerVersion == 0)
         {
-            intst.renderOnFinish = rendering;
+            foreach (Manager intst in managerScripts)
+            {
+                intst.renderOnFinish = rendering;
+            }
+            foreach (Manager intst in managerScripts)
+            {
+                intst.realTimeRender = realTimeRendering;
+            }
         }
-        foreach (Manager intst in managerScripts)
+        if (managerVersion == 1)
         {
-            intst.realTimeRender = realTimeRendering;
+            foreach (StitchedManager intst in stitchedManagers)
+            {
+                intst.renderOnFinish = rendering;
+            }
+            foreach (StitchedManager intst in stitchedManagers)
+            {
+                intst.realTimeRender = realTimeRendering;
+            }
         }
     }
 
     public void RenderAtFinish()
     {
         rendering = !rendering;
-        foreach (Manager intst in managerScripts)
+
+        if (managerVersion == 0)
         {
-            intst.renderOnFinish = rendering;
+            foreach (Manager intst in managerScripts)
+            {
+                intst.renderOnFinish = rendering;
+            }
+            foreach (Manager intst in managerScripts)
+            {
+                intst.realTimeRender = realTimeRendering;
+            }
         }
-        foreach (Manager intst in managerScripts)
+        if (managerVersion == 1)
         {
-            intst.realTimeRender = realTimeRendering;
+            foreach (StitchedManager intst in stitchedManagers)
+            {
+                intst.renderOnFinish = rendering;
+            }
+            foreach (StitchedManager intst in stitchedManagers)
+            {
+                intst.realTimeRender = realTimeRendering;
+            }
         }
     }
 }

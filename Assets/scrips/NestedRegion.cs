@@ -118,7 +118,8 @@ public class NestedRegion
             failCount = 0;
             resetCount++;
             ResetRegionState();
-            UpdateAllEntropy();
+            //UpdateAllEntropy();
+            return;
         }
 
         
