@@ -126,7 +126,6 @@ public class Manager : MonoBehaviour
                             ResetRegion(tile, 0);
                         }
                         failCount = 0;
-                        return;
                     }
                 }
             }
@@ -144,7 +143,11 @@ public class Manager : MonoBehaviour
                     ResetRegion(tile, 0);
                     mRegion[tile].ResetRegionState();
                 }
-                UpdateRegionEntropyList(true);
+                foreach (var tile in mNotCollapsesed)
+                {
+                    mRegion[tile].UpdateAllEntropy();
+                }
+                    UpdateRegionEntropyList(true);
 
             }
             RunningTotal.text = string.Format(collapseCount.ToString());
@@ -160,6 +163,7 @@ public class Manager : MonoBehaviour
             r.rendered = true;
             RunningTotal.text = string.Format(renderedCount.ToString());
         }
+       
     }
 
     public void ResetRegions((int x, int y, int z) failedRegion)
