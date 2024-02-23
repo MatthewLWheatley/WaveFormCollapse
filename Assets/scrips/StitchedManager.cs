@@ -113,37 +113,6 @@ public class StitchedManager : MonoBehaviour
         r.running = true;
         r.RunUpdate();
         
-        //if (r.resetCount > 0)
-        //{
-        //    //if (mStack.Count > 0)
-        //    //{
-        //    //    foreach (var tile in mNotCollapsesed)
-        //    //    {
-        //    //        ResetRegion(tile, 0);
-        //    //        mRegion[tile].ResetRegionState();
-        //    //    }
-        //    //    //Debug.Log("pop");
-        //    //    var temp5 = mStack.Pop();
-        //    //    mNotCollapsesed.Add(temp5);
-        //    //    targetRegion = temp5;
-        //    //    ResetRegion(targetRegion, 0);
-        //    //    if (realTimeRender) r.RunRenderer();
-        //    //    foreach (var tile in mNotCollapsesed)
-        //    //    {
-        //    //        mRegion[tile].UpdateAllEntropy();
-        //    //    }
-        //    //}
-        //    //else
-        //    //{
-        //    //    //Debug.Log("stack empty");
-        //    //    //Debug.Log($"{mNotCollapsesed.Count}");
-        //    //    foreach (var tile in mNotCollapsesed)
-        //    //    {
-        //    //        //Debug.Log($"{tile.x},{tile.y},{tile.z}");
-        //    //        ResetRegion(tile, 0);
-        //    //    }
-        //    //}
-        //}
         if (r.collapsed)
         {
             //r.RunRenderer();

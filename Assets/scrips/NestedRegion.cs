@@ -113,7 +113,7 @@ public class NestedRegion
             } 
         }
 
-        if (failCount > mStack.Count) 
+        if (mStack.Count == 0) 
         { 
             failCount = 0;
             resetCount++;

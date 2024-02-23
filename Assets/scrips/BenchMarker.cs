@@ -291,13 +291,10 @@ public class BenchMarker : MonoBehaviour
                 managerVersion = 0;
                 break;
             case "N-WFC":
-                managerVersion = 1;
+                managerVersion = 0;
                 break;
             case "S-WFC":
-                managerVersion = 2;
-                break;
-            case "R-WFC":
-                managerVersion = 4;
+                managerVersion = 1;
                 break;
         }
     }
